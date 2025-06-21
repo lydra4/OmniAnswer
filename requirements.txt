@@ -1,6 +1,7 @@
 agno==1.6.3
 deepeval==3.1.6
 guardrails-ai==0.6.6
+kedro==0.19.14
 omegaconf==2.3.0
 python-dotenv==1.1.0
 python-json-logger==3.3.0
