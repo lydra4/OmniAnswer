@@ -1,0 +1,7 @@
+name: omnianswer
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11.12
+  - pip=24.3
