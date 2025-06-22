@@ -1,6 +1,7 @@
 import ast
 import logging
 import os
+import re
 from typing import List
 
 import omegaconf
@@ -39,5 +40,11 @@ class ModalityClassifier(Agent):
 
     def run(self, query: str) -> List[str]:
         response = super().run(query)
-        modalities = ast.literal_eval(response.content)
+        cleaned = re.sub(
+            r"^```(?:json|python)?\s*|\s*```$",
+            "",
+            response.content.strip(),
+            flags=re.IGNORECASE,
+        )
+        modalities = ast.literal_eval(cleaned)
         return modalities
