@@ -20,7 +20,7 @@ def main(cfg: omegaconf.DictConfig):
 
     modalityclassifier = ModalityClassifier(cfg=cfg, logger=logger)
     response = modalityclassifier.run(
-        query="Show how the Model Context Protocol works, with visuals and a demo video of it in action."
+        query="What does training a model on a GPU actually look like?"
     )
     print(response)
 
