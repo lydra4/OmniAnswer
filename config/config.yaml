@@ -9,3 +9,15 @@ system_message: >
   Do not include any explanation or extra content—just the list.
 description: "Classifies the response type(s) required to answer a user’s query: text, image, or video."
 markdown: false
+
+guardrails:
+  banned_words:
+    - meth
+    - rape
+    - murder
+    - porn
+    - suicide
+    - drug
+    - sex
+    - kill
+  toxic_threshold: 0.5
