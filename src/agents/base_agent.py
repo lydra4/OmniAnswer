@@ -41,4 +41,4 @@ class BaseAgent(Agent, ABC):
 
     @abstractmethod
     def run(self, input_data, **kwargs) -> Any:
-        pass
+        return super().run(input_data, **kwargs)
