@@ -7,6 +7,8 @@ from agno.agent import Agent
 from agno.models.google import Gemini
 from agno.models.openai import OpenAIChat
 from dotenv import load_dotenv
+from langfuse import Langfuse
+from langsmith import Client
 from omegaconf import DictConfig
 
 
@@ -15,6 +17,15 @@ class BaseAgent(Agent, ABC):
         load_dotenv()
         self.cfg = cfg
         self.logger = logger
+        self.langfuse = Langfuse(
+            public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
+            secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
+            host=os.getenv("LANGFUSE_HOST"),
+        )
+        self.clent = Client(
+            api_key=os.getenv("LANGSMITH_API_KEY"),
+            api_url=os.getenv("LANGSMITH_ENDPOINT"),
+        )
 
         model_id = self.cfg.model.strip().lower()
         self.llm = (
