@@ -17,20 +17,11 @@ class ModalityClassifier(BaseAgent):
         super().__init__(cfg=cfg, logger=logger)
         self.guard = Guard().use_many(
             BanList(
-                banned_words=[
-                    "meth",
-                    "rape",
-                    "murder",
-                    "porn",
-                    "suicide",
-                    "drug",
-                    "sex",
-                    "kill",
-                ],
+                banned_words=cfg.guardrails.banned_words,
                 on_fail="refrain",
             ),
             ToxicLanguage(
-                threshold=0.5,
+                threshold=cfg.guardrails.toxic_threshold,
                 validation_method="sentence",
                 on_fail="refrain",
             ),
