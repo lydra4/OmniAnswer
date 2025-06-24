@@ -36,6 +36,8 @@ class BaseAgent(Agent, ABC):
             description=self.cfg.description,
             instructions=[self.cfg.system_message],
             markdown=self.cfg.markdown,
+            monitoring=True,
+            show_tool_calls=True,
         )
 
     @abstractmethod
