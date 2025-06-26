@@ -29,9 +29,26 @@ class ModalityClassifier(BaseAgent):
 
     def run(self, query: str) -> List[str]:
         result = self.guard.validate(query)
+
         if not result.validation_passed:
-            self.logger.warning(f"Rejected query: {result.error}")
-            raise ValueError(f"Query rejected: {result.error}")
+            reasons_by_validator = {}
+
+            for summary in result.validation_summaries:
+                if summary.validator_status == "fail":
+                    all_reasons = [span.reason for span in summary.error_spans]
+                    reasons_by_validator[summary.validator_name] = all_reasons
+
+                    for reason in all_reasons:
+                        self.logger.warning(
+                            f"{summary.validator_name} failed: {reason}"
+                        )
+
+            formatted = []
+            for validator, reasons in reasons_by_validator.items():
+                for reason in reasons:
+                    formatted.append(f"{validator}: {reason}")
+
+            raise ValueError("Rejected query due to:\n" + "\n".join(formatted))
 
         response = super().run(query)
         cleaned = re.sub(
