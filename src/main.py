@@ -4,7 +4,7 @@ import os
 import hydra
 import omegaconf
 from agents.modality_agent import ModalityAgent
-from utils.general_utils import setup_logging
+from utils.general_utils import load_llm, setup_logging
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="config.yaml")
@@ -17,7 +17,9 @@ def main(cfg: omegaconf.DictConfig):
     )
     logger.info("Setting up logging configuration.")
 
-    modalityclassifier = ModalityAgent(cfg=cfg, logger=logger)
+    llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
+
+    modalityclassifier = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
     response = modalityclassifier.run(
         query="What does training a model on a GPU actually look like?"
     )

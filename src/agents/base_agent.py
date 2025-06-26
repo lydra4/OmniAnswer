@@ -4,33 +4,19 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from agno.agent import Agent
-from agno.models.google import Gemini
-from agno.models.openai import OpenAIChat
 from dotenv import load_dotenv
 from omegaconf import DictConfig
 
 
 class BaseAgent(Agent, ABC):
-    def __init__(self, cfg: DictConfig, logger: logging.Logger) -> None:
+    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
         load_dotenv()
         self.cfg = cfg
         self.logger = logger
+        self.llm = llm
+
         os.environ["AGNO_API_KEY"] = os.getenv("AGNO_API_KEY")
         os.environ["AGNO_MONITOR"] = os.getenv("AGNO_MONITOR")
-
-        model_id = self.cfg.model.strip().lower()
-        self.llm = (
-            OpenAIChat(
-                id=self.cfg.model,
-                api_key=os.getenv("OPENAI_API_KEY"),
-            )
-            if model_id.startswith("gpt-")
-            else Gemini(
-                id=self.cfg.model,
-                api_key=os.getenv("GEMINI_API_KEY"),
-                temperature=self.cfg.temperature,
-            )
-        )
 
         super().__init__(
             name=self.cfg.name,

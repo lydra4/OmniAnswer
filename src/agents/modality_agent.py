@@ -13,8 +13,8 @@ nltk.download("punkt")
 
 
 class ModalityAgent(BaseAgent):
-    def __init__(self, cfg: DictConfig, logger: logging.Logger):
-        super().__init__(cfg=cfg.modality_agent, logger=logger)
+    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+        super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm)
         self.guard = Guard().use_many(
             BanList(
                 banned_words=cfg.modality_agent.guardrails.banned_words,
