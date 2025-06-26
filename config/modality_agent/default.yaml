@@ -1,6 +1,4 @@
 name: ModalityAgent
-model: gemini-2.5-flash-preview-04-17
-temperature: 0
 system_message: >
   You are a classification agent tasked with determining the required response modality for a given user question.
   Your goal is to decide whether the answer should include "text", "image", "video", or a combination of these.
