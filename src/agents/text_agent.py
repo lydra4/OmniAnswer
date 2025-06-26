@@ -2,7 +2,7 @@ import logging
 from typing import Any, List
 
 from agents.base_agent import BaseAgent
-from agno.tools.googlesearch import GoogleSearchTool
+from agno.tools.googlesearch import GoogleSearchTools
 from omegaconf import DictConfig
 
 
@@ -12,7 +12,7 @@ class TextAgent(BaseAgent):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = [GoogleSearchTool()],
+        tools: List[Any] = [GoogleSearchTools()],
     ) -> None:
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
 
