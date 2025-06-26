@@ -15,6 +15,8 @@ class BaseAgent(Agent, ABC):
         load_dotenv()
         self.cfg = cfg
         self.logger = logger
+        os.environ["AGNO_API_KEY"] = os.getenv("AGNO_API_KEY")
+        os.environ["AGNO_MONITOR"] = os.getenv("AGNO_MONITOR")
 
         model_id = self.cfg.model.strip().lower()
         self.llm = (
@@ -35,7 +37,7 @@ class BaseAgent(Agent, ABC):
             model=self.llm,
             description=self.cfg.description,
             instructions=[self.cfg.system_message],
-            markdown=self.cfg.markdown,
+            markdown=True,
             monitoring=True,
             show_tool_calls=True,
         )
