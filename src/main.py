@@ -24,8 +24,10 @@ def main(cfg: omegaconf.DictConfig):
 
     modality_agent = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
     modalities = modality_agent.run(query=query)
+
     paraphrase_agent = ParaphraseAgent(cfg=cfg, logger=logger, llm=llm)
     paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
+
     print(paraphrased_outputs)
 
 
