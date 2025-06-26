@@ -1,5 +1,6 @@
 import ast
 import logging
+import re
 from typing import Dict, List
 
 from agents.base_agent import BaseAgent
@@ -7,12 +8,10 @@ from omegaconf import DictConfig
 
 
 class ParaphraseAgent(BaseAgent):
-    def __init__(self, cfg: DictConfig, logger: logging.Logger):
-        super().__init__(cfg=cfg, logger=logger)
-        self.cfg = cfg
-        self.logger = logger
+    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm)
 
-    def run(self, query: str, modalities: List[str]) -> Dict[str, str]:
+    def run(self, query: str, modalities: List[str], **kwargs) -> Dict[str, str]:
         """
         Run the paraphrase agent to generate paraphrases for the given query.
 
@@ -24,7 +23,13 @@ class ParaphraseAgent(BaseAgent):
             Dict[str, str]: A dictionary containing the paraphrased query.
         """
         self.logger.info(f"Running ParaphraseAgent with query: {query}.")
-        response = super().run(query, modalities)
-        modalities = ast.literal_eval(response.content.strip())
+        response = super().run(query, modalities=modalities, **kwargs)
+        cleaned = re.sub(
+            r"^```(?:json|python)?\s*|\s*```$",
+            "",
+            response.content.strip(),
+            flags=re.IGNORECASE,
+        )
+        paraphrased_outputs = ast.literal_eval(cleaned)
 
-        return modalities
+        return paraphrased_outputs
