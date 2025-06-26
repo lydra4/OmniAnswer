@@ -3,7 +3,7 @@ import os
 
 import hydra
 import omegaconf
-from agents.modality_classifier import ModalityClassifier
+from agents.modality_agent import ModalityAgent
 from utils.general_utils import setup_logging
 
 
@@ -18,7 +18,7 @@ def main(cfg: omegaconf.DictConfig):
     logger.info("Setting up logging configuration.")
     logger.info(f"Using {cfg.model}.")
 
-    modalityclassifier = ModalityClassifier(cfg=cfg, logger=logger)
+    modalityclassifier = ModalityAgent(cfg=cfg, logger=logger)
     response = modalityclassifier.run(
         query="What does training a model on a GPU actually look like?"
     )
