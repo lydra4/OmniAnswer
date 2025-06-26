@@ -1,14 +1,20 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 
 from agno.agent import Agent
 from omegaconf import DictConfig
 
 
 class BaseAgent(Agent, ABC):
-    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+    def __init__(
+        self,
+        cfg: DictConfig,
+        logger: logging.Logger,
+        llm,
+        tools: List[Any] = None,
+    ) -> None:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
@@ -24,6 +30,7 @@ class BaseAgent(Agent, ABC):
             markdown=True,
             monitoring=True,
             show_tool_calls=True,
+            tools=tools,
         )
 
     @abstractmethod
