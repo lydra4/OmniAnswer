@@ -8,8 +8,6 @@ system_message: >
   "text", "image", "video".
   Do not include any explanation or extra content—just the list.
 description: "Classifies the response type(s) required to answer a user’s query: text, image, or video."
-markdown: false
-
 guardrails:
   banned_words:
     - meth
