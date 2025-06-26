@@ -4,13 +4,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from agno.agent import Agent
-from dotenv import load_dotenv
 from omegaconf import DictConfig
 
 
 class BaseAgent(Agent, ABC):
     def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
-        load_dotenv()
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
