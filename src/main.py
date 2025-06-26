@@ -16,7 +16,6 @@ def main(cfg: omegaconf.DictConfig):
         )
     )
     logger.info("Setting up logging configuration.")
-    logger.info(f"Using {cfg.model}.")
 
     modalityclassifier = ModalityAgent(cfg=cfg, logger=logger)
     response = modalityclassifier.run(
