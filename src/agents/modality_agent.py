@@ -14,20 +14,30 @@ nltk.download("punkt")
 
 class ModalityAgent(BaseAgent):
     def __init__(self, cfg: DictConfig, logger: logging.Logger):
-        super().__init__(cfg=cfg, logger=logger)
+        super().__init__(cfg=cfg.modality_agent, logger=logger)
         self.guard = Guard().use_many(
             BanList(
-                banned_words=cfg.guardrails.banned_words,
+                banned_words=cfg.modality_agent.guardrails.banned_words,
                 on_fail="refrain",
             ),
             ToxicLanguage(
-                threshold=cfg.guardrails.toxic_threshold,
+                threshold=cfg.modality_agent.guardrails.toxic_threshold,
                 validation_method="sentence",
                 on_fail="refrain",
             ),
         )
 
     def run(self, query: str) -> List[str]:
+        """
+        Run the ModalityAgent to determine the modalities of the given query.
+
+        Args:
+            query (str): The input query to analyze for modalities.
+
+        Returns:
+            List[str]: A list of modalities identified in the query.
+        """
+        self.logger.info(f"Running ModalityAgent with query: {query}.")
         result = self.guard.validate(query)
 
         if not result.validation_passed:
