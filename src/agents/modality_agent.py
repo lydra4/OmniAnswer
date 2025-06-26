@@ -12,7 +12,7 @@ from omegaconf import DictConfig
 nltk.download("punkt")
 
 
-class ModalityClassifier(BaseAgent):
+class ModalityAgent(BaseAgent):
     def __init__(self, cfg: DictConfig, logger: logging.Logger):
         super().__init__(cfg=cfg, logger=logger)
         self.guard = Guard().use_many(
