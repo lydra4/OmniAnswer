@@ -3,6 +3,7 @@ defaults:
   - modality_agent: default
   - paraphrase_agent: default
   - text_agent: default
+  - image_agent: default
 
 model: gemini-2.5-flash-preview-04-17
 temperature: 0
