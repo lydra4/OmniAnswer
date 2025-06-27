@@ -3,7 +3,6 @@ import os
 from typing import Any, List
 
 from agents.base_agent import BaseAgent
-from agno.tools.duckduckgo import DuckDuckGoTools
 from dotenv import load_dotenv
 from google_images_search import GoogleImagesSearch
 from omegaconf import DictConfig
@@ -13,14 +12,6 @@ class ImageAgent(BaseAgent):
     def __init__(
         self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
     ):
-        if tools is None:
-            tools = [
-                DuckDuckGoTools(
-                    stop_after_tool_call_tools=["duckduckgo_image"],
-                    show_result_tools=["duckduckgo_image"],
-                    fixed_max_results=cfg.image_agent.num,
-                )
-            ]
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def _google_image_search(self, query: str):
