@@ -60,7 +60,7 @@ class ModalityAgent(BaseAgent):
 
             raise ValueError("Rejected query due to:\n" + "\n".join(formatted))
 
-        response = super().run(query)
+        response = super().run(query=query)
         cleaned = re.sub(
             r"^```(?:json|python)?\s*|\s*```$",
             "",
