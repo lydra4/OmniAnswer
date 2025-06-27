@@ -23,7 +23,7 @@ class ParaphraseAgent(BaseAgent):
             Dict[str, str]: A dictionary containing the paraphrased query.
         """
         self.logger.info(f"Running ParaphraseAgent with query: {query}.")
-        response = super().run(query, modalities=modalities, **kwargs)
+        response = super().run(query=query, modalities=modalities, **kwargs)
         cleaned = re.sub(
             r"^```(?:json|python)?\s*|\s*```$",
             "",
