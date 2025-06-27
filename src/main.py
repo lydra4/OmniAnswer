@@ -3,6 +3,7 @@ import os
 
 import hydra
 import omegaconf
+from agents.image_agent import ImageAgent
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
 from agents.text_agent import TextAgent
@@ -31,6 +32,10 @@ def main(cfg: omegaconf.DictConfig):
 
     text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
     text_outputs = text_agent.run(query=paraphrased_outputs["text"])
+
+    image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
+    image_outputs = image_agent.run(query=paraphrased_outputs["image"])
+    print(image_outputs)
 
 
 if __name__ == "__main__":
