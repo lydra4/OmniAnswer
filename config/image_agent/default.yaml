@@ -8,4 +8,4 @@ system_message: >
   Do not describe or generate images; only retrieve real search results.
 
 description: "Searches for relevant images using DuckDuckGo image search based on user queries."
-fixed_max_results: 5
+num: 5
