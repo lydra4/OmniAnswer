@@ -5,6 +5,7 @@ import hydra
 import omegaconf
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
+from agents.text_agent import TextAgent
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -28,7 +29,8 @@ def main(cfg: omegaconf.DictConfig):
     paraphrase_agent = ParaphraseAgent(cfg=cfg, logger=logger, llm=llm)
     paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
 
-    print(paraphrased_outputs)
+    text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
+    text_outputs = text_agent.run(query=paraphrased_outputs["text"])
 
 
 if __name__ == "__main__":
