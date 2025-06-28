@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import Any, List
 
 from agents.base_agent import BaseAgent
@@ -12,21 +13,24 @@ class ImageAgent(BaseAgent):
     def __init__(
         self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
     ):
+        if tools is None:
+            tools = [self._google_image_search]
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def _google_image_search(self, query: str):
         load_dotenv()
         gis = GoogleImagesSearch(
-            developer_key=os.getenv("GOOGLE_API_KEY"),
+            developer_key=os.getenv("GEMINI_API_KEY"),
             custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
         )
         _search_params = {
             "q": query,
-            "num": self.cfg.image_agent.num,
-            "safe": "high",
+            "num": self.cfg.num,
+            "safe": "active",
             "imgType": "photo",
         }
         gis.search(search_params=_search_params)
+        return [image.url for image in gis.results()]
 
     def run(self, query: str):
         """
@@ -38,6 +42,8 @@ class ImageAgent(BaseAgent):
         Returns:
             List[dict]: A list of dictionaries containing image titles and URLs.
         """
-        self.logger.info(f"Running ImageAgent with query: {query}.")
+        self.logger.info(f"Looking up images on query: {query}.")
         response = super().run(query)
-        return response
+        result = re.findall(r"\[.*?\]\((https?://.*?)\)", response.content)
+        self.logger.info(f"URL of images: {result}.")
+        return result
