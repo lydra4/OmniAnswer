@@ -35,7 +35,6 @@ def main(cfg: omegaconf.DictConfig):
 
     image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
     image_outputs = image_agent.run(query=paraphrased_outputs["image"])
-    print(image_outputs)
 
 
 if __name__ == "__main__":
