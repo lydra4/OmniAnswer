@@ -37,7 +37,7 @@ class ModalityAgent(BaseAgent):
         Returns:
             List[str]: A list of modalities identified in the query.
         """
-        self.logger.info(f"Running ModalityAgent with query: {query}.")
+        self.logger.info(f'Running on query: "{query}".')
         result = self.guard.validate(query)
 
         if not result.validation_passed:
@@ -68,4 +68,7 @@ class ModalityAgent(BaseAgent):
             flags=re.IGNORECASE,
         )
         modalities = ast.literal_eval(cleaned)
+        self.logger.info(
+            f'For the query:"{query}", best modes of learning: {modalities}.'
+        )
         return modalities
