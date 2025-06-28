@@ -22,7 +22,7 @@ class ParaphraseAgent(BaseAgent):
         Returns:
             Dict[str, str]: A dictionary containing the paraphrased query.
         """
-        self.logger.info(f"Running ParaphraseAgent with query: {query}.")
+        self.logger.info(f"Running Paraphrase Agent with query: {query}.")
         response = super().run(query=query, modalities=modalities, **kwargs)
         cleaned = re.sub(
             r"^```(?:json|python)?\s*|\s*```$",
@@ -31,5 +31,7 @@ class ParaphraseAgent(BaseAgent):
             flags=re.IGNORECASE,
         )
         paraphrased_outputs = ast.literal_eval(cleaned)
-
+        self.logger.info(
+            f"The different phrase(s) for the different mode(s): {paraphrased_outputs}."
+        )
         return paraphrased_outputs
