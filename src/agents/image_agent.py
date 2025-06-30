@@ -13,8 +13,7 @@ class ImageAgent(BaseAgent):
     def __init__(
         self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
     ):
-        if tools is None:
-            tools = [self._google_image_search]
+        tools = [self._google_image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def _google_image_search(self, query: str):
