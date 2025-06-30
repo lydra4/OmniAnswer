@@ -1,3 +1,4 @@
+import ast
 import logging
 import logging.config
 import os
@@ -16,16 +17,17 @@ def setup_logging(
     logging_config_path="../conf/logging.yaml", default_level=logging.INFO
 ):
     """
-    Logging configuration module.
+    Initializes the logging configuration.
 
-    This module provides functionality to set up logging using a YAML configuration file.
-    If the configuration file is missing or invalid, it defaults to basic logging with a specified level.
+    Attempts to load logging settings from a YAML configuration file. If the file is missing or malformed,
+    it falls back to a basic logging setup.
 
-    Attributes:
-        logger (logging.Logger): Logger used to capture logs during setup.
+    Args:
+        logging_config_path (str): Path to the logging configuration YAML file.
+        default_level (int): Logging level to use if YAML config is not found or fails to load.
 
-    Functions:
-        setup_logging(logging_config_path, default_level): Initializes logging from YAML or falls back to basic config.
+    Raises:
+        Any exception during YAML reading or logging setup will be logged and ignored, using fallback logging.
     """
     try:
         os.makedirs("logs", exist_ok=True)
@@ -44,15 +46,17 @@ def setup_logging(
 
 def load_llm(model_name: str, temperature: Union[int, float]):
     """
-    Load the appropriate LLM based on the model name.
+    Loads a large language model (LLM) based on the model name.
+
     Args:
-        model_name (str): The name of the model to load.
-        temperature (int, float): The temperature setting for the model.
+        model_name (str): Name of the model to load. Should start with 'gpt-' or 'gemini-'.
+        temperature (Union[int, float]): Temperature setting to control response randomness.
 
     Returns:
-        An instance of OpenAIChat or Gemini based on the model name.
+        Union[OpenAIChat, Gemini]: Instantiated LLM object.
+
     Raises:
-        ValueError: If the model name does not match any supported models.
+        ValueError: If the model name does not match supported providers.
     """
     load_dotenv()
     model_id = model_name.strip().lower()
@@ -75,8 +79,45 @@ def load_llm(model_name: str, temperature: Union[int, float]):
 
 
 def extract_image_urls(text: str) -> List[str]:
+    """
+    Extracts all image URLs from markdown-formatted links in the text.
+
+    Args:
+        text (str): Markdown-formatted text containing image links.
+
+    Returns:
+        List[str]: A list of extracted image URLs.
+    """
     return re.findall(r"\[.*?\]\((https?://.*?)\)", text)
 
 
 def extract_video_titles_and_urls(text: str) -> List[Tuple[str, str]]:
+    """
+    Extracts video titles and URLs from formatted markdown text.
+
+    Args:
+        text (str): The text containing video titles in `**Title**` format and associated URLs.
+
+    Returns:
+        List[Tuple[str, str]]: A list of tuples with (video title, video URL).
+    """
     return re.findall(r"\*\*([^\*]+)\*\*[\s\S]*?URL:\s*(https?://[^\s]+)", text)
+
+
+def extract_python_json_block(text: str) -> List[str]:
+    """
+    Extracts a Python or JSON code block from the text.
+
+    Args:
+        text (str): The input text containing code blocks.
+
+    Returns:
+        Union[str, None]: The extracted code block as a string, or None if no block is found.
+    """
+    cleaned = re.sub(
+        r"^```(?:json|python)?\s*|\s*```$",
+        "",
+        text.strip(),
+        flags=re.IGNORECASE,
+    )
+    return ast.literal_eval(cleaned)
