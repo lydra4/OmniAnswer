@@ -2,7 +2,7 @@ import ast
 import logging
 from typing import Any, List
 
-from agents.base_agent import BaseAgent
+from agents.base.base_agent import BaseAgent
 from agno.tools.googlesearch import GoogleSearchTools
 from omegaconf import DictConfig
 

@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 import nltk
-from agents.base_agent import BaseAgent
+from agents.base.base_agent import BaseAgent
 from guardrails.guard import Guard
 from guardrails.hub import BanList, ToxicLanguage
 from omegaconf import DictConfig

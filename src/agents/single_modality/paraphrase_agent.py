@@ -3,7 +3,7 @@ import logging
 import re
 from typing import Dict, List
 
-from agents.base_agent import BaseAgent
+from agents.base.base_agent import BaseAgent
 from omegaconf import DictConfig
 
 
