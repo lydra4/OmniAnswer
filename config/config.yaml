@@ -1,10 +1,10 @@
 defaults:
   - _self_
-  - modality_agent: default
-  - paraphrase_agent: default
-  - text_agent: default
-  - image_agent: default
-  - video_agent: default
+  - multi_modality/modality_agent@modality_agent: default
+  - single_modality/paraphrase_agent@paraphrase_agent: default
+  - single_modality/text_agent@text_agent: default
+  - single_modality/image_agent@image_agent: default
+  - single_modality/video_agent@video_agent: default
 
 model: gemini-2.5-flash-preview-04-17
 temperature: 0
