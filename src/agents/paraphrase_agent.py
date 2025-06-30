@@ -8,7 +8,22 @@ from omegaconf import DictConfig
 
 
 class ParaphraseAgent(BaseAgent):
+    """
+    Agent for generating paraphrases of user queries tailored to specific learning modalities.
+
+    This agent leverages a language model to create alternative versions of an input query
+    suited to different modalities such as visual, auditory, or kinesthetic learning.
+    """
+
     def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+        """
+        Initializes the ParaphraseAgent with configuration, logger, and language model.
+
+        Args:
+            cfg (DictConfig): Hydra configuration object containing agent parameters.
+            logger (logging.Logger): Logger instance for logging runtime info.
+            llm: Language model instance used for paraphrasing queries.
+        """
         super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm)
 
     def run(self, query: str, modalities: List[str], **kwargs) -> Dict[str, str]:
@@ -18,9 +33,13 @@ class ParaphraseAgent(BaseAgent):
         Args:
             query (str): The input query to be paraphrased.
             modalities (List[str]): List of modalities to consider for paraphrasing.
+            **kwargs: Additional keyword arguments passed to the underlying LLM call.
 
         Returns:
-            Dict[str, str]: A dictionary containing the paraphrased query.
+            Dict[str, str]: A dictionary mapping each modality to its corresponding paraphrased query.
+
+        Raises:
+            ValueError: If the LLM response cannot be parsed into a valid Python dictionary.
         """
         self.logger.info(f"Running Paraphrase Agent with query: {query}.")
         response = super().run(query=query, modalities=modalities, **kwargs)

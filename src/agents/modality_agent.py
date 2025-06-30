@@ -1,6 +1,4 @@
-import ast
 import logging
-import re
 from typing import List
 
 import nltk
@@ -8,12 +6,28 @@ from agents.base_agent import BaseAgent
 from guardrails.guard import Guard
 from guardrails.hub import BanList, ToxicLanguage
 from omegaconf import DictConfig
+from utils.general_utils import extract_python_json_block
 
 nltk.download("punkt")
 
 
 class ModalityAgent(BaseAgent):
+    """
+    Agent that determines the best learning modalities for a given user query.
+
+    It uses guardrails to reject queries containing banned words or toxic language before processing
+    with a language model to return modality suggestions.
+    """
+
     def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+        """
+        Initializes the ModalityAgent with configuration, logger, LLM, and validation guardrails.
+
+        Args:
+            cfg (DictConfig): Configuration specific to the modality agent.
+            logger (logging.Logger): Logger instance for tracking execution.
+            llm (Any): The language model used to generate responses.
+        """
         super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm)
         self.guard = Guard().use_many(
             BanList(
@@ -29,13 +43,19 @@ class ModalityAgent(BaseAgent):
 
     def run(self, query: str) -> List[str]:
         """
-        Run the ModalityAgent to determine the modalities of the given query.
+        Validates and processes the user query to determine optimal learning modalities.
+
+        Applies language safety checks, and if passed, uses the LLM to suggest modalities
+        such as visual, auditory, kinesthetic, etc.
 
         Args:
-            query (str): The input query to analyze for modalities.
+            query (str): User input about their learning preferences or needs.
 
         Returns:
-            List[str]: A list of modalities identified in the query.
+            List[str]: A list of learning modalities derived from the query.
+
+        Raises:
+            ValueError: If the query fails any validation guardrails.
         """
         self.logger.info(f'Running on query: "{query}".')
         result = self.guard.validate(query)
@@ -61,13 +81,7 @@ class ModalityAgent(BaseAgent):
             raise ValueError("Rejected query due to:\n" + "\n".join(formatted))
 
         response = super().run(query=query)
-        cleaned = re.sub(
-            r"^```(?:json|python)?\s*|\s*```$",
-            "",
-            response.content.strip(),
-            flags=re.IGNORECASE,
-        )
-        modalities = ast.literal_eval(cleaned)
+        modalities = extract_python_json_block(response.content.strip())
         self.logger.info(
             f'For the query:"{query}", best modes of learning: {modalities}.'
         )

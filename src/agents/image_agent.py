@@ -10,13 +10,35 @@ from utils.general_utils import extract_image_urls
 
 
 class ImageAgent(BaseAgent):
+    """
+    Agent responsible for retrieving relevant images based on a query using Google Custom Search API.
+    """
+
     def __init__(
         self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
     ):
+        """
+        Initializes the ImageAgent with configuration, logger, LLM, and optional tools.
+
+        Args:
+            cfg (DictConfig): Configuration specific to the image agent.
+            logger (logging.Logger): Logger instance for tracking execution.
+            llm (Any): The language model used to interpret or expand image search queries.
+            tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
+        """
         tools = [self._google_image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def _google_image_search(self, query: str):
+        """
+        Performs a Google Custom Search for images related to the input query.
+
+        Args:
+            query (str): Search term to retrieve relevant images.
+
+        Returns:
+            List[str]: A list of image URLs from the search results.
+        """
         load_dotenv()
         gis = GoogleImagesSearch(
             developer_key=os.getenv("GEMINI_API_KEY"),
@@ -33,13 +55,16 @@ class ImageAgent(BaseAgent):
 
     def run(self, query: str):
         """
-        Run the ImageAgent to process the given query.
+        Processes a user query to retrieve and extract image URLs.
+
+        Executes the configured image search tool, parses the markdown-formatted output,
+        and extracts image links.
 
         Args:
-            query (str): The input query to process.
+            query (str): Text-based image search query.
 
         Returns:
-            List[dict]: A list of dictionaries containing image titles and URLs.
+            List[str]: List of image URLs extracted from the response content.
         """
         self.logger.info(f"Looking up images on query: {query}.")
         response = super().run(query)
