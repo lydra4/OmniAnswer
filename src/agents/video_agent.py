@@ -1,8 +1,10 @@
 import logging
+import os
 from typing import Any, List
 
 from agents.base_agent import BaseAgent
-from agno.tools.youtube import YouTubeTools
+from dotenv import load_dotenv
+from googleapiclient.discovery import build
 from omegaconf import DictConfig
 
 
@@ -12,10 +14,18 @@ class VideoAgent(BaseAgent):
     """
 
     def __init__(
-        self, cfg: DictConfig, logger: logging.Logger, tools: List[Any] = None
+        self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
     ):
-        tools = [YouTubeTools()] if tools is None else tools
-        super().__init__(cfg=cfg.video_agent, logger=logger, tools=tools)
+        tools = [self._youtube_search] if tools is None else tools
+        super().__init__(cfg=cfg.video_agent, logger=logger, llm=llm, tools=tools)
+
+    def _youtube_search(self, query: str):
+        load_dotenv()
+        youtube = build("youtube", "v3", developerKey=os.getenv("GEMINI_API_KEY"))
+        request = youtube.search().list(
+            q=query, part="snippet", type="video", maxResults=self.cfg.num
+        )
+        return request.execute()
 
     def run(self, query: str):
         """
