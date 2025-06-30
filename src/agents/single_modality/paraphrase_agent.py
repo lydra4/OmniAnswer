@@ -1,10 +1,10 @@
-import ast
 import logging
-import re
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from agents.base.base_agent import BaseAgent
+from agno.tools.thinking import ThinkingTools
 from omegaconf import DictConfig
+from utils.general_utils import extract_python_json_block
 
 
 class ParaphraseAgent(BaseAgent):
@@ -15,7 +15,13 @@ class ParaphraseAgent(BaseAgent):
     suited to different modalities such as visual, auditory, or kinesthetic learning.
     """
 
-    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+    def __init__(
+        self,
+        cfg: DictConfig,
+        logger: logging.Logger,
+        llm,
+        tools: List[Any] = None,
+    ) -> None:
         """
         Initializes the ParaphraseAgent with configuration, logger, and language model.
 
@@ -23,8 +29,10 @@ class ParaphraseAgent(BaseAgent):
             cfg (DictConfig): Hydra configuration object containing agent parameters.
             logger (logging.Logger): Logger instance for logging runtime info.
             llm: Language model instance used for paraphrasing queries.
+            tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm)
+        tools = [ThinkingTools()] if tools is None else tools
+        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm, tools=tools)
 
     def run(self, query: str, modalities: List[str], **kwargs) -> Dict[str, str]:
         """
@@ -43,13 +51,7 @@ class ParaphraseAgent(BaseAgent):
         """
         self.logger.info(f"Running Paraphrase Agent with query: {query}.")
         response = super().run(query=query, modalities=modalities, **kwargs)
-        cleaned = re.sub(
-            r"^```(?:json|python)?\s*|\s*```$",
-            "",
-            response.content.strip(),
-            flags=re.IGNORECASE,
-        )
-        paraphrased_outputs = ast.literal_eval(cleaned)
+        paraphrased_outputs = extract_python_json_block(text=response.content.strip())
         self.logger.info(
             f"The different phrase(s) for the different mode(s): {paraphrased_outputs}."
         )
