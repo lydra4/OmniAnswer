@@ -7,6 +7,7 @@ from agents.image_agent import ImageAgent
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
 from agents.text_agent import TextAgent
+from agents.video_agent import VideoAgent
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -35,6 +36,10 @@ def main(cfg: omegaconf.DictConfig):
 
     image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
     image_outputs = image_agent.run(query=paraphrased_outputs["image"])
+
+    video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
+    video_outputs = video_agent.run(query=paraphrased_outputs["video"])
+    print(video_outputs)
 
 
 if __name__ == "__main__":
