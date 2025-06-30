@@ -39,7 +39,6 @@ def main(cfg: omegaconf.DictConfig):
 
     video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
     video_outputs = video_agent.run(query=paraphrased_outputs["video"])
-    print(video_outputs)
 
 
 if __name__ == "__main__":
