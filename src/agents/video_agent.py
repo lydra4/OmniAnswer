@@ -6,6 +6,7 @@ from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
 from googleapiclient.discovery import build
 from omegaconf import DictConfig
+from utils.general_utils import extract_video_titles_and_urls
 
 
 class VideoAgent(BaseAgent):
@@ -21,9 +22,16 @@ class VideoAgent(BaseAgent):
 
     def _youtube_search(self, query: str):
         load_dotenv()
-        youtube = build("youtube", "v3", developerKey=os.getenv("GEMINI_API_KEY"))
+        youtube = build(
+            serviceName="youtube",
+            version="v3",
+            developerKey=os.getenv("GEMINI_API_KEY"),
+        )
         request = youtube.search().list(
-            q=query, part="snippet", type="video", maxResults=self.cfg.num
+            q=query,
+            part="snippet",
+            type="video",
+            maxResults=self.cfg.num,
         )
         return request.execute()
 
@@ -39,6 +47,8 @@ class VideoAgent(BaseAgent):
         """
         self.logger.info(f"Looking up videos with query: {query}.")
         response = super().run(query)
-        result = response.content
+        # print(response.content)
+        matches = extract_video_titles_and_urls(text=response.content)
+        result = [{"title": title, "url": url} for title, url in matches]
         self.logger.info(f"URL of videos: {result}.")
         return result

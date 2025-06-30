@@ -1,12 +1,12 @@
 import logging
 import os
-import re
 from typing import Any, List
 
 from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
 from google_images_search import GoogleImagesSearch
 from omegaconf import DictConfig
+from utils.general_utils import extract_image_urls
 
 
 class ImageAgent(BaseAgent):
@@ -43,6 +43,6 @@ class ImageAgent(BaseAgent):
         """
         self.logger.info(f"Looking up images on query: {query}.")
         response = super().run(query)
-        result = re.findall(r"\[.*?\]\((https?://.*?)\)", response.content)
+        result = extract_image_urls(text=response.content)
         self.logger.info(f"URL of images: {result}.")
         return result

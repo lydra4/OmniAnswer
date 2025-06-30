@@ -1,7 +1,8 @@
 import logging
 import logging.config
 import os
-from typing import Union
+import re
+from typing import List, Tuple, Union
 
 import yaml
 from agno.models.google import Gemini
@@ -71,3 +72,11 @@ def load_llm(model_name: str, temperature: Union[int, float]):
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
+
+
+def extract_image_urls(text: str) -> List[str]:
+    return re.findall(r"\[.*?\]\((https?://.*?)\)", text)
+
+
+def extract_video_titles_and_urls(text: str) -> List[Tuple[str, str]]:
+    return re.findall(r"\*\*([^\*]+)\*\*[\s\S]*?URL:\s*(https?://[^\s]+)", text)
