@@ -80,15 +80,21 @@ def load_llm(model_name: str, temperature: Union[int, float]):
 
 def extract_image_urls(text: str) -> List[str]:
     """
-    Extracts all image URLs from markdown-formatted links in the text.
+    Extract image URLs from markdown or plain text.
+
+    Supports:
+    - Markdown format: ![alt](https://example.com)
+    - Plain bullet list: * https://example.com
 
     Args:
-        text (str): Markdown-formatted text containing image links.
+        text (str): Input text containing image URLs.
 
     Returns:
-        List[str]: A list of extracted image URLs.
+        List[str]: List of valid image URLs.
     """
-    return re.findall(r"\[.*?\]\((https?://.*?)\)", text)
+    # Match markdown-style and bare URLs
+    urls = re.findall(r"\(?(https?://[^\s)]+)\)?", text)
+    return [url.strip(").,") for url in urls]
 
 
 def extract_video_titles_and_urls(text: str) -> List[Tuple[str, str]]:
