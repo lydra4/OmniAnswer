@@ -47,7 +47,6 @@ class VideoAgent(BaseAgent):
         """
         self.logger.info(f"Looking up videos with query: {query}.")
         response = super().run(query)
-        # print(response.content)
         matches = extract_video_titles_and_urls(text=response.content)
         result = [{"title": title, "url": url} for title, url in matches]
         self.logger.info(f"URL of videos: {result}.")
