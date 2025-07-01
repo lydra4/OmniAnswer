@@ -4,6 +4,7 @@ from typing import Any, List
 
 from agents.base.base_agent import BaseAgent
 from agno.tools.googlesearch import GoogleSearchTools
+from agno.tools.reasoning import ReasoningTools
 from omegaconf import DictConfig
 
 
@@ -33,11 +34,12 @@ class TextAgent(BaseAgent):
         """
         tools = (
             [
+                ReasoningTools(),
                 GoogleSearchTools(
                     stop_after_tool_call_tools=["google_search"],
                     show_result_tools=["google_search"],
                     fixed_max_results=cfg.text_agent.fixed_max_results,
-                )
+                ),
             ]
             if tools is None
             else tools
