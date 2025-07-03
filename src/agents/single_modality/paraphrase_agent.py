@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 
 from agents.base.base_agent import BaseAgent
 from agno.tools.thinking import ThinkingTools
+from jinja2 import Template
 from omegaconf import DictConfig
 from utils.general_utils import extract_python_json_block
 
@@ -32,7 +33,25 @@ class ParaphraseAgent(BaseAgent):
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
         tools = [ThinkingTools()] if tools is None else tools
-        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm, tools=tools)
+        super().__init__(cfg=cfg, logger=logger, llm=llm, tools=tools)
+        self.raw_system_message = self.cfg.system_message
+
+    def _render_system_message(self, modalities: List[str]) -> str:
+        """
+        Render the system message using Jinja2 template, dynamically injecting modalities and example outputs.
+
+        Args:
+            modalities (List[str]): List of modalities to generate paraphrases for.
+
+        Returns:
+            str: Rendered system message prompt.
+        """
+        example_dict = {m: f"paraphrase for {m}" for m in modalities}
+        example_str = str(example_dict).replace("'", '"')
+        template = Template(self.raw_system_message)
+        rendered_prompt = template.render(modalities=modalities, example=example_str)
+
+        return rendered_prompt
 
     def run(self, query: str, modalities: List[str], **kwargs) -> Dict[str, str]:
         """
@@ -49,8 +68,13 @@ class ParaphraseAgent(BaseAgent):
         Raises:
             ValueError: If the LLM response cannot be parsed into a valid Python dictionary.
         """
-        self.logger.info(f"Running Paraphrase Agent with query: {query}.")
-        response = super().run(query=query, modalities=modalities, **kwargs)
+        self.logger.info(
+            f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
+        )
+        system_prompt = self._render_system_message(modalities=modalities)
+        response = super().run(
+            query=query, modalities=modalities, system_prompt=system_prompt, **kwargs
+        )
         paraphrased_outputs = extract_python_json_block(text=response.content.strip())
         self.logger.info(
             f"The different phrase(s) for the different mode(s): {paraphrased_outputs}."
