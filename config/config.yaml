@@ -7,5 +7,5 @@ defaults:
   - single_modality/video_agent@video_agent: default
   - teams/multimodal_team@multimodal_team: default
 
-model: gemini-2.0-flash
-temperature: 0
+model: gemini-2.5-flash-preview-04-17
+temperature: 0.0
