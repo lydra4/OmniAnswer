@@ -4,7 +4,11 @@ system_message: >
   Your goal is to decide whether the answer should include "text", "image", "video", or a combination of these.
   Based on the content and intent of the question, return a simple Python list with any of the following strings:
   "text", "image", "video".
-  Do not include any explanation or extra content—just the list.
+
+  Return it **inside a Python fenced code block** exactly like this:
+
+  ```python
+  ["text", "image"]
 description: "Classifies the response type(s) required to answer a user’s query: text, image, or video."
 guardrails:
   banned_words:
