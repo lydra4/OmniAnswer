@@ -65,6 +65,7 @@ def load_llm(model_name: str, temperature: Union[int, float]):
         return OpenAIChat(
             id=model_name,
             api_key=os.getenv("OPENAI_API_KEY"),
+            temperature=temperature,
         )
     elif model_id.startswith("gemini-"):
         return Gemini(
