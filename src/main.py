@@ -8,6 +8,7 @@ from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
 from agents.single_modality.text_agent import TextAgent
 from agents.single_modality.video_agent import VideoAgent
+from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -28,17 +29,18 @@ def main(cfg: omegaconf.DictConfig):
     modality_agent = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
     modalities = modality_agent.run(query=query)
 
-    paraphrase_agent = ParaphraseAgent(cfg=cfg, logger=logger, llm=llm)
+    paraphrase_agent = ParaphraseAgent(cfg=cfg.paraphrase_agent, logger=logger, llm=llm)
     paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
 
-    text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
-    text_outputs = text_agent.run(query=paraphrased_outputs["text"])
-
-    image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
-    image_outputs = image_agent.run(query=paraphrased_outputs["image"])
-
-    video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
-    video_outputs = video_agent.run(query=paraphrased_outputs["video"])
+    multimodal_team = MultiModalTeam(
+        text_agent=TextAgent(cfg=cfg, logger=logger, llm=llm),
+        image_agent=ImageAgent(cfg=cfg, logger=logger, llm=llm),
+        video_agent=VideoAgent(cfg=cfg, logger=logger, llm=llm),
+        cfg=cfg.multimodal_team,
+        logger=logger,
+        llm=llm,
+    )
+    multimodal_team.run(query=query)
 
 
 if __name__ == "__main__":
