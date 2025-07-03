@@ -5,6 +5,7 @@ defaults:
   - single_modality/text_agent@text_agent: default
   - single_modality/image_agent@image_agent: default
   - single_modality/video_agent@video_agent: default
+  - teams/multimodal_team@multimodal_team: default
 
-model: gemini-2.5-flash-preview-04-17
+model: gemini-2.0-flash
 temperature: 0
