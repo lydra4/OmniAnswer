@@ -1,8 +1,9 @@
 import logging
-from typing import List
+from typing import Any, List
 
 import nltk
 from agents.base.base_agent import BaseAgent
+from agno.tools.reasoning import ReasoningTools
 from guardrails.guard import Guard
 from guardrails.hub import BanList, ToxicLanguage
 from omegaconf import DictConfig
@@ -19,7 +20,13 @@ class ModalityAgent(BaseAgent):
     with a language model to return modality suggestions.
     """
 
-    def __init__(self, cfg: DictConfig, logger: logging.Logger, llm) -> None:
+    def __init__(
+        self,
+        cfg: DictConfig,
+        logger: logging.Logger,
+        llm,
+        tools: List[Any] = None,
+    ) -> None:
         """
         Initializes the ModalityAgent with configuration, logger, LLM, and validation guardrails.
 
@@ -28,7 +35,8 @@ class ModalityAgent(BaseAgent):
             logger (logging.Logger): Logger instance for tracking execution.
             llm (Any): The language model used to generate responses.
         """
-        super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm)
+        tools = [ReasoningTools()] if tools is None else tools
+        super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm, tools=tools)
         self.guard = Guard().use_many(
             BanList(
                 banned_words=cfg.modality_agent.guardrails.banned_words,
