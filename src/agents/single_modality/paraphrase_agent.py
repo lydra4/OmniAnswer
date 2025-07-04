@@ -1,8 +1,7 @@
 import logging
 from typing import Any, Dict, List
 
-from agents.base.base_agent import BaseAgent
-from agno.tools.thinking import ThinkingTools
+from agents.base_agent import BaseAgent
 from jinja2 import Template
 from omegaconf import DictConfig
 from utils.general_utils import extract_python_json_block
@@ -32,11 +31,10 @@ class ParaphraseAgent(BaseAgent):
             llm: Language model instance used for paraphrasing queries.
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        tools = [ThinkingTools()] if tools is None else tools
         super().__init__(cfg=cfg, logger=logger, llm=llm, tools=tools)
         self.raw_system_message = self.cfg.system_message
 
-    def _render_system_message(self, modalities: List[str]) -> str:
+    def _render_system_message(self, query: str, modality: str) -> str:
         """
         Render the system message using Jinja2 template, dynamically injecting modalities and example outputs.
 
@@ -46,10 +44,8 @@ class ParaphraseAgent(BaseAgent):
         Returns:
             str: Rendered system message prompt.
         """
-        example_dict = {m: f"paraphrase for {m}" for m in modalities}
-        example_str = str(example_dict).replace("'", '"')
         template = Template(self.raw_system_message)
-        rendered_prompt = template.render(modalities=modalities, example=example_str)
+        rendered_prompt = template.render(query=query, modality=modality)
 
         return rendered_prompt
 
@@ -71,12 +67,23 @@ class ParaphraseAgent(BaseAgent):
         self.logger.info(
             f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
         )
-        system_prompt = self._render_system_message(modalities=modalities)
-        response = super().run(
-            query=query, modalities=modalities, system_prompt=system_prompt, **kwargs
-        )
-        paraphrased_outputs = extract_python_json_block(text=response.content.strip())
-        self.logger.info(
-            f"The different phrase(s) for the different mode(s): {paraphrased_outputs}."
-        )
-        return paraphrased_outputs
+        results: dict = {}
+
+        for mode in modalities:
+            system_prompt = self._render_system_message(query=query, modality=mode)
+
+            try:
+                response = super().run(
+                    query=query, modality=mode, system_prompt=system_prompt, **kwargs
+                )
+                result_dict = extract_python_json_block(text=response.content.strip())
+
+                if isinstance(result_dict, dict) and mode in result_dict:
+                    results[mode] = result_dict[mode]
+                else:
+                    self.logger.warning(f"Invalid response format for modality {mode}.")
+            except Exception as e:
+                self.logger.error(f"Error processing modality {mode}: {e}")
+
+        self.logger.info(f"Paraphrase results: {results}")
+        return results
