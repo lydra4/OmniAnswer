@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 from typing import Any, Dict, List
 
 from agents.base_agent import BaseAgent
@@ -34,6 +36,9 @@ class MultiModalTeam:
             if modality in self.modality_agent_map
         ]
 
+    def _extract_urls(self, text: str) -> List[str]:
+        return re.findall(r"(https?://\S+)", text)
+
     def _define_team(self) -> Team:
         return Team(
             name=self.cfg.multimodal_team.name,
@@ -46,10 +51,26 @@ class MultiModalTeam:
             markdown=True,
             monitoring=True,
             enable_session_summaries=True,
+            stream_intermediate_steps=True,
         )
 
-    def run(self, query: str) -> Any:
+    def run(self, query: str):
         multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
         response = multimodal_team.run(query)
-        print(response.content.strip())
+        content = response.content or ""
+        outputs: Dict[str, List[str]] = {}
+
+        json_match = re.search(r"```json\n(.*?)```", content, re.DOTALL)
+        if json_match:
+            try:
+                plan = json.loads(json_match.group(1))
+                for entry in plan:
+                    agent_id = entry["agent_id"]  # e.g., text-search-agent
+                    modality = agent_id.split("-")[0]  # "text", "image", etc.
+                    outputs.setdefault(modality, []).append(entry["task"])
+            except json.JSONDecodeError as e:
+                self.logger.error(f"Failed to parse agent JSON: {e}")
+
+        print(outputs)
+        return outputs
