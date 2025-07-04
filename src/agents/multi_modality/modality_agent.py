@@ -3,7 +3,6 @@ from typing import Any, List
 
 import nltk
 from agents.base_agent import BaseAgent
-from agno.tools.reasoning import ReasoningTools
 from guardrails.guard import Guard
 from guardrails.hub import BanList, ToxicLanguage
 from omegaconf import DictConfig
@@ -35,7 +34,7 @@ class ModalityAgent(BaseAgent):
             logger (logging.Logger): Logger instance for tracking execution.
             llm (Any): The language model used to generate responses.
         """
-        tools = [ReasoningTools()] if tools is None else tools
+        tools = [] if tools is None else tools
         super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm, tools=tools)
         self.guard = Guard().use_many(
             BanList(
