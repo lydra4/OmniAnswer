@@ -4,7 +4,6 @@ from typing import Any, Dict, List
 from agents.base_agent import BaseAgent
 from jinja2 import Template
 from omegaconf import DictConfig
-from utils.general_utils import extract_python_json_block
 
 
 class ParaphraseAgent(BaseAgent):
@@ -31,8 +30,9 @@ class ParaphraseAgent(BaseAgent):
             llm: Language model instance used for paraphrasing queries.
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        super().__init__(cfg=cfg, logger=logger, llm=llm, tools=tools)
-        self.raw_system_message = self.cfg.system_message
+        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm, tools=tools)
+        self.cfg = cfg
+        self.raw_system_message = self.cfg.paraphrase_agent.system_message
 
     def _render_system_message(self, query: str, modality: str) -> str:
         """
@@ -67,7 +67,7 @@ class ParaphraseAgent(BaseAgent):
         self.logger.info(
             f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
         )
-        results: dict = {}
+        results: Dict[str, str] = {}
 
         for mode in modalities:
             system_prompt = self._render_system_message(query=query, modality=mode)
@@ -76,12 +76,8 @@ class ParaphraseAgent(BaseAgent):
                 response = super().run(
                     query=query, modality=mode, system_prompt=system_prompt, **kwargs
                 )
-                result_dict = extract_python_json_block(text=response.content.strip())
+                results[mode] = response.content.strip()
 
-                if isinstance(result_dict, dict) and mode in result_dict:
-                    results[mode] = result_dict[mode]
-                else:
-                    self.logger.warning(f"Invalid response format for modality {mode}.")
             except Exception as e:
                 self.logger.error(f"Error processing modality {mode}: {e}")
 
