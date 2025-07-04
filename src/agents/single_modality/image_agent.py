@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Any, List
 
-from agents.base.base_agent import BaseAgent
+from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
 from google_images_search import GoogleImagesSearch
 from omegaconf import DictConfig
