@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents.base_agent import BaseAgent
 from agents.single_modality.image_agent import ImageAgent
@@ -18,7 +18,7 @@ class MultiModalTeam:
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> None:
         self.paraphrased_outputs = paraphrased_outputs
         self.cfg = cfg
@@ -68,7 +68,25 @@ class MultiModalTeam:
                 for entry in plan:
                     agent_id = entry["agent_id"]  # e.g., text-search-agent
                     modality = agent_id.split("-")[0]  # "text", "image", etc.
-                    outputs.setdefault(modality, []).append(entry["task"])
+                    task = entry["task"]
+                    agent = self.modality_agent_map.get(modality)
+                    if agent:
+                        try:
+                            result = agent.run(task)
+                            # Each agent returns a list of dicts with 'url' or a list of URLs
+                            if isinstance(result, list):
+                                # Try to extract URLs from dicts or use as-is if already URLs
+                                urls = []
+                                for item in result:
+                                    if isinstance(item, dict) and "url" in item:
+                                        urls.append(item["url"])
+                                    elif isinstance(item, str):
+                                        urls.append(item)
+                                outputs.setdefault(modality, []).extend(urls)
+                            else:
+                                outputs.setdefault(modality, []).append(result)
+                        except Exception as e:
+                            self.logger.error(f"Agent {modality} failed: {e}")
             except json.JSONDecodeError as e:
                 self.logger.error(f"Failed to parse agent JSON: {e}")
 
