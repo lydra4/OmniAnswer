@@ -1,6 +1,7 @@
 import logging
-from typing import Any, List, Optional
+from typing import Any, Dict, List
 
+from agents.base_agent import BaseAgent
 from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.text_agent import TextAgent
 from agents.single_modality.video_agent import VideoAgent
@@ -11,44 +12,44 @@ from omegaconf import DictConfig
 class MultiModalTeam:
     def __init__(
         self,
-        text_agent: Optional[TextAgent],
-        image_agent: Optional[ImageAgent],
-        video_agent: Optional[VideoAgent],
+        paraphrased_outputs: Dict[str, str],
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
         tools: List[Any] = None,
     ) -> None:
-        self.text_agent = text_agent
-        self.image_agent = image_agent
-        self.video_agent = video_agent
+        self.paraphrased_outputs = paraphrased_outputs
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
         self.tools = tools if tools is not None else []
-        self.agents = [
-            agent
-            for agent in [self.text_agent, self.image_agent, self.video_agent]
-            if agent is not None
+        self.modality_agent_map: Dict[str, BaseAgent] = {
+            "text": TextAgent(cfg=self.cfg, logger=logger, llm=llm),
+            "image": ImageAgent(cfg=self.cfg, logger=logger, llm=llm),
+            "video": VideoAgent(cfg=self.cfg, logger=logger, llm=llm),
+        }
+        self.agents: List[BaseAgent] = [
+            self.modality_agent_map[modality]
+            for modality in self.paraphrased_outputs
+            if modality in self.modality_agent_map
         ]
 
-    def _define_team(self) -> None:
+    def _define_team(self) -> Team:
         return Team(
-            name=self.cfg.name,
-            mode=self.cfg.mode,
+            name=self.cfg.multimodal_team.name,
+            mode=self.cfg.multimodal_team.mode,
             members=self.agents,
-            instructions=self.cfg.instructions,
+            instructions=self.cfg.multimodal_team.instructions,
             model=self.llm,
-            expected_output=self.cfg.expected_output,
-            share_member_interactions=self.cfg.share_member_interactions,
+            expected_output=self.cfg.multimodal_team.expected_output,
+            share_member_interactions=self.cfg.multimodal_team.share_member_interactions,
             markdown=True,
             monitoring=True,
+            enable_session_summaries=True,
         )
 
     def run(self, query: str) -> Any:
         multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
-        team_response = multimodal_team.run(query)
-        for response in team_response.member_response:
-            print(f"Agent ID: {response.agent_id}")
-            print(f"Content: {response.content}")
+        response = multimodal_team.run(query)
+        print(response.content.strip())
