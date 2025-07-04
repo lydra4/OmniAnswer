@@ -8,4 +8,4 @@ defaults:
   - teams/multimodal_team@multimodal_team: default
 
 model: gemini-2.5-flash-preview-04-17
-temperature: 0.0
+temperature: 1.0
