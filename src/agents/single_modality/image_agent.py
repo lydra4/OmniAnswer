@@ -53,7 +53,7 @@ class ImageAgent(BaseAgent):
         gis.search(search_params=_search_params)
         return [image.url for image in gis.results()]
 
-    def run(self, query: str):
+    def run(self, query: str, **kwargs):
         """
         Processes a user query to retrieve and extract image URLs.
 

@@ -35,7 +35,7 @@ class VideoAgent(BaseAgent):
         )
         return request.execute()
 
-    def run(self, query: str):
+    def run(self, query: str, **kwargs):
         """
         Run the VideoAgent to process the given query.
 
