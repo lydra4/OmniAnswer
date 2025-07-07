@@ -42,6 +42,7 @@ class BaseAgent(Agent, ABC):
 
         super().__init__(
             name=self.cfg.name,
+            role=self.cfg.role,
             model=self.llm,
             description=self.cfg.description,
             instructions=[self.cfg.system_message],
