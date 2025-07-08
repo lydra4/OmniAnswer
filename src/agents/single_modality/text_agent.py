@@ -73,3 +73,5 @@ class TextAgent(BaseAgent):
         url_result = [item["url"] for item in result_list]
         url = " ".join(url_result)
         self.logger.info(f"For text: {[url]}.")
+
+        return url
