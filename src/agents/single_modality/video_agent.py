@@ -42,4 +42,5 @@ class VideoAgent(BaseAgent):
 
         top_url = video_urls[0]
         self.logger.info(f"URL of video: {[top_url]}")
+
         return top_url

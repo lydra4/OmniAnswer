@@ -71,4 +71,5 @@ class ImageAgent(BaseAgent):
         url_result = extract_image_urls(text=response.content)
         url = " ".join(url_result)
         self.logger.info(f"URL of image: {[url]}.")
+
         return url
