@@ -3,7 +3,7 @@ import logging
 import logging.config
 import os
 import re
-from typing import List, Tuple, Union
+from typing import List, Union
 
 import yaml
 from agno.models.google import Gemini
@@ -98,17 +98,17 @@ def extract_image_urls(text: str) -> List[str]:
     return [url.strip(").,") for url in urls]
 
 
-def extract_video_titles_and_urls(text: str) -> List[Tuple[str, str]]:
+def extract_video_urls(text: str) -> List[str]:
     """
-    Extracts video titles and URLs from formatted markdown text.
+    Extracts all YouTube URLs from markdown-style links in the text.
 
     Args:
-        text (str): The text containing video titles in `**Title**` format and associated URLs.
+        text (str): Raw string containing YouTube links.
 
     Returns:
-        List[Tuple[str, str]]: A list of tuples with (video title, video URL).
+        List[str]: List of extracted video URLs.
     """
-    return re.findall(r"\*\*([^\*]+)\*\*[\s\S]*?URL:\s*(https?://[^\s]+)", text)
+    return re.findall(r"https?://www\.youtube\.com/watch\?v=[\w-]+", text)
 
 
 def extract_python_json_block(text: str) -> List[str]:
