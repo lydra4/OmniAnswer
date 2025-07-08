@@ -1,4 +1,4 @@
-name: ParaphraseAgent
+name: Paraphrase Agent
 
 role: >
   You are responsible for rewriting a user’s query to optimize it for search based on the given modality (text, image, or video).

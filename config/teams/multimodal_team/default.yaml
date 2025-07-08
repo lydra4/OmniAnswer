@@ -1,15 +1,23 @@
-name: ModalityAgent
+name: Multimodal Team
 mode: Coordinate
 instructions: >
   You are a multimodal team composed of up to three agents: TextAgent, ImageAgent, and VideoAgent.
   Each of you receives a query optimized for your specific modality — paraphrased and filtered by upstream agents.
 
-  Your task is to independently analyze the modality-specific query and return a list of relevant hyperlinks 
-  based on your domain expertise. Avoid duplicating efforts across modalities.
+  Your task is to independently analyze the modality-specific query and return structured results based on your domain expertise.
+  - TextAgent: Return a short factual answer **and** its source URL.
+  - ImageAgent: Return a relevant image URL and optional caption.
+  - VideoAgent: Return a video URL and title if available.
 
-  Share findings as needed with team members to support a coherent and comprehensive multimodal response.
-  Keep responses concise and focused on your modality’s strengths.
+  Avoid duplicating efforts across modalities.
+  Keep your responses short, factual, and in your area of strength.
 
 expected_output: >
-  Each agent returns a list of hyperlinks relevant to their modality’s interpretation of the query.
+  {
+    "text": "summary of the answer",
+    "text_url": "https://source-url.com/article",
+    "image": "https://image-url.com/image.png",
+    "video": "https://youtube.com/watch?v=abc123"
+  }
+
 share_member_interactions: true
