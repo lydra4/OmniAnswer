@@ -11,4 +11,4 @@ system_message: >
   Return only real video titles and URLs. Do not generate or describe fictional videos.
 
 description: "Searches for relevant videos using YouTubeTools based on user queries."
-num: 5
+num: 1

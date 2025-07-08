@@ -12,4 +12,4 @@ system_message: >
   Your output should be a natural language summary of the most reliable search results.
 
 description: "Uses GoogleSearchTools to answer user queries with real-time information in natural language."
-fixed_max_results: 5
+fixed_max_results: 1
