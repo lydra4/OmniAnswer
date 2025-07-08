@@ -11,9 +11,9 @@ from pydantic import BaseModel
 
 
 class ModalityLinks(BaseModel):
-    text: Optional[List[str]]
-    image: Optional[List[str]]
-    video: Optional[List[str]]
+    text: Optional[str]
+    image: Optional[str]
+    video: Optional[str]
 
 
 class MultiModalTeam:
@@ -55,18 +55,26 @@ class MultiModalTeam:
             response_model=ModalityLinks,
         )
 
-    def run(self, query: str):
-        # for agent in self.agents:
-        #     print(f"Name: {agent.name}")
-        #     print(f"Agent ID: {agent.agent_id}")
-        #     print("---")
+    def run(self, query: str) -> Dict[str, List[str]]:
         multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
-        response = multimodal_team.run(query, stream=True)
+        response = multimodal_team.run(query, stream=False)
+
         print("\n--- Final Team Response ---")
         print(response.content)
 
-        print("\n--- Individual Modality Responses ---")
-        for member in response.member_responses:
-            print(f"[{member.agent_id}]")
-            print(member.content)
+        modality_links = {
+            "text": response.content.text or [],
+            "image": response.content.image or [],
+            "video": response.content.video or [],
+        }
+
+        print("\n--- Structured Modality Links Dictionary ---")
+        for modality, links in modality_links.items():
+            print(f"{modality.title()}:")
+            for link in links:
+                print(f"- {link}")
+
+        print(modality_links)
+
+        return modality_links
