@@ -55,26 +55,11 @@ class MultiModalTeam:
             response_model=ModalityLinks,
         )
 
-    def run(self, query: str) -> Dict[str, List[str]]:
+    def run(self, query: str):
         multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
         response = multimodal_team.run(query, stream=False)
 
-        print("\n--- Final Team Response ---")
-        print(response.content)
-
-        modality_links = {
-            "text": response.content.text or [],
-            "image": response.content.image or [],
-            "video": response.content.video or [],
-        }
-
-        print("\n--- Structured Modality Links Dictionary ---")
-        for modality, links in modality_links.items():
-            print(f"{modality.title()}:")
-            for link in links:
-                print(f"- {link}")
-
-        print(modality_links)
-
-        return modality_links
+        print(f"text:{response.content.text}")
+        print(f"image:{response.content.image}")
+        print(f"video:{response.content.video}")
