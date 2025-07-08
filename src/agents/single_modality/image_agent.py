@@ -68,6 +68,7 @@ class ImageAgent(BaseAgent):
         """
         self.logger.info(f"Looking up images on query: {query}.")
         response = super().run(query)
-        result = extract_image_urls(text=response.content)
-        self.logger.info(f"URL of images: {result}.")
-        return result
+        url_result = extract_image_urls(text=response.content)
+        url = " ".join(url_result)
+        self.logger.info(f"URL of image: {[url]}.")
+        return url

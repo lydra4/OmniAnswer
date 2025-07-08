@@ -64,10 +64,12 @@ class TextAgent(BaseAgent):
         """
         self.logger.info(f"Looking up text documents with query: {query}.")
         response = super().run(query)
-        result = ast.literal_eval(response.content)
-        result_dict = [
-            {"title": dictionary["title"], "url": dictionary["url"]}
-            for dictionary in result
-        ]
-        self.logger.info(f"URL of text documents: {result_dict}.")
-        return result_dict
+        result_list = ast.literal_eval(response.content)
+
+        if not result_list:
+            self.logger.warning("No text results found.")
+            return "No text results found."
+
+        url_result = [item["url"] for item in result_list]
+        url = " ".join(url_result)
+        self.logger.info(f"For text: {[url]}.")
