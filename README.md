@@ -42,18 +42,9 @@ This project was conceived in response to the rapidly evolving landscape of data
 
 ## Architecture
 
-```
-User Query
-   |
-   v
-[ModalityAgent] --(decides modalities: text/image/video)--> [ParaphraseAgent] --(optimizes query per modality)--> [MultiModalTeam]
-   |                                                                                                              |
-   |                                                                                                              v
-   |                                                                                                   [TextAgent, ImageAgent, VideoAgent]
-   |                                                                                                              |
-   |                                                                                                              v
-   |                                                                                                   [Aggregated Multi-modal Answer]
-```
+<p align="center">
+  <img src="assets/architecture.png" alt="OmniAnswer Architecture Diagram" width="700"/>
+</p>
 
 ## Directory Structure
 
