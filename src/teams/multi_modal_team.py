@@ -60,6 +60,14 @@ class MultiModalTeam:
         self.logger.info(f"Running MultiModalTeam on: {query}.")
         response = multimodal_team.run(query, stream=False)
 
-        print(f"text:{response.content.text}")
-        print(f"image:{response.content.image}")
-        print(f"video:{response.content.video}")
+        output = {
+            key: value
+            for key, value in {
+                "text": response.content.text,
+                "image": response.content.image,
+                "video": response.content.video,
+            }.items()
+            if value is not None
+        }
+        self.logger.info(f"MultiModalTeam output: {output}")
+        return output
