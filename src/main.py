@@ -5,6 +5,7 @@ import hydra
 import omegaconf
 from agents.multi_modality.modality_agent import ModalityAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
+from evaluation.evaluation_pipeline import EvaluationPipeline
 from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
 
@@ -32,7 +33,12 @@ def main(cfg: omegaconf.DictConfig):
     multimodal_team = MultiModalTeam(
         paraphrased_outputs=paraphrased_outputs, cfg=cfg, logger=logger, llm=llm
     )
-    multimodal_team.run(query=query)
+    output = multimodal_team.run(query=query)
+
+    evaluation_pipeline = EvaluationPipeline(
+        cfg=cfg, logger=logger, query=query, output=output
+    )
+    evaluation_pipeline.evaluate_text_agent(text_output=output["text"])
 
 
 if __name__ == "__main__":
