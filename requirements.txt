@@ -1,5 +1,5 @@
 agno==1.6.3
-deepeval==3.1.6
+deepeval==3.2.6
 google-api-python-client==2.48.0
 Google-Images-Search==1.4.7
 google-search-results==2.4.2
