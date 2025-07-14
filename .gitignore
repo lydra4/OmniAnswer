@@ -9,6 +9,7 @@
 **/logs/**
 **/models/**
 **/data/**
+**/.deepeval/**
 
 # Except their sub-folders (structure, but not files inside)
 !**/logs/**/
