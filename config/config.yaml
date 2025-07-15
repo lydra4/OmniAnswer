@@ -1,11 +1,12 @@
 defaults:
   - _self_
-  - multi_modality/modality_agent@modality_agent: default
+  - multi_modality@modality_agent: modality_agent
   - single_modality/paraphrase_agent@paraphrase_agent: default
   - single_modality/text_agent@text_agent: default
   - single_modality/image_agent@image_agent: default
   - single_modality/video_agent@video_agent: default
-  - teams/multimodal_team@multimodal_team: default
+  - teams@omni_team: omni_team
+  - evaluation/text@text_evaluator: text_evaluator
 
-model: gemini-2.5-pro
+model: gpt-4o-mini
 temperature: 1.0
