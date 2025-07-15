@@ -36,52 +36,51 @@ class EvaluationPipeline:
             )
         )
 
-    def evaluate_text_agent(self):
-        self.logger.info("Evaluating relevancy on text agent.")
-        relevancy_metric = AnswerRelevancyMetric(
-            model=self.llm,
-            include_reason=False,
-        )
+    def _evaluate_relevancy(self) -> float:
+        test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
+        metric = AnswerRelevancyMetric(model=self.llm, include_reason=False)
+        metric.measure(test_case, _show_indicator=False)
+        return metric.score
+
+    def _evaluate_llm_metrics(self):
         test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
 
-        relevancy_metric.measure(test_case, _show_indicator=False)
-        self.logger.info(f"Relevancy score: {relevancy_metric.score}.")
+        metrics_config = {
+            "factuality": {
+                "name": self.cfg.text_evaluator.factuality_name,
+                "criteria": self.cfg.text_evaluator.factuality_criteria,
+            },
+            "clarity": {
+                "name": self.cfg.text_evaluator.clarity_name,
+                "criteria": self.cfg.text_evaluator.clarity_criteria,
+            },
+            "conciseness": {
+                "name": self.cfg.text_evaluator.conciseness_name,
+                "criteria": self.cfg.text_evaluator.conciseness_criteria,
+            },
+        }
 
-    def evaluate_with_llm(self):
-        test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
+        scores = {}
+        for metric_key, metric_info in metrics_config.items():
+            metric = GEval(
+                name=metric_info["name"],
+                criteria=metric_info["criteria"],
+                evaluation_params=[
+                    LLMTestCaseParams.INPUT,
+                    LLMTestCaseParams.ACTUAL_OUTPUT,
+                ],
+                model=self.llm,
+            )
+            metric.measure(test_case, _show_indicator=False)
+            scores[metric_key.capitalize()] = metric.score
 
-        factuality = GEval(
-            name=self.cfg.text_evaluator.factuality_name,
-            criteria=self.cfg.text_evaluator.factuality_criteria,
-            evaluation_params=[
-                LLMTestCaseParams.INPUT,
-                LLMTestCaseParams.ACTUAL_OUTPUT,
-            ],
-        )
+        return scores
 
-        clarity = GEval(
-            name=self.cfg.text_evaluator.clarity_name,
-            criteria=self.cfg.text_evaluator.clarity_criteria,
-            evaluation_params=[
-                LLMTestCaseParams.INPUT,
-                LLMTestCaseParams.ACTUAL_OUTPUT,
-            ],
-        )
+    def evaluate_all(self) -> Dict[str, float]:
+        self.logger.info("Evaluating text agent.")
+        relevancy = self._evaluate_relevancy()
+        llm_scores = self._evaluate_llm_metrics()
 
-        conciseness = GEval(
-            name=self.cfg.text_evaluator.conciseness_name,
-            criteria=self.cfg.text_evaluator.conciseness_criteria,
-            evaluation_params=[
-                LLMTestCaseParams.INPUT,
-                LLMTestCaseParams.ACTUAL_OUTPUT,
-            ],
-        )
-
-        factuality.measure(test_case=test_case, _show_indicator=False)
-        clarity.measure(test_case=test_case, _show_indicator=False)
-        conciseness.measure(test_case=test_case, _show_indicator=False)
-        print(
-            factuality.score,
-            clarity.score,
-            conciseness.score,
-        )
+        scores = {"relevancy": relevancy, **llm_scores}
+        self.logger.info(f"Text agent scores: {scores}.")
+        return scores
