@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, List
+from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
@@ -15,7 +15,11 @@ class ImageAgent(BaseAgent):
     """
 
     def __init__(
-        self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
+        self,
+        cfg: DictConfig,
+        logger: logging.Logger,
+        llm,
+        tools: Optional[List[Any]] = None,
     ):
         """
         Initializes the ImageAgent with configuration, logger, LLM, and optional tools.

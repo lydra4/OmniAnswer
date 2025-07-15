@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, List
+from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
 from agno.tools.serpapi import SerpApiTools
@@ -14,7 +14,11 @@ class VideoAgent(BaseAgent):
     """
 
     def __init__(
-        self, cfg: DictConfig, logger: logging.Logger, llm, tools: List[Any] = None
+        self,
+        cfg: DictConfig,
+        logger: logging.Logger,
+        llm,
+        tools: Optional[List[Any]] = None,
     ):
         tools = (
             [SerpApiTools(api_key=os.getenv("SERP_API_KEY"), search_youtube=True)]

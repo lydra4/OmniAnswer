@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 import nltk
 from agents.base_agent import BaseAgent
@@ -24,7 +24,7 @@ class ModalityAgent(BaseAgent):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> None:
         """
         Initializes the ModalityAgent with configuration, logger, LLM, and validation guardrails.

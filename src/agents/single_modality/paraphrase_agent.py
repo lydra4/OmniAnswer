@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agents.base_agent import BaseAgent
 from jinja2 import Template
@@ -19,7 +19,7 @@ class ParaphraseAgent(BaseAgent):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> None:
         """
         Initializes the ParaphraseAgent with configuration, logger, and language model.

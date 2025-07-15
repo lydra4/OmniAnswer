@@ -1,6 +1,6 @@
 import ast
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
 from agno.tools.googlesearch import GoogleSearchTools
@@ -21,7 +21,7 @@ class TextAgent(BaseAgent):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> None:
         """
         Initializes the TextAgent with configuration, logger, language model, and tools.
