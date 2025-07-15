@@ -3,8 +3,9 @@ import os
 from typing import Dict
 
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
+from deepeval.metrics.g_eval.g_eval import GEval
 from deepeval.models.llms import GeminiModel, GPTModel
-from deepeval.test_case.llm_test_case import LLMTestCase
+from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
 from omegaconf import DictConfig
 
 
@@ -35,9 +36,52 @@ class EvaluationPipeline:
             )
         )
 
-    def evaluate_text_agent(self, text_output: str):
-        relevancy_metric = AnswerRelevancyMetric(model=self.llm, include_reason=False)
+    def evaluate_text_agent(self):
+        self.logger.info("Evaluating relevancy on text agent.")
+        relevancy_metric = AnswerRelevancyMetric(
+            model=self.llm,
+            include_reason=False,
+        )
         test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
 
-        relevancy_metric.measure(test_case)
-        print(relevancy_metric.score)
+        relevancy_metric.measure(test_case, _show_indicator=False)
+        self.logger.info(f"Relevancy score: {relevancy_metric.score}.")
+
+    def evaluate_with_llm(self):
+        test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
+
+        factuality = GEval(
+            name=self.cfg.text_evaluator.factuality_name,
+            criteria=self.cfg.text_evaluator.factuality_criteria,
+            evaluation_params=[
+                LLMTestCaseParams.INPUT,
+                LLMTestCaseParams.ACTUAL_OUTPUT,
+            ],
+        )
+
+        clarity = GEval(
+            name=self.cfg.text_evaluator.clarity_name,
+            criteria=self.cfg.text_evaluator.clarity_criteria,
+            evaluation_params=[
+                LLMTestCaseParams.INPUT,
+                LLMTestCaseParams.ACTUAL_OUTPUT,
+            ],
+        )
+
+        conciseness = GEval(
+            name=self.cfg.text_evaluator.conciseness_name,
+            criteria=self.cfg.text_evaluator.conciseness_criteria,
+            evaluation_params=[
+                LLMTestCaseParams.INPUT,
+                LLMTestCaseParams.ACTUAL_OUTPUT,
+            ],
+        )
+
+        factuality.measure(test_case=test_case, _show_indicator=False)
+        clarity.measure(test_case=test_case, _show_indicator=False)
+        conciseness.measure(test_case=test_case, _show_indicator=False)
+        print(
+            factuality.score,
+            clarity.score,
+            conciseness.score,
+        )
