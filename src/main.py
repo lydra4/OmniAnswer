@@ -5,9 +5,10 @@ import hydra
 import omegaconf
 from agents.multi_modality.modality_agent import ModalityAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
-from evaluation.evaluation_pipeline import EvaluationPipeline
 from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
+
+from OmniAnswer.src.evaluation.text_evaluation import TextEvaluation
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="config.yaml")
@@ -35,7 +36,7 @@ def main(cfg: omegaconf.DictConfig):
     )
     output = multimodal_team.run(query=query)
 
-    evaluation_pipeline = EvaluationPipeline(
+    evaluation_pipeline = TextEvaluation(
         cfg=cfg, logger=logger, query=query, output=output
     )
     evaluation_results = evaluation_pipeline.evaluate_all()
