@@ -9,7 +9,7 @@ from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
 from omegaconf import DictConfig
 
 
-class EvaluationPipeline:
+class TextEvaluation:
     def __init__(
         self,
         cfg: DictConfig,
