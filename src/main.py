@@ -38,7 +38,8 @@ def main(cfg: omegaconf.DictConfig):
     evaluation_pipeline = EvaluationPipeline(
         cfg=cfg, logger=logger, query=query, output=output
     )
-    evaluation_pipeline.evaluate_text_agent(text_output=output["text"])
+    evaluation_pipeline.evaluate_text_agent()
+    evaluation_pipeline.evaluate_with_llm()
 
 
 if __name__ == "__main__":
