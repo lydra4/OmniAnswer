@@ -43,11 +43,11 @@ class MultiModalTeam:
 
     def _define_team(self) -> Team:
         return Team(
-            name=self.cfg.multimodal_team.name,
-            mode=self.cfg.multimodal_team.mode,
+            name=self.cfg.omni_team.name,
+            mode=self.cfg.omni_team.mode,
             members=self.agents,
             model=self.llm,
-            share_member_interactions=self.cfg.multimodal_team.share_member_interactions,
+            share_member_interactions=self.cfg.omni_team.share_member_interactions,
             markdown=True,
             monitoring=True,
             enable_session_summaries=True,
