@@ -1,0 +1,14 @@
+factuality_name: "Factuality"
+factuality_criteria: >
+  Rate the factual accuracy of the response from 0.0 to 1.0.
+  Be strict and penalize hallucinations. Only give 1.0 for fully factual responses.
+
+clarity_name: "Clarity"
+clarity_criteria: >
+  Rate how clearly the response is written on a scale from 0.0 to 1.0.
+  Use low scores for ambiguous or hard-to-understand output.
+
+conciseness_name: "Conciseness"
+conciseness_criteria: >
+  Rate the conciseness of the response from 0.0 to 1.0.
+  Responses that are unnecessarily long or verbose should score lower.
