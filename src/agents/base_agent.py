@@ -1,7 +1,7 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import Any, List, Optional
 
 from agno.agent import Agent
 from omegaconf import DictConfig
@@ -22,7 +22,7 @@ class BaseAgent(Agent, ABC):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: List[Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> None:
         """
         Initializes the BaseAgent with configuration, logger, LLM, and optional tools.
@@ -37,8 +37,13 @@ class BaseAgent(Agent, ABC):
         self.logger = logger
         self.llm = llm
 
-        os.environ["AGNO_API_KEY"] = os.getenv("AGNO_API_KEY")
-        os.environ["AGNO_MONITOR"] = os.getenv("AGNO_MONITOR")
+        agno_api_key = os.getenv("AGNO_API_KEY")
+        agno_monitor = os.getenv("AGNO_MONITOR")
+
+        if agno_api_key is not None:
+            os.environ["AGNO_API_KEY"] = agno_api_key
+        if agno_monitor is not None:
+            os.environ["AGNO_MONITOR"] = agno_monitor
 
         super().__init__(
             name=self.cfg.name,
