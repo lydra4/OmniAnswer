@@ -40,7 +40,7 @@ class TextEvaluation:
         test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
         metric = AnswerRelevancyMetric(model=self.llm, include_reason=False)
         metric.measure(test_case, _show_indicator=False)
-        return metric.score
+        return round(metric.score if metric.score is not None else 0.0, 2)
 
     def _evaluate_llm_metrics(self):
         test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
@@ -72,7 +72,9 @@ class TextEvaluation:
                 model=self.llm,
             )
             metric.measure(test_case, _show_indicator=False)
-            scores[metric_key.capitalize()] = metric.score
+            scores[metric_key.capitalize()] = round(
+                metric.score if metric.score is not None else 0.0, 2
+            )
 
         return scores
 
