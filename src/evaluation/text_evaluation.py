@@ -1,15 +1,14 @@
 import logging
-import os
 from typing import Dict
 
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
 from deepeval.metrics.g_eval.g_eval import GEval
-from deepeval.models.llms import GeminiModel, GPTModel
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
+from evaluation.base_evaluation import BaseEvaluation
 from omegaconf import DictConfig
 
 
-class TextEvaluation:
+class TextEvaluation(BaseEvaluation):
     def __init__(
         self,
         cfg: DictConfig,
@@ -17,24 +16,7 @@ class TextEvaluation:
         query: str,
         output: Dict[str, str],
     ):
-        """
-        Initializes the evaluation pipeline with configuration and logger.
-
-        Args:
-            cfg (DictConfig): Configuration for the evaluation pipeline.
-            logger (logging.Logger): Logger instance for tracking execution.
-        """
-        self.cfg = cfg
-        self.logger = logger
-        self.query = query
-        self.output = output
-        self.llm = (
-            GPTModel(model=self.cfg.model, api_key=os.getenv("OPENAI_API_KEY"))
-            if self.cfg.model.startswith("gpt-")
-            else GeminiModel(
-                model_name=self.cfg.model, api_key=os.getenv("GEMINI_API_KEY")
-            )
-        )
+        super().__init__(cfg=cfg, logger=logger, query=query, output=output)
 
     def _evaluate_relevancy(self) -> float:
         test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
@@ -78,7 +60,7 @@ class TextEvaluation:
 
         return scores
 
-    def evaluate_all(self) -> Dict[str, float]:
+    def evaluate_all(self):
         self.logger.info("Evaluating text agent.")
         relevancy = self._evaluate_relevancy()
         llm_scores = self._evaluate_llm_metrics()
