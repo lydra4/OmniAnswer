@@ -7,6 +7,7 @@ defaults:
   - single_modality/video_agent@video_agent: default
   - teams@omni_team: omni_team
   - evaluation/text@text_evaluator: text_evaluator
+  - evaluation/image@image_evaluator: image_evaluator
 
-model: gpt-4o-mini
+model: gemini-2.5-pro
 temperature: 1.0
