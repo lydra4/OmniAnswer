@@ -5,10 +5,9 @@ import hydra
 import omegaconf
 from agents.multi_modality.modality_agent import ModalityAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
+from evaluation.text_evaluation import TextEvaluation
 from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
-
-from OmniAnswer.src.evaluation.text_evaluation import TextEvaluation
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="config.yaml")
