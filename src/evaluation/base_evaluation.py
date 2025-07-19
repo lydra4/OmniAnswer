@@ -31,17 +31,20 @@ class BaseEvaluation(ABC):
 
     def _execute_deepeval_metric(
         self,
-        input_data: str,
         output_data: Any,
         metric: BaseMetric,
         test_case_class=LLMTestCase,
-    ):
+    ) -> float:
         if hasattr(metric, "model") and metric.model is None:
-            metric.model = self.llm
+            setattr(metric, "model", self.llm)
 
-        test_case = test_case_class(input=input_data, actual_output=output_data)
+        test_case = test_case_class(input=self.query, actual_output=output_data)
         score = metric.measure(test_case=test_case)
-        return round(score, 2)
+
+        metric_name = getattr(metric, "name", metric.__class__.__name__)
+        score = 0.0 if score is None else round(score, 2)
+        self.logger.info(f"{metric_name}: score={score}")
+        return score
 
     @abstractmethod
     def evaluate_all(self) -> Dict[str, float]:
