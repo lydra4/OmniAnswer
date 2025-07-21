@@ -1,11 +1,11 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Type, Union
 
-from deepeval.metrics.base_metric import BaseMetric
 from deepeval.models.llms import GeminiModel, GPTModel
 from deepeval.test_case.llm_test_case import LLMTestCase
+from deepeval.test_case.mllm_test_case import MLLMTestCase
 from omegaconf import DictConfig
 
 
@@ -32,8 +32,8 @@ class BaseEvaluation(ABC):
     def _execute_deepeval_metric(
         self,
         output_data: Any,
-        metric: BaseMetric,
-        test_case_class=LLMTestCase,
+        metric: Any,
+        test_case_class: Type[Union[LLMTestCase, MLLMTestCase]] = LLMTestCase,
     ) -> float:
         if hasattr(metric, "model") and metric.model is None:
             setattr(metric, "model", self.llm)
