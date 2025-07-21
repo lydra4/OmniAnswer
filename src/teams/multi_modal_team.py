@@ -1,5 +1,7 @@
+import json
 import logging
-from typing import Any, Dict, List, Optional
+import os
+from typing import Dict, List, Optional
 
 from agents.base_agent import BaseAgent
 from agents.single_modality.image_agent import ImageAgent
@@ -23,13 +25,11 @@ class MultiModalTeam:
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: Optional[List[Any]] = None,
     ) -> None:
         self.paraphrased_outputs = paraphrased_outputs
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
-        self.tools = tools if tools is not None else []
         self.modality_agent_map: Dict[str, BaseAgent] = {
             "text": TextAgent(cfg=self.cfg, logger=logger, llm=llm),
             "image": ImageAgent(cfg=self.cfg, logger=logger, llm=llm),
@@ -40,6 +40,7 @@ class MultiModalTeam:
             for modality in self.paraphrased_outputs
             if modality in self.modality_agent_map
         ]
+        self.file_path: str = self.cfg.omni_team.file_path
 
     def _define_team(self) -> Team:
         return Team(
@@ -55,19 +56,46 @@ class MultiModalTeam:
             response_model=ModalityLinks,
         )
 
+    def _save_output(self, file_path: str, new_output: dict):
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        if not os.path.exists(file_path):
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump([new_output], f, indent=4)
+        else:
+            with open(file_path, encoding="utf-8") as f:
+                try:
+                    data = json.load(f)
+                    if not isinstance(data, list):
+                        data = [data]
+                except json.JSONDecodeError:
+                    data = []
+
+            data.append(new_output)
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+
     def run(self, query: str):
         multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
         response = multimodal_team.run(query, stream=False)
 
         output = {
-            key: value
-            for key, value in {
-                "text": response.content.text,
-                "image": response.content.image,
-                "video": response.content.video,
-            }.items()
-            if value is not None
+            "original_query": query,
+            "paraphrased_queries": self.paraphrased_outputs,
+            "results": {
+                key: value
+                for key, value in {
+                    "text": response.content.text,
+                    "image": response.content.image,
+                    "video": response.content.video,
+                }.items()
+                if value is not None
+            },
         }
+
+        self._save_output(file_path=self.file_path, new_output=output)
+
         self.logger.info(f"MultiModalTeam output: {output}")
         return output
