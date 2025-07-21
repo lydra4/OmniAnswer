@@ -3,11 +3,17 @@ from io import BytesIO
 from typing import Dict
 
 import requests
-from deepeval import evaluate
 from deepeval.metrics.multimodal_metrics.image_coherence.image_coherence import (
     ImageCoherenceMetric,
 )
-from deepeval.test_case.mllm_test_case import MLLMImage, MLLMTestCase
+from deepeval.metrics.multimodal_metrics.multimodal_g_eval.multimodal_g_eval import (
+    MultimodalGEval,
+)
+from deepeval.test_case.mllm_test_case import (
+    MLLMImage,
+    MLLMTestCase,
+    MLLMTestCaseParams,
+)
 from evaluation.base_evaluation import BaseEvaluation
 from omegaconf import DictConfig
 from PIL import Image
@@ -44,9 +50,55 @@ class ImageEvaluation(BaseEvaluation):
 
     def _image_coherence(self, url: str) -> float:
         metric = ImageCoherenceMetric()
-        test_case = MLLMTestCase(
-            input=[self.query],
-            actual_output=[MLLMImage(url=self.output["image"], local=False)],
+        return self._execute_deepeval_metric(
+            output_data=[MLLMImage(url=url, local=False)],
+            metric=metric,
+            test_case_class=MLLMTestCase,
         )
-        evaluate(test_cases=[test_case], metrics=[metric])
-        return round(metric.measure(test_case=test_case), 2)
+
+    def _evaluate_llm_metrics(self, url: str) -> Dict[str, float]:
+        metrics_config = {
+            "Instruction Compliance": {
+                "name": self.cfg.image_evaluator.instruction_compliance_name,
+                "criteria": self.cfg.image_evaluator.instruction_compliance_criteria,
+            },
+            "Factual alignment": {
+                "name": self.cfg.image_evaluator.factual_alignment_name,
+                "criteria": self.cfg.image_evaluator.factual_alignment_criteria,
+            },
+            "Aesthetics": {
+                "name": self.cfg.image_evaluator.aesthetics_name,
+                "criteria": self.cfg.image_evaluator.aesthetics_criteria,
+            },
+        }
+
+        scores = {}
+        for metric_key, metric_info in metrics_config.items():
+            metric = MultimodalGEval(
+                name=metric_info["name"],
+                criteria=metric_info["criteria"],
+                evaluation_params=[
+                    MLLMTestCaseParams.INPUT,
+                    MLLMTestCaseParams.ACTUAL_OUTPUT,
+                ],
+            )
+            scores[metric_key] = self._execute_deepeval_metric(
+                output_data=url,
+                metric=metric,
+                test_case_class=MLLMTestCase,
+            )
+
+        return scores
+
+    def evaluate_all(self) -> Dict[str, float]:
+        self.logger.info("Evaluating image agent")
+
+        image = self._load_image(url=self.output["image"])
+        scores = {
+            "relevancy": self._evaluate_clip_relevancy(image=image),
+            "coherence": self._image_coherence(url=self.output["image"]),
+            **self._evaluate_llm_metrics(url=self.output["image"]),
+        }
+
+        self.logger.info(f"Image agent scores: {scores}")
+        return scores
