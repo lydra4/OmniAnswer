@@ -1,1 +1,16 @@
 pretrained_model_name_or_path: "openai/clip-vit-base-patch32"
+
+instruction_compliance_name: "Instruction Compliance"
+instruction_compliance_criteria: >
+  Rate how well the image fulfills the user’s request or follows the given instructions,
+  on a scale from 0.0 to 1.0. Give 1.0 only if the image fully meets the intended purpose.
+
+factual_alignment_name: "Factual Alignment"
+factual_alignment_criteria: >
+  Rate how accurately the image represents the factual details described in the query,
+  from 0.0 to 1.0. Penalize any inaccuracies or mismatches; give 1.0 only for complete factual alignment.
+
+aesthetics_name: "Aesthetics"
+aesthetics_criteria: >
+  Rate the overall visual appeal and presentation quality of the image on a scale from 0.0 to 1.0.
+  Consider composition, clarity, and professional appearance; give 1.0 for highly aesthetic images.
