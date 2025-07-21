@@ -18,15 +18,13 @@ class TextEvaluation(BaseEvaluation):
     ):
         super().__init__(cfg=cfg, logger=logger, query=query, output=output)
 
-    def _evaluate_relevancy(self) -> float:
-        test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
+    def _evaluate_relevancy(self, answer: str) -> float:
         metric = AnswerRelevancyMetric(model=self.llm, include_reason=False)
-        metric.measure(test_case, _show_indicator=False)
-        return round(metric.score if metric.score is not None else 0.0, 2)
+        return self._execute_deepeval_metric(
+            output_data=answer, metric=metric, test_case_class=LLMTestCase
+        )
 
-    def _evaluate_llm_metrics(self):
-        test_case = LLMTestCase(input=self.query, actual_output=self.output["text"])
-
+    def _evaluate_llm_metrics(self, answer: str) -> Dict[str, float]:
         metrics_config = {
             "factuality": {
                 "name": self.cfg.text_evaluator.factuality_name,
@@ -53,18 +51,20 @@ class TextEvaluation(BaseEvaluation):
                 ],
                 model=self.llm,
             )
-            metric.measure(test_case, _show_indicator=False)
-            scores[metric_key.capitalize()] = round(
-                metric.score if metric.score is not None else 0.0, 2
+            scores[metric_key] = self._execute_deepeval_metric(
+                output_data=answer,
+                metric=metric,
+                test_case_class=LLMTestCase,
             )
 
         return scores
 
     def evaluate_all(self):
         self.logger.info("Evaluating text agent.")
-        relevancy = self._evaluate_relevancy()
-        llm_scores = self._evaluate_llm_metrics()
 
-        scores = {"relevancy": relevancy, **llm_scores}
+        scores = {
+            "relevancy": self._evaluate_relevancy(answer=self.output["text"]),
+            **self._evaluate_llm_metrics(answer=self.output["text"]),
+        }
         self.logger.info(f"Text agent scores: {scores}.")
         return scores
