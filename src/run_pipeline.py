@@ -2,15 +2,17 @@ import logging
 import os
 
 import hydra
-import omegaconf
 from agents.multi_modality.modality_agent import ModalityAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
+from omegaconf import DictConfig
 from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
 
 
-@hydra.main(version_base=None, config_path="../config", config_name="config.yaml")
-def main(cfg: omegaconf.DictConfig):
+@hydra.main(
+    version_base=None, config_path="../config", config_name="pipeline_config.yaml"
+)
+def main(cfg: DictConfig):
     logger = logging.getLogger(__name__)
     setup_logging(
         logging_config_path=os.path.join(
