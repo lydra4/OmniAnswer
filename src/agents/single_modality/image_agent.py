@@ -2,8 +2,10 @@ import logging
 import os
 from typing import Any, List, Optional
 
+import requests
 from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
+from duckduckgo_search import DDGS
 from google_images_search import GoogleImagesSearch
 from omegaconf import DictConfig
 from utils.general_utils import extract_image_urls
@@ -30,10 +32,10 @@ class ImageAgent(BaseAgent):
             llm (Any): The language model used to interpret or expand image search queries.
             tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
         """
-        tools = [self._google_image_search] if tools is None else tools
+        tools = [self._image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
-    def _google_image_search(self, query: str):
+    def _image_search(self, query: str) -> List[str]:
         """
         Performs a Google Custom Search for images related to the input query.
 
@@ -44,18 +46,53 @@ class ImageAgent(BaseAgent):
             List[str]: A list of image URLs from the search results.
         """
         load_dotenv()
-        gis = GoogleImagesSearch(
-            developer_key=os.getenv("GEMINI_API_KEY"),
-            custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
-        )
-        _search_params = {
-            "q": query,
-            "num": self.cfg.num,
-            "safe": "active",
-            "imgType": "photo",
-        }
-        gis.search(search_params=_search_params)
-        return [image.url for image in gis.results()]
+        try:
+            gis = GoogleImagesSearch(
+                developer_key=os.getenv("GEMINI_API_KEY"),
+                custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
+            )
+            _search_params = {
+                "q": query,
+                "num": self.cfg.num,
+                "safe": "active",
+                "imgType": "photo",
+                "fileType": "jpg|png|gif|webp",
+            }
+            gis.search(search_params=_search_params)
+            for image in gis.results():
+                url = image.url
+                if url and url.lower().endswith(
+                    (".jpg", ".jpeg", ".png", ".gif", ".webp")
+                ):
+                    try:
+                        response = requests.head(url, timeout=5)
+                        if response.status_code == 200:
+                            return [url]
+                    except requests.RequestException:
+                        continue
+        except Exception:
+            pass
+
+        try:
+            with DDGS() as ddgs:
+                for image in ddgs.images(
+                    keywords=query, max_results=self.cfg.num, safesearch="On"
+                ):
+                    url = image.get("image")
+                    if url and url.lower().endswith(
+                        (".jpg", ".jpeg", ".png", ".gif", ".webp")
+                    ):
+                        try:
+                            response = requests.head(url=url, timeout=5)
+                            if response.status_code == 200:
+                                return [url]
+                        except requests.RequestException:
+                            continue
+
+        except Exception:
+            pass
+
+        return []
 
     def run(self, query: str, **kwargs):
         """
