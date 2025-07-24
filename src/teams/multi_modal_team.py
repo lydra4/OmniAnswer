@@ -1,12 +1,13 @@
 import json
 import logging
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from agents.base_agent import BaseAgent
 from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.text_agent import TextAgent
 from agents.single_modality.video_agent import VideoAgent
+from agno.agent import Agent
 from agno.team import Team
 from omegaconf import DictConfig
 from pydantic import BaseModel
@@ -35,7 +36,7 @@ class MultiModalTeam:
             "image": ImageAgent(cfg=self.cfg, logger=logger, llm=llm),
             "video": VideoAgent(cfg=self.cfg, logger=logger, llm=llm),
         }
-        self.agents: List[BaseAgent] = [
+        self.agents: List[Union[Agent, Team]] = [
             self.modality_agent_map[modality]
             for modality in self.paraphrased_outputs
             if modality in self.modality_agent_map
