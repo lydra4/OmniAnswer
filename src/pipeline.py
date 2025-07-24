@@ -19,7 +19,7 @@ def main(cfg: DictConfig):
     )
     logger.info("Setting up logging configuration.")
 
-    query = "Please explain model context protocol."
+    query = "Please explain model context protocol in the context of agentic workflow."
 
     llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
 
