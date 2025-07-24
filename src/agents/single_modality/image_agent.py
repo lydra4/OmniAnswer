@@ -47,6 +47,7 @@ class ImageAgent(BaseAgent):
         """
         load_dotenv()
         try:
+            self.logger.info(f"Using Google Image Search on {query}.")
             gis = GoogleImagesSearch(
                 developer_key=os.getenv("GEMINI_API_KEY"),
                 custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
@@ -67,13 +68,19 @@ class ImageAgent(BaseAgent):
                     try:
                         response = requests.head(url, timeout=5)
                         if response.status_code == 200:
+                            self.logger.info(
+                                f"Google Image Search Found valid image URL: {url}"
+                            )
                             return [url]
-                    except requests.RequestException:
-                        continue
-        except Exception:
-            pass
+                    except requests.RequestException as e:
+                        self.logger.warning(
+                            f"Google Image Search Error validating URL {url}: {e}"
+                        )
+        except Exception as e:
+            self.logger.error(f"Google Image Search Failed with error: {e}")
 
         try:
+            self.logger.info(f"Using DuckDuckGo Search on {query}.")
             with DDGS() as ddgs:
                 for image in ddgs.images(
                     keywords=query, max_results=self.cfg.num, safesearch="On"
@@ -85,13 +92,18 @@ class ImageAgent(BaseAgent):
                         try:
                             response = requests.head(url=url, timeout=5)
                             if response.status_code == 200:
+                                self.logger.info(
+                                    f"DuckDuckGo Search Found valid image URL: {url}"
+                                )
                                 return [url]
-                        except requests.RequestException:
-                            continue
+                        except requests.RequestException as e:
+                            self.logger.warning(
+                                f"DuckDuckGo Search Error validating URL {url}: {e}"
+                            )
+        except Exception as e:
+            self.logger.error(f"DuckDuckGo Search Failed with error: {e}")
 
-        except Exception:
-            pass
-
+        self.logger.warning(f"No valid image found for query: {query}.")
         return []
 
     def run(self, query: str, **kwargs):
