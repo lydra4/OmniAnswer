@@ -40,6 +40,7 @@ class ModalityAgent(BaseAgent):
             BanList(
                 banned_words=cfg.modality_agent.guardrails.banned_words,
                 on_fail="refrain",
+                max_l_dist=0,
             ),
             ToxicLanguage(
                 threshold=cfg.modality_agent.guardrails.toxic_threshold,
