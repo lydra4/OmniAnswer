@@ -14,9 +14,9 @@ from pydantic import BaseModel
 
 
 class ModalityLinks(BaseModel):
-    text: Optional[str]
-    image: Optional[str]
-    video: Optional[str]
+    text: Optional[str] = None
+    image: Optional[str] = None
+    video: Optional[str] = None
 
 
 class MultiModalTeam:
@@ -41,6 +41,7 @@ class MultiModalTeam:
             for modality in self.paraphrased_outputs
             if modality in self.modality_agent_map
         ]
+        self.team = self._define_team()
         self.file_path: str = self.cfg.omni_team.file_path
 
     def _define_team(self) -> Team:
@@ -78,9 +79,8 @@ class MultiModalTeam:
                 json.dump(data, f, indent=4)
 
     def run(self, query: str):
-        multimodal_team = self._define_team()
         self.logger.info(f"Running MultiModalTeam on: {query}.")
-        response = multimodal_team.run(query, stream=False)
+        response = self.team.run(query, stream=False)
 
         output = {
             "original_query": query,
