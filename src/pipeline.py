@@ -9,9 +9,7 @@ from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
 
 
-@hydra.main(
-    version_base=None, config_path="../config", config_name="pipeline_config.yaml"
-)
+@hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
 def main(cfg: DictConfig):
     logger = logging.getLogger(__name__)
     setup_logging(
@@ -21,7 +19,7 @@ def main(cfg: DictConfig):
     )
     logger.info("Setting up logging configuration.")
 
-    query = "What does training a model on a GPU actually look like?"
+    query = "Please explain model context protocol."
 
     llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
 
