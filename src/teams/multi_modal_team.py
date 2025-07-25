@@ -32,15 +32,18 @@ class MultiModalTeam:
         self.logger = logger
         self.llm = llm
         self.modality_agent_map: Dict[str, BaseAgent] = {
-            "text": TextAgent(cfg=self.cfg, logger=logger, llm=llm),
-            "image": ImageAgent(cfg=self.cfg, logger=logger, llm=llm),
-            "video": VideoAgent(cfg=self.cfg, logger=logger, llm=llm),
+            "text": TextAgent(cfg=self.cfg, logger=self.logger, llm=llm),
+            "image": ImageAgent(cfg=self.cfg, logger=self.logger, llm=llm),
+            "video": VideoAgent(cfg=self.cfg, logger=self.logger, llm=llm),
         }
         self.agents: List[Union[Agent, Team]] = [
             self.modality_agent_map[modality]
             for modality in self.paraphrased_outputs
             if modality in self.modality_agent_map
         ]
+        self.logger.info(
+            f"Initialized team with agents: {[agent.name for agent in self.agents]}"
+        )
         self.team = self._define_team()
         self.file_path: str = self.cfg.omni_team.file_path
 
@@ -55,6 +58,8 @@ class MultiModalTeam:
             monitoring=True,
             enable_session_summaries=True,
             stream_intermediate_steps=True,
+            stream_member_events=True,
+            debug_level=2,
             response_model=ModalityLinks,
         )
 
@@ -80,7 +85,11 @@ class MultiModalTeam:
 
     def run(self, query: str):
         self.logger.info(f"Running MultiModalTeam on: {query}.")
-        response = self.team.run(query, stream=False)
+        response = self.team.run(
+            query,
+            stream=False,
+            stream_intermediate_steps=True,
+        )
 
         output = {
             "original_query": query,
