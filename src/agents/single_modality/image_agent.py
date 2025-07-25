@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from duckduckgo_search import DDGS
 from google_images_search import GoogleImagesSearch
 from omegaconf import DictConfig
+from pexelsapi.pexels import Pexels
 from utils.general_utils import extract_image_urls
 
 
@@ -32,10 +33,11 @@ class ImageAgent(BaseAgent):
             llm (Any): The language model used to interpret or expand image search queries.
             tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
         """
-        tools = [self._image_search] if tools is None else tools
+        load_dotenv()
+        tools = [self._pexels_image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
-    def _image_search(self, query: str) -> List[str]:
+    def _google_image_search(self, query: str) -> List[str]:
         """
         Performs a Google Custom Search for images related to the input query.
 
@@ -45,7 +47,6 @@ class ImageAgent(BaseAgent):
         Returns:
             List[str]: A list of image URLs from the search results.
         """
-        load_dotenv()
         try:
             self.logger.info(f"Using Google Image Search on {query}.")
             gis = GoogleImagesSearch(
@@ -54,7 +55,7 @@ class ImageAgent(BaseAgent):
             )
             _search_params = {
                 "q": query,
-                "num": self.cfg.num,
+                "num": self.cfg.max_results,
                 "safe": "active",
                 "imgType": "photo",
                 "fileType": "jpg|png|gif|webp",
@@ -62,46 +63,78 @@ class ImageAgent(BaseAgent):
             gis.search(search_params=_search_params)
             for image in gis.results():
                 url = image.url
-                if url and url.lower().endswith(
-                    (".jpg", ".jpeg", ".png", ".gif", ".webp")
-                ):
+                if url:
                     try:
-                        response = requests.head(url, timeout=5)
+                        response = requests.head(url, timeout=10)
                         if response.status_code == 200:
                             self.logger.info(
-                                f"Google Image Search Found valid image URL: {url}"
+                                f"Google Image Search found valid image url for query:{query}."
                             )
                             return [url]
                     except requests.RequestException as e:
                         self.logger.warning(
-                            f"Google Image Search Error validating URL {url}: {e}"
+                            f"Google Image Search Error validating query, {query}: {e}."
                         )
         except Exception as e:
-            self.logger.error(f"Google Image Search Failed with error: {e}")
+            self.logger.error(
+                f"Google Image Search failed for query, {query}, with error: {e}"
+            )
+        self.logger.warning(f"No valid image found for query: {query}.")
+        return []
 
+    def _duckduckgo_image_search(self, query: str) -> List[str]:
         try:
             self.logger.info(f"Using DuckDuckGo Search on {query}.")
             with DDGS() as ddgs:
                 for image in ddgs.images(
-                    keywords=query, max_results=self.cfg.num, safesearch="On"
+                    keywords=query, max_results=self.cfg.max_results, safesearch="On"
                 ):
                     url = image.get("image")
-                    if url and url.lower().endswith(
-                        (".jpg", ".jpeg", ".png", ".gif", ".webp")
-                    ):
+                    if url:
                         try:
-                            response = requests.head(url=url, timeout=5)
+                            response = requests.head(url=url, timeout=10)
                             if response.status_code == 200:
                                 self.logger.info(
-                                    f"DuckDuckGo Search Found valid image URL: {url}"
+                                    f"DuckDuckGo Search found valid image url for query:{query}."
                                 )
                                 return [url]
                         except requests.RequestException as e:
                             self.logger.warning(
-                                f"DuckDuckGo Search Error validating URL {url}: {e}"
+                                f"DuckDuckGo Search Error validating query, {query}: {e}."
                             )
         except Exception as e:
-            self.logger.error(f"DuckDuckGo Search Failed with error: {e}")
+            self.logger.error(
+                f"DuckDuckGo Search failed for query, {query}, with error: {e}"
+            )
+
+        self.logger.warning(f"No valid image found for query: {query}.")
+        return []
+
+    def _pexels_image_search(self, query: str) -> List[str]:
+        try:
+            self.logger.info(f"Using Pexels search on {query}.")
+            p = Pexels(api_key=os.getenv("PEXELS_API_KEY"))
+            results = p.search_photos(query=query, per_page=self.cfg.max_results)[
+                "photos"
+            ]
+            for image in results:
+                original_url = image["src"]["original"]
+                if original_url:
+                    try:
+                        response = requests.head(url=original_url, timeout=10)
+                        if response.status_code == 200:
+                            self.logger.info(
+                                f"Pexels search found valid image url for query:{query}."
+                            )
+                            return [original_url]
+                    except requests.RequestException as e:
+                        self.logger.warning(
+                            f"Pexels Search Error validating query, {query}: {e}."
+                        )
+        except Exception as e:
+            self.logger.error(
+                f"Pexels Search failed for query, {query}, with error: {e}"
+            )
 
         self.logger.warning(f"No valid image found for query: {query}.")
         return []
