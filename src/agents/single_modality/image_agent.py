@@ -34,7 +34,7 @@ class ImageAgent(BaseAgent):
             tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
         """
         load_dotenv()
-        tools = [self._pexels_image_search] if tools is None else tools
+        tools = [self._google_image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def _google_image_search(self, query: str) -> List[str]:
