@@ -3,9 +3,11 @@ import os
 
 import hydra
 from agents.multi_modality.modality_agent import ModalityAgent
+from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
+from agents.single_modality.text_agent import TextAgent
+from agents.single_modality.video_agent import VideoAgent
 from omegaconf import DictConfig
-from teams.multi_modal_team import MultiModalTeam
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -28,11 +30,22 @@ def main(cfg: DictConfig):
 
     paraphrase_agent = ParaphraseAgent(cfg=cfg, logger=logger, llm=llm)
     paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
+    paraphrased_modalities = list(paraphrased_outputs.keys())
 
-    multimodal_team = MultiModalTeam(
-        paraphrased_outputs=paraphrased_outputs, cfg=cfg, logger=logger, llm=llm
-    )
-    multimodal_team.run(query=query)
+    if "text" in paraphrased_modalities:
+        text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
+        url = text_agent.run(query=query)
+        print(url)
+
+    if "image" in paraphrased_modalities:
+        image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
+        url = image_agent.run(query=query)
+        print(url)
+
+    if "video" in paraphrased_modalities:
+        video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
+        url = video_agent.run(query=query)
+        print(url)
 
 
 if __name__ == "__main__":
