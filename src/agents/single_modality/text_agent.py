@@ -1,10 +1,8 @@
-import ast
 import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from agno.tools.googlesearch import GoogleSearchTools
-from agno.tools.reasoning import ReasoningTools
+from ddgs import DDGS
 from omegaconf import DictConfig
 
 
@@ -32,20 +30,17 @@ class TextAgent(BaseAgent):
             llm: The language model to use for processing queries.
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        tools = (
-            [
-                ReasoningTools(),
-                GoogleSearchTools(
-                    stop_after_tool_call_tools=["google_search"],
-                    show_result_tools=["google_search"],
-                    fixed_max_results=cfg.text_agent.fixed_max_results,
-                ),
-            ]
-            if tools is None
-            else tools
-        )
+        tools = [self._ddgs_search] if tools is None else tools
 
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
+
+    def _ddgs_search(self, query: str) -> List[str]:
+        with DDGS() as ddgs:
+            results = ddgs.text(
+                query=query,
+                max_results=self.cfg.fixed_max_results,
+            )
+            return [result["href"] for result in results]
 
     def run(self, query: str, **kwargs):
         """
@@ -62,16 +57,12 @@ class TextAgent(BaseAgent):
         Raises:
             ValueError: If the LLM response cannot be parsed into the expected list of dicts.
         """
-        self.logger.info(f"Looking up text documents with query: {query}.")
+        self.logger.info("Searching the web...")
         response = super().run(query)
-        result_list = ast.literal_eval(response.content)
+        url = response.content.strip()
 
-        if not result_list:
-            self.logger.warning("No text results found.")
-            return "No text results found."
+        if not url.startswith("http"):
+            self.logger.warning(f"Invalid response: {url}.")
 
-        url_result = [item["url"] for item in result_list]
-        url = " ".join(url_result)
-        self.logger.info(f"For text: {[url]}.")
-
+        self.logger.info(f"For text: {url}.")
         return url
