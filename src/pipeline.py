@@ -35,12 +35,10 @@ def main(cfg: DictConfig):
     if "text" in paraphrased_modalities:
         text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
         url = text_agent.run(query=query)
-        print(url)
 
     if "image" in paraphrased_modalities:
         image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
         url = image_agent.run(query=query)
-        print(url)
 
     if "video" in paraphrased_modalities:
         video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
