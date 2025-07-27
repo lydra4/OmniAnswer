@@ -7,5 +7,5 @@ defaults:
   - single_modality/video_agent@video_agent
   - teams/omni_team@omni_team
 
-model: gemini-2.5-flash
+model: gemini-2.5-pro
 temperature: 1.0
