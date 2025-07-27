@@ -6,6 +6,7 @@ torchvision==0.22.1
 
 # APIs and Services
 ddgs==9.4.3
+pexels-api-py ==0.0.5
 
 # AI Safety and Validation
 guardrails-ai
