@@ -1,10 +1,11 @@
 import logging
+import os
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from ddgs import DDGS
 from dotenv import load_dotenv
 from omegaconf import DictConfig
+from pexelsapi.pexels import Pexels
 
 
 class ImageAgent(BaseAgent):
@@ -29,15 +30,15 @@ class ImageAgent(BaseAgent):
             tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
         """
         load_dotenv()
-        tools = [self._ddgs_image_search] if tools is None else tools
+        tools = [self._pexels_image_search] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
-    def _ddgs_image_search(self, query: str) -> List[str]:
-        with DDGS() as ddgs:
-            results = ddgs.images(query=query, max_results=self.cfg.max_results)
+    def _pexels_image_search(self, query: str) -> List[str]:
+        load_dotenv()
+        p = Pexels(api_key=os.getenv("PEXELS_API_KEY"))
+        results = p.search_photos(query=query, per_page=self.cfg.max_results)["photos"]
 
-        print(results)
-        return [result["image"] for result in results]
+        return [result["src"]["original"] for result in results]
 
     def run(self, query: str, **kwargs):
         """
