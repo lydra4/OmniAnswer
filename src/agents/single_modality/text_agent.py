@@ -49,7 +49,6 @@ class TextAgent(BaseAgent):
         Raises:
             ValueError: If the LLM response cannot be parsed into the expected list of dicts.
         """
-        self.logger.info("Searching the web...")
         response = super().run(query)
         url = response.content.strip()
 
