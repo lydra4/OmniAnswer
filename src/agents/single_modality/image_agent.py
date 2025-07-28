@@ -1,11 +1,10 @@
 import logging
-import os
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
 from omegaconf import DictConfig
-from pexelsapi.pexels import Pexels
+from tools.pexels_search import PexelSearch
 
 
 class ImageAgent(BaseAgent):
@@ -30,15 +29,8 @@ class ImageAgent(BaseAgent):
             tools (List[Any], optional): List of tools to enable (defaults to internal image search method).
         """
         load_dotenv()
-        tools = [self._pexels_image_search] if tools is None else tools
+        tools = [PexelSearch(cfg=cfg)] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
-
-    def _pexels_image_search(self, query: str) -> List[str]:
-        load_dotenv()
-        p = Pexels(api_key=os.getenv("PEXELS_API_KEY"))
-        results = p.search_photos(query=query, per_page=self.cfg.max_results)["photos"]
-
-        return [result["src"]["original"] for result in results]
 
     def run(self, query: str, **kwargs):
         """
@@ -53,6 +45,11 @@ class ImageAgent(BaseAgent):
         Returns:
             List[str]: List of image URLs extracted from the response content.
         """
-        self.logger.info(f"Looking up images on query: {query}.")
         response = super().run(query)
-        print(response.content)
+        url = response.content.strip()
+
+        if not url.startswith("http"):
+            self.logger.warning(f"Invalid response: {url}.")
+
+        self.logger.info(f"For image: {url}.")
+        return url
