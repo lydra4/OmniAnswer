@@ -1,5 +1,7 @@
 name: Text Search Agent
 
+tool_name: DuckDuckGoSearch
+
 role: >
   You are responsible for selecting the single most relevant and accurate URL from a provided list of URLs.
   Only return the **best matching URL** that directly answers the user's query.
