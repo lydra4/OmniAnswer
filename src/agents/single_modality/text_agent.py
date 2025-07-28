@@ -2,8 +2,8 @@ import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from ddgs import DDGS
 from omegaconf import DictConfig
+from tools.serpapi_search import SerpAPISearch
 
 
 class TextAgent(BaseAgent):
@@ -30,17 +30,9 @@ class TextAgent(BaseAgent):
             llm: The language model to use for processing queries.
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        tools = [self._ddgs_search] if tools is None else tools
+        tools = [SerpAPISearch(cfg=cfg)] if tools is None else tools
 
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
-
-    def _ddgs_search(self, query: str) -> List[str]:
-        with DDGS() as ddgs:
-            results = ddgs.text(
-                query=query,
-                max_results=self.cfg.fixed_max_results,
-            )
-            return [result["href"] for result in results]
 
     def run(self, query: str, **kwargs):
         """
