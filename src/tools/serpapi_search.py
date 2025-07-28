@@ -16,7 +16,7 @@ class SerpAPISearch(Toolkit):
         )
 
     def _serpapi_search(self, query: str) -> List[str]:
-        logger.info(f"Performing web search on {query}.")
+        logger.info(f"Performing web search on '{query}'.")
         try:
             load_dotenv()
             search = GoogleSearch(
