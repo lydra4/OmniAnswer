@@ -1,6 +1,6 @@
 name: Text Search Agent
 
-tool_name: DuckDuckGoSearch
+tool_name: serpapi_search
 
 role: >
   You are responsible for selecting the single most relevant and accurate URL from a provided list of URLs.
