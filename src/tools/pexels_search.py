@@ -11,7 +11,11 @@ from pexelsapi.pexels import Pexels
 class PexelSearch(Toolkit):
     def __init__(self, cfg: DictConfig, **kwargs):
         self.cfg = cfg
-        super().__init__(name=self.cfg.image_agent.tool_name, tools=[], **kwargs)
+        super().__init__(
+            name=self.cfg.image_agent.tool_name,
+            tools=[self._pexels_image_search],
+            **kwargs,
+        )
 
     def _pexels_image_search(self, query: str) -> List[str]:
         logger.info(f"Performing image search on '{query}'.")
