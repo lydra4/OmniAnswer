@@ -63,13 +63,13 @@ class ParaphraseAgent(BaseAgent):
         Raises:
             ValueError: If the LLM response cannot be parsed into a valid Python dictionary.
         """
-        logger.info(
-            f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
-        )
-
         modalities = kwargs.get("modalities", [])
         if not modalities:
             raise ValueError("Missing modalities in kwargs.")
+
+        logger.info(
+            f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
+        )
 
         results: Dict[str, str] = {}
 
