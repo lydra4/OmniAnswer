@@ -1,7 +1,7 @@
-import logging
 from typing import Any, Dict, List, Optional
 
 from agents.base_agent import BaseAgent
+from agno.utils.log import logger
 from jinja2 import Template
 from omegaconf import DictConfig
 
@@ -17,7 +17,6 @@ class ParaphraseAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
-        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ) -> None:
@@ -49,7 +48,7 @@ class ParaphraseAgent(BaseAgent):
 
         return rendered_prompt
 
-    def run(self, query: str, modalities: List[str], **kwargs) -> Dict[str, str]:
+    def run(self, query: str, **kwargs) -> Dict[str, str]:
         """
         Run the paraphrase agent to generate paraphrases for the given query.
 
@@ -64,9 +63,14 @@ class ParaphraseAgent(BaseAgent):
         Raises:
             ValueError: If the LLM response cannot be parsed into a valid Python dictionary.
         """
-        self.logger.info(
+        logger.info(
             f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
         )
+
+        modalities = kwargs.get("modalities", [])
+        if not modalities:
+            raise ValueError("Missing modalities in kwargs.")
+
         results: Dict[str, str] = {}
 
         for mode in modalities:
@@ -79,7 +83,7 @@ class ParaphraseAgent(BaseAgent):
                 results[mode] = response.content.strip()
 
             except Exception as e:
-                self.logger.error(f"Error processing modality {mode}: {e}")
+                logger.error(f"Error processing modality {mode}: {e}")
 
-        self.logger.info(f"Paraphrase results: {results}")
+        logger.info(f"Paraphrase results: {results}")
         return results

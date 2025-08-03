@@ -1,7 +1,7 @@
-import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
+from agno.utils.log import logger
 from dotenv import load_dotenv
 from omegaconf import DictConfig
 from tools.pexels_search import PexelSearch
@@ -15,7 +15,6 @@ class ImageAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
-        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ):
@@ -49,7 +48,7 @@ class ImageAgent(BaseAgent):
         url = response.content.strip()
 
         if not url.startswith("http"):
-            self.logger.warning(f"Invalid response: {url}.")
+            logger.warning(f"Invalid response: {url}.")
 
-        self.logger.info(f"For image: {url}.")
+        logger.info(f"For image: {url}.")
         return url

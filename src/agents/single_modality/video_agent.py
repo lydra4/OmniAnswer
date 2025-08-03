@@ -1,9 +1,9 @@
-import logging
 import os
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
 from agno.tools.serpapi import SerpApiTools
+from agno.utils.log import logger
 from omegaconf import DictConfig
 from utils.general_utils import extract_video_urls
 
@@ -16,7 +16,6 @@ class VideoAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
-        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ):
@@ -37,14 +36,14 @@ class VideoAgent(BaseAgent):
         Returns:
             List[dict]: A list of dictionaries containing video titles and URLs.
         """
-        self.logger.info(f"Looking up videos with query: {query}.")
+        logger.info(f"Looking up videos with query: {query}.")
         response = super().run(query)
         video_urls = extract_video_urls(text=response.content)
 
         if not video_urls:
-            self.logger.warning("No video URLs found.")
+            logger.warning("No video URLs found.")
 
         top_url = video_urls[0]
-        self.logger.info(f"URL of video: {[top_url]}")
+        logger.info(f"URL of video: {[top_url]}")
 
         return top_url

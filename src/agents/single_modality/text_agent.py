@@ -1,7 +1,7 @@
-import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
+from agno.utils.log import logger
 from omegaconf import DictConfig
 from tools.serpapi_search import SerpAPISearch
 
@@ -17,7 +17,6 @@ class TextAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
-        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ) -> None:
@@ -53,7 +52,7 @@ class TextAgent(BaseAgent):
         url = response.content.strip()
 
         if not url.startswith("http"):
-            self.logger.warning(f"Invalid response: {url}.")
+            logger.warning(f"Invalid response: {url}.")
 
-        self.logger.info(f"For text: {url}.")
+        logger.info(f"For text: {url}.")
         return url
