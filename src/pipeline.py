@@ -28,12 +28,12 @@ def main(cfg: DictConfig):
     modality_agent = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
     modalities = modality_agent.run(query=query)
 
-    paraphrase_agent = ParaphraseAgent(cfg=cfg, logger=logger, llm=llm)
+    paraphrase_agent = ParaphraseAgent(cfg=cfg, llm=llm)
     paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
     paraphrased_modalities = list(paraphrased_outputs.keys())
 
     if "text" in paraphrased_modalities:
-        text_agent = TextAgent(cfg=cfg, logger=logger, llm=llm)
+        text_agent = TextAgent(cfg=cfg, llm=llm)
         url = text_agent.run(query=query)
 
     if "image" in paraphrased_modalities:
