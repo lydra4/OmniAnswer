@@ -29,7 +29,7 @@ def main(cfg: DictConfig):
     modalities = modality_agent.run(query=query)
 
     paraphrase_agent = ParaphraseAgent(cfg=cfg, llm=llm)
-    paraphrased_outputs = paraphrase_agent.run(query, modalities=modalities)
+    paraphrased_outputs = paraphrase_agent.run(query=query, modalities=modalities)
     paraphrased_modalities = list(paraphrased_outputs.keys())
 
     if "text" in paraphrased_modalities:
