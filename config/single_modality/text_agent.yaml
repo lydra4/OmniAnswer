@@ -2,11 +2,6 @@ name: Text Search Agent
 
 tool_name: serpapi_search
 
-instructions: >
-  You are presented with a dictionary where the keys are the URL, values are the text content of the URL. 
-  Read each value to find the most relevant content that is able to answer the query.
-  Return the URL
-
 role: >
   You are a passage selector for text-based web searches.
   From a dictionary of URLs mapped to cleaned text, pick the text that best answers the user's query.
