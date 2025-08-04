@@ -1,7 +1,7 @@
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from agno.tools.reasoning import ReasoningTools
+from agno.tools.thinking import ThinkingTools
 from agno.utils.log import logger
 from omegaconf import DictConfig
 from tools.serpapi_search import SerpAPISearch
@@ -32,10 +32,7 @@ class TextAgent(BaseAgent):
         """
         tools = (
             [
-                ReasoningTools(
-                    instructions=cfg.text_agent.instructions,
-                    add_few_shot=True,
-                ),
+                ThinkingTools(),
                 SerpAPISearch(cfg=cfg),
             ]
             if tools is None
