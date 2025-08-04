@@ -88,7 +88,7 @@ class ModalityAgent(BaseAgent):
 
             raise ValueError("Rejected query due to:\n" + "\n".join(formatted))
 
-        response = super().run(query=query)
+        response = super().run(message=query)
         modalities = extract_python_json_block(response.content.strip())
         self.logger.info(
             f'For the query:"{query}", best modes of learning: {modalities}.'

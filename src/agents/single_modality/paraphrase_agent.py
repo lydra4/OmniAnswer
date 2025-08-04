@@ -78,7 +78,7 @@ class ParaphraseAgent(BaseAgent):
 
             try:
                 response = super().run(
-                    query=query, modality=mode, system_prompt=system_prompt, **kwargs
+                    message=query, modality=mode, system_prompt=system_prompt, **kwargs
                 )
                 results[mode] = response.content.strip()
 
