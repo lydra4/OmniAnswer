@@ -1,6 +1,7 @@
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
+from agno.tools.reasoning import ReasoningTools
 from agno.utils.log import logger
 from omegaconf import DictConfig
 from tools.serpapi_search import SerpAPISearch
@@ -29,7 +30,17 @@ class TextAgent(BaseAgent):
             llm: The language model to use for processing queries.
             tools (List[Any], optional): Custom list of tools to override defaults.
         """
-        tools = [SerpAPISearch(cfg=cfg)] if tools is None else tools
+        tools = (
+            [
+                ReasoningTools(
+                    instructions=cfg.text_agent.instructions,
+                    add_few_shot=True,
+                ),
+                SerpAPISearch(cfg=cfg),
+            ]
+            if tools is None
+            else tools
+        )
 
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
 
@@ -49,6 +60,7 @@ class TextAgent(BaseAgent):
             ValueError: If the LLM response cannot be parsed into the expected list of dicts.
         """
         response = super().run(query)
+        print(response)
         url = response.content.strip()
 
         if not url.startswith("http"):
