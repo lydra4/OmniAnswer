@@ -26,7 +26,7 @@ class VideoAgent(BaseAgent):
         )
         super().__init__(cfg=cfg.video_agent, logger=logger, llm=llm, tools=tools)
 
-    def run(self, query: str, **kwargs):
+    def run_query(self, query: str, **kwargs):
         """
         Run the VideoAgent to process the given query.
 

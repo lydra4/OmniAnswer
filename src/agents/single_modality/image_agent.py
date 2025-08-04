@@ -31,7 +31,7 @@ class ImageAgent(BaseAgent):
         tools = [PexelSearch(cfg=cfg)] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
-    def run(self, query: str, **kwargs):
+    def run_query(self, query: str, **kwargs):
         """
         Processes a user query to retrieve and extract image URLs.
 

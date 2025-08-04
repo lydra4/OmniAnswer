@@ -49,7 +49,7 @@ class ModalityAgent(BaseAgent):
             ),
         )
 
-    def run(self, query: str) -> List[str]:
+    def run_query(self, query: str, **kwargs) -> List[str]:
         """
         Validates and processes the user query to determine optimal learning modalities.
 

@@ -33,7 +33,7 @@ class TextAgent(BaseAgent):
 
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
 
-    def run(self, query: str, **kwargs):
+    def run_query(self, query: str, **kwargs):
         """
         Run the TextAgent to process the given query.
 

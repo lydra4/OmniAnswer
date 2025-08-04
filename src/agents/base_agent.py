@@ -58,7 +58,7 @@ class BaseAgent(Agent, ABC):
         )
 
     @abstractmethod
-    def run(self, query: str, **kwargs) -> Any:
+    def run_query(self, query: str, **kwargs) -> Any:
         """
         Abstract method to run the agent with a given query.
 

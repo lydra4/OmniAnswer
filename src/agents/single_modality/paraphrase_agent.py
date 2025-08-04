@@ -48,7 +48,7 @@ class ParaphraseAgent(BaseAgent):
 
         return rendered_prompt
 
-    def run(self, query: str, **kwargs) -> Dict[str, str]:
+    def run_query(self, query: str, **kwargs) -> Dict[str, str]:
         """
         Run the paraphrase agent to generate paraphrases for the given query.
 
