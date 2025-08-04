@@ -26,23 +26,23 @@ def main(cfg: DictConfig):
     llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
 
     modality_agent = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
-    modalities = modality_agent.run(query=query)
+    modalities = modality_agent.run_query(query=query)
 
     paraphrase_agent = ParaphraseAgent(cfg=cfg, llm=llm)
-    paraphrased_outputs = paraphrase_agent.run(query=query, modalities=modalities)
+    paraphrased_outputs = paraphrase_agent.run_query(query=query, modalities=modalities)
     paraphrased_modalities = list(paraphrased_outputs.keys())
 
     if "text" in paraphrased_modalities:
         text_agent = TextAgent(cfg=cfg, llm=llm)
-        url = text_agent.run(query=query)
+        url = text_agent.run_query(query=query)
 
     if "image" in paraphrased_modalities:
-        image_agent = ImageAgent(cfg=cfg, logger=logger, llm=llm)
-        url = image_agent.run(query=query)
+        image_agent = ImageAgent(cfg=cfg, llm=llm)
+        url = image_agent.run_query(query=query)
 
     if "video" in paraphrased_modalities:
-        video_agent = VideoAgent(cfg=cfg, logger=logger, llm=llm)
-        # url = video_agent.run(query=query)
+        video_agent = VideoAgent(cfg=cfg, llm=llm)
+        # url = video_agent.run_query(query=query)
 
 
 if __name__ == "__main__":
