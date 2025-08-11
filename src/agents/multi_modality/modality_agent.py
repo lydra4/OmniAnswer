@@ -1,11 +1,11 @@
 import logging
+import os
 from typing import Any, List, Optional
 
 import nltk
 from agents.base_agent import BaseAgent
-from guardrails.guard import Guard
-from guardrails.hub import BanList, ToxicLanguage
 from omegaconf import DictConfig
+from openai import OpenAI
 from utils.general_utils import extract_python_json_block
 
 nltk.download("punkt")
@@ -36,18 +36,7 @@ class ModalityAgent(BaseAgent):
         """
         tools = [] if tools is None else tools
         super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm, tools=tools)
-        self.guard = Guard().use_many(
-            BanList(
-                banned_words=cfg.modality_agent.guardrails.banned_words,
-                on_fail="refrain",
-                max_l_dist=0,
-            ),
-            ToxicLanguage(
-                threshold=cfg.modality_agent.guardrails.toxic_threshold,
-                validation_method="sentence",
-                on_fail="refrain",
-            ),
-        )
+        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def run_query(self, query: str, **kwargs) -> List[str]:
         """
