@@ -9,10 +9,6 @@ from utils.general_utils import extract_video_urls
 
 
 class VideoAgent(BaseAgent):
-    """
-    Agent for video processing tasks.
-    """
-
     def __init__(
         self,
         cfg: DictConfig,
@@ -27,15 +23,6 @@ class VideoAgent(BaseAgent):
         super().__init__(cfg=cfg.video_agent, logger=logger, llm=llm, tools=tools)
 
     def run_query(self, query: str, **kwargs):
-        """
-        Run the VideoAgent to process the given query.
-
-        Args:
-            query (str): The input query to process.
-
-        Returns:
-            List[dict]: A list of dictionaries containing video titles and URLs.
-        """
         logger.info(f"Looking up videos with query: {query}.")
         response = super().run(query)
         video_urls = extract_video_urls(text=response.content)
