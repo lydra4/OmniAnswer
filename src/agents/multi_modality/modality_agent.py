@@ -41,6 +41,6 @@ class ModalityAgent(BaseAgent):
         response = super().run(message=query)
         modalities = extract_python_json_block(response.content.strip())
         self.logger.info(
-            f'For the query:"{query}", best modes of learning: {modalities}.'
+            f'For the query:"{query}", best modes of learning: "{modalities}".'
         )
         return modalities
