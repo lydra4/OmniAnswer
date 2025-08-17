@@ -18,7 +18,7 @@ class TextSearch(Toolkit):
             name=self.cfg.text_agent.tool_name, tools=[self._serpapi_search], **kwargs
         )
 
-    def _extract_text_from_url(self, urls: List[str]) -> Dict[str, str]:
+    def _extract_text(self, urls: List[str]) -> Dict[str, str]:
         texts: dict = {}
         for url in urls:
             try:
@@ -61,7 +61,7 @@ class TextSearch(Toolkit):
             )
             results_dict = search.get_dict()
             urls = [result["link"] for result in results_dict["organic_results"]]
-            urls_dict = self._extract_text_from_url(urls=urls)
+            urls_dict = self._extract_text(urls=urls)
 
             return urls_dict
 
