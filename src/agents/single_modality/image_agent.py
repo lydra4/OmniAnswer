@@ -4,7 +4,7 @@ from agents.base_agent import BaseAgent
 from agno.utils.log import logger
 from dotenv import load_dotenv
 from omegaconf import DictConfig
-from tools.google_search import GoogleSearch
+from tools.image_search import ImageSearch
 
 
 class ImageAgent(BaseAgent):
@@ -15,7 +15,7 @@ class ImageAgent(BaseAgent):
         tools: Optional[List[Any]] = None,
     ):
         load_dotenv()
-        tools = [GoogleSearch(cfg=cfg)] if tools is None else tools
+        tools = [ImageSearch(cfg=cfg)] if tools is None else tools
         super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
 
     def run_query(self, query: str, **kwargs):
