@@ -1,6 +1,6 @@
 import os
 from io import BytesIO
-from typing import Dict, Optional
+from typing import Dict, List
 
 import requests
 from agno.tools import Toolkit
@@ -21,6 +21,18 @@ class ImageSearch(Toolkit):
             **kwargs,
         )
 
+    def _fetch_image(self, urls: List[str]) -> Dict[str, PILImage]:
+        images: dict = {}
+        for url in urls:
+            try:
+                response = requests.get(url, timeout=10)
+                if response.status_code == 200:
+                    image = Image.open(BytesIO(response.content))
+                    images[url] = image
+            except Exception as e:
+                logger.warning(f"Invalid image data from '{url}': {e}")
+        return images
+
     def _image_search(self, query: str) -> Dict[str, PILImage]:
         logger.info(f"Performing image search on '{query}'.")
         try:
@@ -36,25 +48,10 @@ class ImageSearch(Toolkit):
             }
             gis.search(search_params=search_params)
             results = [image.url for image in gis.results()]
-            valid_images: Dict[str, PILImage] = {}
-            for url in results:
-                img = self._fetch_image(url)
-                if img:
-                    valid_images[url] = img
+            valid_images = self._fetch_image(urls=results)
 
             return valid_images
 
         except Exception as e:
             logger.warning(f"Error for query: {query}, {e}.")
             return {}
-
-    def _fetch_image(self, url: str) -> Optional[PILImage]:
-        try:
-            response = requests.get(url, timeout=10)
-            if response.status_code == 200:
-                return Image.open(BytesIO(response.content))
-        except requests.RequestException as e:
-            logger.warning(f"Failed to fetch image from '{url}': {e}")
-        except Exception as e:
-            logger.warning(f"Invalid image data from '{url}': {e}")
-        return None
