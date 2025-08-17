@@ -29,7 +29,7 @@ class ParaphraseAgent(BaseAgent):
             raise ValueError("Missing modalities in kwargs.")
 
         logger.info(
-            f"Running ParaphraseAgent with query: {query} and modalities: {modalities}"
+            f'Running ParaphraseAgent with query: "{query}" and modalities: "{modalities}"'
         )
 
         results: Dict[str, str] = {}
@@ -46,5 +46,5 @@ class ParaphraseAgent(BaseAgent):
             except Exception as e:
                 logger.error(f"Error processing modality {mode}: {e}")
 
-        logger.info(f"Paraphrase results: {results}")
+        logger.info(f'Paraphrase results: "{results}"')
         return results
