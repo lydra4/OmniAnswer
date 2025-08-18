@@ -41,4 +41,4 @@ class BaseAgent(Agent, ABC):
 
     @abstractmethod
     def run_query(self, query: str, **kwargs) -> Any:
-        return super().run(query, **kwargs)
+        return super().run(message=query, **kwargs)

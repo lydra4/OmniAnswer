@@ -24,7 +24,7 @@ class TextAgent(BaseAgent):
         super().__init__(cfg=cfg.text_agent, logger=logger, llm=llm, tools=tools)
 
     def run_query(self, query: str, **kwargs):
-        response = super().run(query)
+        response = super().run(message=query)
         url = response.content.strip()
 
         if not url.startswith("http"):
