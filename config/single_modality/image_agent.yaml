@@ -1,6 +1,6 @@
 name: Image Search Agent
 
-tool_name: google_search
+tool_name: image_search
 
 role: >
   Your role is not to answer the query directly but to return the url of the image that best matches the user's query, nothing else.
