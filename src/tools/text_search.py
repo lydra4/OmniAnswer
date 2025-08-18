@@ -15,7 +15,7 @@ class TextSearch(Toolkit):
     def __init__(self, cfg: DictConfig, **kwargs):
         self.cfg = cfg
         super().__init__(
-            name=self.cfg.tool_name, tools=[self._serpapi_search], **kwargs
+            name=self.cfg.text_agent.tool_name, tools=[self._serpapi_search], **kwargs
         )
 
     def _extract_text(self, urls: List[str]) -> Dict[str, str]:
