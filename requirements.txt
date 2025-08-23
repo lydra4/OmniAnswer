@@ -24,4 +24,4 @@ rich==13.9.4
 pycountry==24.6.1
 
 # Platform-specific Dependencies
-windows-curses==2.4.1
+# windows-curses==2.4.1
