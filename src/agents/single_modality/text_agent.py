@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
@@ -10,6 +11,7 @@ class TextAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
+        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ) -> None:
@@ -28,7 +30,7 @@ class TextAgent(BaseAgent):
         url = response.content.strip()
 
         if not url.startswith("http"):
-            logger.warning(f"Invalid response: {url}.")
+            self.logger.warning(f"Invalid response: {url}.")
 
-        logger.info(f"For text: {url}.")
+        self.logger.info(f"For text: {url}.")
         return url

@@ -1,7 +1,7 @@
+import logging
 from typing import Any, Dict, List, Optional
 
 from agents.base_agent import BaseAgent
-from agno.utils.log import logger
 from jinja2 import Template
 from omegaconf import DictConfig
 
@@ -10,6 +10,7 @@ class ParaphraseAgent(BaseAgent):
     def __init__(
         self,
         cfg: DictConfig,
+        logger: logging.Logger,
         llm,
         tools: Optional[List[Any]] = None,
     ) -> None:
@@ -28,7 +29,7 @@ class ParaphraseAgent(BaseAgent):
         if not modalities:
             raise ValueError("Missing modalities in kwargs.")
 
-        logger.info(
+        self.logger.info(
             f'Running ParaphraseAgent with query: "{query}" and modalities: "{modalities}"'
         )
 
@@ -44,7 +45,7 @@ class ParaphraseAgent(BaseAgent):
                 results[mode] = response.content.strip()
 
             except Exception as e:
-                logger.error(f"Error processing modality {mode}: {e}")
+                self.logger.error(f"Error processing modality {mode}: {e}")
 
-        logger.info(f'Paraphrase results: "{results}"')
+        self.logger.info(f'Paraphrase results: "{results}"')
         return results

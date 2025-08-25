@@ -3,11 +3,10 @@ import logging
 import logging.config
 import os
 import re
-from typing import List, Union
+from typing import List
 
 import yaml
-from agno.models.google import Gemini
-from agno.models.openai import OpenAIChat
+from crewai import LLM
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
@@ -31,26 +30,27 @@ def setup_logging(
         logger.info("Logging config file is not found. Basic config is used.")
 
 
-def load_llm(model_name: str, temperature: Union[int, float]):
+def load_llm(model_name: str, temperature: float):
     load_dotenv()
     model_id = model_name.strip().lower()
 
     if model_id.startswith("gpt-"):
-        return OpenAIChat(
-            id=model_name,
-            api_key=os.getenv("OPENAI_API_KEY"),
-            temperature=temperature,
-        )
+        provider, env_key = "openai", "OPENAI_API_KEY"
     elif model_id.startswith("gemini-"):
-        return Gemini(
-            id=model_name,
-            api_key=os.getenv("GEMINI_API_KEY"),
-            temperature=temperature,
-        )
+        provider, env_key = "gemini", "GEMINI_API_KEY"
     else:
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
+
+    api_key = os.getenv(key=env_key)
+    if not api_key:
+        raise ValueError(f"Missing API key for {provider}.")
+    return LLM(
+        model=f"{provider}/{model_id}",
+        temperature=temperature,
+        api_key=api_key,
+    )
 
 
 def extract_image_urls(text: str) -> List[str]:
