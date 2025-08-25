@@ -2,7 +2,6 @@ import logging
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from agno.utils.log import logger
 from omegaconf import DictConfig
 from tools.text_search import TextSearch
 
