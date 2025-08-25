@@ -1,6 +1,6 @@
 # Core AI and ML Libraries
 beautifulsoup4==4.13.4
-'crewai==0.165.1
+crewai==0.165.1
 deepeval==3.3.0
 nltk==3.9.1
 torchvision==0.22.1
