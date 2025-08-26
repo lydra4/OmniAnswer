@@ -17,5 +17,5 @@ goal: |
   5. If none are relevant, respond with: "No suitable text found."
 
 backstory: "Select the most relevant text content that answers the query and return the URL."
-fixed_max_results: 10
+n_results: 10
 max_words: 100
