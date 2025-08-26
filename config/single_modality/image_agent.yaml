@@ -26,4 +26,4 @@ system_message: |
   - Do not add text, explanation, or formatting.
 
 description: "Finds the most suitable image from a dictionary of {url: image} pairs that answers the user's query."
-max_results: 10
+max_results: 5
