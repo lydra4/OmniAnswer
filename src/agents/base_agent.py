@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
 from crewai import Agent
+from crewai.tools import BaseTool
 from omegaconf import DictConfig
 
 
@@ -12,7 +13,7 @@ class BaseAgent(Agent, ABC):
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: Optional[List[Any]] = None,
+        tools: Optional[List[BaseTool]] = None,
     ) -> None:
         self.cfg = cfg
         self.logger = logger
@@ -29,4 +30,4 @@ class BaseAgent(Agent, ABC):
 
     @abstractmethod
     def run_query(self, query: str, **kwargs) -> Any:
-        return super().run(message=query, **kwargs)
+        return super().kickoff(message=query, **kwargs)
