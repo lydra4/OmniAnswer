@@ -7,6 +7,7 @@ from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
 from agents.single_modality.text_agent import TextAgent
 from agents.single_modality.video_agent import VideoAgent
+from moderation.content_moderator import ContentModeratior
 from omegaconf import DictConfig
 from utils.general_utils import load_llm, setup_logging
 
@@ -24,6 +25,9 @@ def main(cfg: DictConfig):
     query = "Please explain model context protocol in the context of agentic workflow."
 
     llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
+
+    content_moderator = ContentModeratior(cfg=cfg, logger=logger)
+    content_moderator.moderate_query(query=query)
 
     modality_agent = ModalityAgent(cfg=cfg, logger=logger, llm=llm)
     modalities = modality_agent.run_query(query=query)

@@ -25,19 +25,6 @@ class ModalityAgent(BaseAgent):
 
     def run_query(self, query: str, **kwargs) -> List[str]:
         self.logger.info(f'Running on query: "{query}".')
-        [response] = self.client.moderations.create(
-            model=self.cfg.moderation_model, input=query
-        ).model_dump()["results"]
-        true_categories: List[str] = [
-            key for key, value in response["categories"].items() if value is True
-        ]
-
-        if true_categories:
-            self.logger.error(
-                f"Rejected query due to: {' and '.join(true_categories)}."
-            )
-            raise ValueError(f"Rejected query due to: {'and '.join(true_categories)}.")
-
         response = super().run(message=query)
         modalities = extract_python_json_block(response.content.strip())
         self.logger.info(
