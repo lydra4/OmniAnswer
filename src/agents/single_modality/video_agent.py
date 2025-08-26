@@ -1,9 +1,8 @@
 import logging
-import os
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
-from agno.tools.serpapi import SerpApiTools
+from crewai_tools import YoutubeVideoSearchTool
 from omegaconf import DictConfig
 from utils.general_utils import extract_video_urls
 
@@ -16,12 +15,13 @@ class VideoAgent(BaseAgent):
         llm,
         tools: Optional[List[Any]] = None,
     ):
-        tools = (
-            [SerpApiTools(api_key=os.getenv("SERP_API_KEY"), search_youtube=True)]
-            if tools is None
-            else tools
+        tools = [YoutubeVideoSearchTool()] if tools is None else tools
+        super().__init__(
+            cfg=cfg.video_agent,
+            logger=logger,
+            llm=llm,
+            tools=tools,
         )
-        super().__init__(cfg=cfg.video_agent, logger=logger, llm=llm, tools=tools)
 
     def run_query(self, query: str, **kwargs):
         self.logger.info(f"Looking up videos with query: {query}.")
