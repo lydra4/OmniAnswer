@@ -1,9 +1,10 @@
 import logging
+import os
 from typing import Any, List, Optional
 
 from agents.base_agent import BaseAgent
+from crewai_tools import SerperDevTool
 from omegaconf import DictConfig
-from tools.text_search import TextSearch
 
 
 class TextAgent(BaseAgent):
@@ -16,7 +17,10 @@ class TextAgent(BaseAgent):
     ) -> None:
         tools = (
             [
-                TextSearch(cfg=cfg),
+                SerperDevTool(
+                    api_key=os.getenv("SERP_API_KEY"),
+                    n_results=cfg.text_agent.n_results,
+                ),
             ]
             if tools is None
             else tools
