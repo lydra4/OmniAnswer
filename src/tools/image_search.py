@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import Any, List
 
 from crewai.tools import BaseTool
 from dotenv import load_dotenv
@@ -17,13 +17,13 @@ class ImageSearch(BaseTool):
     def __init__(self, cfg: DictConfig, logger: logging.Logger, **kwargs):
         self.cfg = cfg
         self.logger = logger
-        super().__init__(
-            name=self.cfg.image_agent.tool_name,
-            tools=[self._image_search],
-            **kwargs,
-        )
+        super().__init__(**kwargs)
 
-    def _run(self, query: str) -> List[str]:
+    def _run(
+        self,
+        query: str,
+        **kwargs: Any,
+    ) -> List[str]:
         self.logger.info(f"Performing image search on '{query}'.")
         try:
             load_dotenv()

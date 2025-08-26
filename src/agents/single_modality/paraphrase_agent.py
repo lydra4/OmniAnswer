@@ -14,7 +14,12 @@ class ParaphraseAgent(BaseAgent):
         llm,
         tools: Optional[List[Any]] = None,
     ) -> None:
-        super().__init__(cfg=cfg.paraphrase_agent, logger=logger, llm=llm, tools=tools)
+        super().__init__(
+            cfg=cfg.paraphrase_agent,
+            logger=logger,
+            llm=llm,
+            tools=tools,
+        )
         self.cfg = cfg
         self.raw_system_message = self.cfg.paraphrase_agent.system_message
 

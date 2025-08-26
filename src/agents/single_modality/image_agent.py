@@ -17,7 +17,12 @@ class ImageAgent(BaseAgent):
     ):
         load_dotenv()
         tools = [ImageSearch(cfg=cfg)] if tools is None else tools
-        super().__init__(cfg=cfg.image_agent, logger=logger, llm=llm, tools=tools)
+        super().__init__(
+            cfg=cfg.image_agent,
+            logger=logger,
+            llm=llm,
+            tools=tools,
+        )
 
     def run_query(self, query: str, **kwargs):
         response = super().run(message=query)

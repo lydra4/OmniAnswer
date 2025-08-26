@@ -20,7 +20,12 @@ class ModalityAgent(BaseAgent):
         tools: Optional[List[Any]] = None,
     ) -> None:
         tools = [] if tools is None else tools
-        super().__init__(cfg=cfg.modality_agent, logger=logger, llm=llm, tools=tools)
+        super().__init__(
+            cfg=cfg.modality_agent,
+            logger=logger,
+            llm=llm,
+            tools=tools,
+        )
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def run_query(self, query: str, **kwargs) -> List[str]:
