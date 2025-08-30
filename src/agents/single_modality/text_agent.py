@@ -2,9 +2,10 @@ import logging
 import os
 from typing import Any, List, Optional
 
-from agents.base_agent import BaseAgent
 from crewai_tools import SerperDevTool
 from omegaconf import DictConfig
+
+from agents.base_agent import BaseAgent
 
 
 class TextAgent(BaseAgent):

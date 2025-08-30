@@ -2,13 +2,14 @@ import logging
 import os
 
 import hydra
+from omegaconf import DictConfig
+
 from agents.multi_modality.modality_agent import ModalityAgent
 from agents.single_modality.image_agent import ImageAgent
 from agents.single_modality.paraphrase_agent import ParaphraseAgent
 from agents.single_modality.text_agent import TextAgent
 from agents.single_modality.video_agent import VideoAgent
 from moderation.content_moderator import ContentModeratior
-from omegaconf import DictConfig
 from utils.general_utils import load_llm, setup_logging
 
 

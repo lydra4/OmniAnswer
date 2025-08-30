@@ -3,9 +3,10 @@ import os
 from typing import Any, List, Optional
 
 import nltk
-from agents.base_agent import BaseAgent
 from omegaconf import DictConfig
 from openai import OpenAI
+
+from agents.base_agent import BaseAgent
 from utils.general_utils import extract_python_json_block
 
 nltk.download("punkt")

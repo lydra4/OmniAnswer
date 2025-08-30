@@ -3,14 +3,15 @@ import logging
 import os
 from typing import Dict, List, Optional, Union
 
-from agents.base_agent import BaseAgent
-from agents.single_modality.image_agent import ImageAgent
-from agents.single_modality.text_agent import TextAgent
-from agents.single_modality.video_agent import VideoAgent
 from agno.agent import Agent
 from agno.team import Team
 from omegaconf import DictConfig
 from pydantic import BaseModel
+
+from agents.base_agent import BaseAgent
+from agents.single_modality.image_agent import ImageAgent
+from agents.single_modality.text_agent import TextAgent
+from agents.single_modality.video_agent import VideoAgent
 
 
 class ModalityLinks(BaseModel):

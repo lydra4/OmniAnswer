@@ -2,6 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from omegaconf import OmegaConf
+
 from src.agents.multi_modality.modality_agent import ModalityAgent
 
 modality_agent_cfg = OmegaConf.create(

@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 from omegaconf import OmegaConf
+
 from src.agents.base_agent import BaseAgent
 
 

@@ -1,9 +1,10 @@
 import logging
 from typing import Any, List, Optional
 
-from agents.base_agent import BaseAgent
 from crewai_tools import YoutubeVideoSearchTool
 from omegaconf import DictConfig
+
+from agents.base_agent import BaseAgent
 from utils.general_utils import extract_video_urls
 
 

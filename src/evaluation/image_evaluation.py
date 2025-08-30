@@ -14,10 +14,11 @@ from deepeval.test_case.mllm_test_case import (
     MLLMTestCase,
     MLLMTestCaseParams,
 )
-from evaluation.base_evaluation import BaseEvaluation
 from omegaconf import DictConfig
 from PIL import Image, UnidentifiedImageError
 from transformers import CLIPModel, CLIPProcessor
+
+from evaluation.base_evaluation import BaseEvaluation
 
 
 class ImageEvaluation(BaseEvaluation):

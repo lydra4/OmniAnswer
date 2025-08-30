@@ -4,8 +4,9 @@ from typing import Dict, Union
 from deepeval.metrics.answer_relevancy.answer_relevancy import AnswerRelevancyMetric
 from deepeval.metrics.g_eval.g_eval import GEval
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
-from evaluation.base_evaluation import BaseEvaluation
 from omegaconf import DictConfig
+
+from evaluation.base_evaluation import BaseEvaluation
 
 
 class TextEvaluation(BaseEvaluation):

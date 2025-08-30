@@ -1,9 +1,10 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from agents.base_agent import BaseAgent
 from jinja2 import Template
 from omegaconf import DictConfig
+
+from agents.base_agent import BaseAgent
 
 
 class ParaphraseAgent(BaseAgent):

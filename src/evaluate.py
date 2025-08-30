@@ -3,10 +3,11 @@ import logging
 import os
 
 import hydra
-from evaluation.image_evaluation import ImageEvaluation
-from evaluation.text_evaluation import TextEvaluation
 from omegaconf import DictConfig
 from tqdm import tqdm
+
+from evaluation.image_evaluation import ImageEvaluation
+from evaluation.text_evaluation import TextEvaluation
 from utils.general_utils import setup_logging
 
 

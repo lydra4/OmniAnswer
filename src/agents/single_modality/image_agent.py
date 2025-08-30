@@ -1,9 +1,10 @@
 import logging
 from typing import Any, List, Optional
 
-from agents.base_agent import BaseAgent
 from dotenv import load_dotenv
 from omegaconf import DictConfig
+
+from agents.base_agent import BaseAgent
 from tools.image_search import ImageSearch
 
 
