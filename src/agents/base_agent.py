@@ -5,9 +5,16 @@ from typing import Any, List, Optional
 from crewai import Agent
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
+from pydantic import PrivateAttr
 
 
 class BaseAgent(Agent, ABC):
+    model_config = {"extra": "allow"}
+
+    _cfg: DictConfig = PrivateAttr()
+    _logger: logging.Logger = PrivateAttr()
+    _llm: Any = PrivateAttr()
+
     def __init__(
         self,
         cfg: DictConfig,
@@ -15,19 +22,18 @@ class BaseAgent(Agent, ABC):
         llm,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
-        self.cfg = cfg
-        self.logger = logger
-        self.llm = llm
-
         super().__init__(
-            role=self.cfg.role,
-            goal=self.cfg.goal,
-            backstory=self.cfg.backstory,
-            llm=self.llm,
-            tools=[tools],
+            role=cfg.role,
+            goal=cfg.goal,
+            backstory=cfg.backstory,
+            llm=llm,
+            tools=tools or [],
             verbose=True,
         )
+        self._cfg = cfg
+        self._logger = logger
+        self._llm = llm
 
     @abstractmethod
     def run_query(self, query: str, **kwargs) -> Any:
-        return super().kickoff(message=query, **kwargs)
+        return self.llm(messages=query, **kwargs)
