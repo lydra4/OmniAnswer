@@ -27,13 +27,12 @@ class ModalityAgent(BaseAgent):
             llm=llm,
             tools=tools,
         )
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def run_query(self, query: str, **kwargs) -> List[str]:
-        self.logger.info(f'Running on query: "{query}".')
-        response = super().run(message=query)
+        self._logger.info(f'Running on query: "{query}".')
+        response = super().run_query(query=query)
         modalities = extract_python_json_block(response.content.strip())
-        self.logger.info(
+        self._logger.info(
             f'For the query:"{query}", best modes of learning: "{modalities}".'
         )
         return modalities
