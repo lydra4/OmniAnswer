@@ -28,12 +28,12 @@ class BaseAgent(Agent, ABC):
             backstory=cfg.backstory,
             llm=llm,
             tools=tools or [],
-            verbose=True,
+            verbose=False,
         )
-        self._cfg = cfg
-        self._logger = logger
-        self._llm = llm
+        object.__setattr__(self, "_cfg", cfg)
+        object.__setattr__(self, "_logger", logger)
+        object.__setattr__(self, "_llm", llm)
 
     @abstractmethod
     def run_query(self, query: str, **kwargs) -> Any:
-        return self.llm(messages=query, **kwargs)
+        return super().kickoff(messages=query, **kwargs)
