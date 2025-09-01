@@ -1,4 +1,3 @@
-import ast
 import logging
 import logging.config
 import os
@@ -60,13 +59,3 @@ def extract_image_urls(text: str) -> List[str]:
 
 def extract_video_urls(text: str) -> List[str]:
     return re.findall(r"https?://www\.youtube\.com/watch\?v=[\w-]+", text)
-
-
-def extract_python_json_block(text: str) -> List[str]:
-    cleaned = re.sub(
-        r"^```(?:json|python)?\s*|\s*```$",
-        "",
-        text.strip(),
-        flags=re.IGNORECASE,
-    )
-    return ast.literal_eval(cleaned)
