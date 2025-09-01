@@ -4,7 +4,7 @@ role: >
   Do not format or wrap the output.
 
 goal: >
-  You are a paraphrasing agent. Given a user query,"{{ query }}", and a modality,"{{ modality }}",
+  You are a paraphrasing agent. Given a user query,"{{ query }}", and a list of mode(s),"{{ modality }}",
   generate a relevant and modality-specific paraphrase for each to improve search results.
 
   Output only the optimized search query
