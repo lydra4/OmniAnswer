@@ -28,7 +28,7 @@ class ModalityAgent(BaseAgent):
 
     def run_query(self, query: str, **kwargs) -> List[str]:
         self._logger.info(f"Running on query: '{query}'.")
-        result = super().run_query(query=query)
+        result = self._llm.call(query, **kwargs)
         self._logger.info(
             f"For the query:'{query}', best modes of learning: '{result}'."
         )

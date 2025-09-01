@@ -30,10 +30,10 @@ class BaseAgent(Agent, ABC):
             tools=tools or [],
             verbose=False,
         )
-        object.__setattr__(self, "_cfg", cfg)
-        object.__setattr__(self, "_logger", logger)
-        object.__setattr__(self, "_llm", llm)
+        self._cfg = cfg
+        self._logger = logger
+        self._llm = llm
 
     @abstractmethod
     def run_query(self, query: str, **kwargs) -> Any:
-        return super().kickoff(messages=query, **kwargs)
+        raise NotImplementedError

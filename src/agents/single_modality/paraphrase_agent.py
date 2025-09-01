@@ -29,6 +29,9 @@ class ParaphraseAgent(BaseAgent):
         self._logger.info(
             f'Running ParaphraseAgent with query: "{query}" and modalities: "{modalities}"'
         )
-        result = super().run_query(query=query, modalities=modalities)
+        result = self._llm.invoke(
+            query=query,
+            modalities=modalities,
+        )
         self._logger.info(f'Paraphrase results: "{result}"')
         return result
