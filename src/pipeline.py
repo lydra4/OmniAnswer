@@ -2,19 +2,21 @@ import logging
 import os
 
 import hydra
+from dotenv import load_dotenv
 from omegaconf import DictConfig
 
-from agents.multi_modality.modality_agent import ModalityAgent
-from agents.single_modality.image_agent import ImageAgent
-from agents.single_modality.paraphrase_agent import ParaphraseAgent
-from agents.single_modality.text_agent import TextAgent
-from agents.single_modality.video_agent import VideoAgent
+from agents.image_agent import ImageAgent
+from agents.modality_agent import ModalityAgent
+from agents.paraphrase_agent import ParaphraseAgent
+from agents.text_agent import TextAgent
+from agents.video_agent import VideoAgent
 from moderation.content_moderator import ContentModeratior
 from utils.general_utils import load_llm, setup_logging
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
 def main(cfg: DictConfig):
+    load_dotenv()
     logger = logging.getLogger(__name__)
     setup_logging(
         logging_config_path=os.path.join(

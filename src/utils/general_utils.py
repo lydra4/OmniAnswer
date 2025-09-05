@@ -5,7 +5,6 @@ import re
 from typing import List
 
 import yaml
-from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import OpenAI
 
@@ -31,7 +30,6 @@ def setup_logging(
 
 
 def load_llm(model_name: str, temperature: float):
-    load_dotenv()
     model = model_name.strip().lower()
     if model.startswith("gemini-"):
         return ChatGoogleGenerativeAI(
