@@ -1,5 +1,5 @@
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any, List, Optional
 
 from crewai import Agent
@@ -33,7 +33,3 @@ class BaseAgent(Agent, ABC):
         self._cfg = cfg
         self._logger = logger
         self._llm = llm
-
-    @abstractmethod
-    def run_query(self, query: str, **kwargs) -> Any:
-        raise NotImplementedError
