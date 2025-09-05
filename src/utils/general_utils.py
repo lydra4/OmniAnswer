@@ -1,10 +1,9 @@
 import logging
 import logging.config
 import os
-import re
-from typing import List
 
 import yaml
+from crewai.project import llm
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import OpenAI
 
@@ -29,6 +28,7 @@ def setup_logging(
         logger.info("Logging config file is not found. Basic config is used.")
 
 
+@llm
 def load_llm(model_name: str, temperature: float):
     model = model_name.strip().lower()
     if model.startswith("gemini-"):
@@ -48,12 +48,3 @@ def load_llm(model_name: str, temperature: float):
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
-
-
-def extract_image_urls(text: str) -> List[str]:
-    urls = re.findall(r"\(?(https?://[^\s)]+)\)?", text)
-    return [url.strip(").,") for url in urls]
-
-
-def extract_video_urls(text: str) -> List[str]:
-    return re.findall(r"https?://www\.youtube\.com/watch\?v=[\w-]+", text)
