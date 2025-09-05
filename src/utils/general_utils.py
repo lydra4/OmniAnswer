@@ -33,10 +33,26 @@ def load_llm(model_name: str, temperature: float):
     load_dotenv()
     model_id = model_name.strip().lower()
 
+<<<<<<< HEAD
     if model_id.startswith("gpt-"):
         provider, env_key = "openai", "OPENAI_API_KEY"
     elif model_id.startswith("gemini-"):
         provider, env_key = "gemini", "GEMINI_API_KEY"
+=======
+    if model.startswith("gemini-"):
+        return ChatGoogleGenerativeAI(
+            api_key=os.getenv("GEMINI_API_KEY"),
+            model=model,
+            temperature=temperature,
+        )
+
+    elif model.startswith("gpt-"):
+        return OpenAI(
+            env_key=os.getenv("OPENAI_API_KEY"),
+            model=model,
+            temperature=temperature,
+        )
+>>>>>>> 3bf2f5c (chore: remove api key)
     else:
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
