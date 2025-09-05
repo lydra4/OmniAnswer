@@ -1,20 +1,13 @@
 import logging
-from abc import ABC
-from typing import Any, List, Optional
+from typing import List, Optional
 
-from crewai import Agent
+from crewai import Agent, Task
+from crewai.project import agent, task
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
-from pydantic import PrivateAttr
 
 
-class BaseAgent(Agent, ABC):
-    model_config = {"extra": "allow"}
-
-    _cfg: DictConfig = PrivateAttr()
-    _logger: logging.Logger = PrivateAttr()
-    _llm: Any = PrivateAttr()
-
+class BaseAgentTask:
     def __init__(
         self,
         cfg: DictConfig,
@@ -22,14 +15,15 @@ class BaseAgent(Agent, ABC):
         llm,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
-        super().__init__(
-            role=cfg.role,
-            goal=cfg.goal,
-            backstory=cfg.backstory,
-            llm=llm,
-            tools=tools or [],
-            verbose=False,
-        )
-        self._cfg = cfg
-        self._logger = logger
-        self._llm = llm
+        self.cfg = cfg
+        self.logger = logger
+        self.llm = llm
+        self.tools = tools
+
+    @agent
+    def _init_agent(self) -> Agent:
+        return Agent(**self.cfg.agent)
+
+    @task
+    def _init_task(self) -> Task:
+        return Task(**self.cfg.task)
