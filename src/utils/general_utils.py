@@ -5,8 +5,9 @@ import re
 from typing import List
 
 import yaml
-from crewai import LLM
 from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import OpenAI
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +32,7 @@ def setup_logging(
 
 def load_llm(model_name: str, temperature: float):
     load_dotenv()
-    model_id = model_name.strip().lower()
-
-<<<<<<< HEAD
-    if model_id.startswith("gpt-"):
-        provider, env_key = "openai", "OPENAI_API_KEY"
-    elif model_id.startswith("gemini-"):
-        provider, env_key = "gemini", "GEMINI_API_KEY"
-=======
+    model = model_name.strip().lower()
     if model.startswith("gemini-"):
         return ChatGoogleGenerativeAI(
             api_key=os.getenv("GEMINI_API_KEY"),
@@ -48,24 +42,14 @@ def load_llm(model_name: str, temperature: float):
 
     elif model.startswith("gpt-"):
         return OpenAI(
-            env_key=os.getenv("OPENAI_API_KEY"),
+            api_key=os.getenv("OPENAI_API_KEY"),
             model=model,
             temperature=temperature,
         )
->>>>>>> 3bf2f5c (chore: remove api key)
     else:
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
-
-    api_key = os.getenv(key=env_key)
-    if not api_key:
-        raise ValueError(f"Missing API key for {provider}.")
-    return LLM(
-        model=f"{provider}/{model_id}",
-        temperature=temperature,
-        api_key=api_key,
-    )
 
 
 def extract_image_urls(text: str) -> List[str]:
