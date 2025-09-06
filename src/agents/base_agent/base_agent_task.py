@@ -18,12 +18,15 @@ class BaseAgentTask:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
-        self.tools = tools
+        self.tools = tools or []
 
     @agent
-    def _init_agent(self) -> Agent:
+    def _create_agent(self) -> Agent:
         return Agent(**self.cfg.agent)
 
     @task
-    def _init_task(self) -> Task:
-        return Task(**self.cfg.task)
+    def create_task(self) -> Task:
+        return Task(
+            **self.cfg.task,
+            agent=self._create_agent(),
+        )
