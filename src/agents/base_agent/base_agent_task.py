@@ -7,21 +7,19 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 
 
-class StringListOutput(BaseModel):
-    items: List[str]
-
-
 class BaseAgentTask:
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
+        output: BaseModel,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
+        self.output = output
         self.tools = tools or []
         self.agent = self._create_agent()
 
@@ -41,5 +39,5 @@ class BaseAgentTask:
         return Task(
             **rendered,
             agent=self.agent,
-            output_json=StringListOutput,
+            output_json=self.output,
         )
