@@ -1,11 +1,10 @@
 defaults:
   - _self_
-  - multi_modality/modality_agent@modality_agent
-  - single_modality/paraphrase_agent@paraphrase_agent
-  - single_modality/text_agent@text_agent
-  - single_modality/image_agent@image_agent
-  - single_modality/video_agent@video_agent
-  - teams/omni_team@omni_team
+  - agent/image_agent@image_agent
+  - agent/modality_agent@modality_agent
+  - agent/paraphrase_agent@paraphrase_agent
+  - agent/text_agent@text_agent
+  - agent/video_agent@video_agent
 
 model: gemini-2.5-pro
 temperature: 1.0
