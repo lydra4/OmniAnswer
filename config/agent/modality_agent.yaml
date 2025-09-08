@@ -1,6 +1,6 @@
 agent:
   role: >
-    Expert educator
+    Modality Agent
   goal: >
     You are an experienced educator who understands how people learn best. 
     Your role is to determine which modalities, text, image, or video, will most effectively 
@@ -12,10 +12,10 @@ agent:
 
 task:
   description: >
-    Analyze the topic "{query}" and decide which single modality (text, image, or video)
+    Analyze the question "{query}" and decide which mode(s) (text, image, or video)
     will most effectively teach the user about this topic.
   expected_output: >
-    A concise explanation of the most suitable modality for teaching "{query}" 
-    and a short justification for the choice.
+    Return a valid JSON array of the chosen mode(s), e.g. ["text", "image", "video"] or ["image", "video"] or ["text"]
+    Do not include any explanation, justification, or extra text.
 
 moderation_model: "omni-moderation-latest"
