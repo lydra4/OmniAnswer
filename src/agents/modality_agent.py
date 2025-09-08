@@ -1,36 +1,36 @@
-import ast
 import logging
-from typing import Any, List, Optional
+from typing import List, Optional
 
-import nltk
+from crewai.tools import BaseTool
 from omegaconf import DictConfig
 
-from agents.base_agent import BaseAgent
+from agents.base_agent.base_agent_task import BaseAgentTask
+from utils.general_utils import parse_json_list
 
-nltk.download("punkt")
 
-
-class ModalityAgent(BaseAgent):
+class ModalityAgent(BaseAgentTask):
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
-        tools: Optional[List[Any]] = None,
+        output,
+        tools: Optional[List[BaseTool]] = None,
     ) -> None:
-        tools = [] if tools is None else tools
         super().__init__(
-            cfg=cfg.modality_agent,
+            cfg=cfg,
             logger=logger,
             llm=llm,
+            output=output,
             tools=tools,
         )
 
     def run_query(self, query: str, **kwargs) -> List[str]:
-        self._logger.info(f"Running on query: '{query}'.")
-        result = self._llm.call(query, **kwargs)
+        self.logger.info(f"Running on query: '{query}'.")
+        result = self.agent.kickoff(query)
+        print(result.raw)
+        parsed_result = parse_json_list(output=result)
         self._logger.info(
-            f"For the query:'{query}', best modes of learning: '{result}'."
+            f"For the query:'{query}', best modes of learning: '{parsed_result}'."
         )
-        result_cleaned = ast.literal_eval(result.__dict__["raw"])
-        return result_cleaned
+        return parsed_result
