@@ -16,7 +16,7 @@ class ContentModeratior:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def moderate_query(self, query: str):
-        self.logger.info(f"Moderating query:{query}.")
+        self.logger.info(f"Moderating query:'{query}'.")
         response = self.client.moderations.create(
             model=self.cfg.moderation_model,
             input=query,
