@@ -34,7 +34,7 @@ def main(cfg: DictConfig):
         llm=llm,
     )
     task = modality_agent.create_task(query=query)
-    crew = Crew(agents=[modality_agent], tasks=[task], verbose=True)
+    crew = Crew(agents=[modality_agent.agent], tasks=[task], verbose=True)
     result = crew.kickoff()
     print(result)
 
