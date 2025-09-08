@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -9,7 +8,8 @@ from omegaconf import DictConfig
 
 from agents.base_agent.base_agent_task import BaseAgentTask
 from moderation.content_moderator import ContentModeratior
-from utils.general_utils import load_llm, setup_logging
+from utils.general_utils import load_llm, parse_json_list, setup_logging
+from schemas.schemas import StringListOutput
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
@@ -33,13 +33,13 @@ def main(cfg: DictConfig):
         cfg=cfg.modality_agent,
         logger=logger,
         llm=llm,
+        output=StringListOutput,
     )
     task = modality_agent.create_task(query=query)
     crew = Crew(agents=[modality_agent.agent], tasks=[task])
     result = crew.kickoff()
-    result_json = result.json
-    parsed_result = json.loads(result_json)
-    print(parsed_result["items"])
+    parsed_result = parse_json_list(output=result)
+    print(parsed_result)
 
 
 if __name__ == "__main__":
