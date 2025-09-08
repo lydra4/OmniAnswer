@@ -2,7 +2,6 @@ import logging
 from typing import List, Optional
 
 from crewai import Agent, Task
-from crewai.project import agent, task
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 
@@ -21,7 +20,6 @@ class BaseAgentTask:
         self.tools = tools or []
         self.agent = self._create_agent()
 
-    @agent
     def _create_agent(self) -> Agent:
         return Agent(
             llm=self.llm,
@@ -29,7 +27,6 @@ class BaseAgentTask:
             **self.cfg.agent,
         )
 
-    @task
     def create_task(self, query: str, **kwargs) -> Task:
         rendered = {
             k: str(v).format(query=query, **kwargs) for k, v in self.cfg.task.items()
