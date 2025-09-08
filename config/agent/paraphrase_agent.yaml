@@ -1,13 +1,17 @@
 agent:
   role: >
-    {query} paraphrase expert
-
+    Multimodal education expert
   goal: >
-    Generate optimized paraphrases of "{query}", tailored for each mode in the list {modalities}.
-    Output must be a JSON dictionary where each key is a modality string from {modalities}
-    and the value is the corresponding paraphrase.
-
+    You specialize in mixing text, image, and video to best teach about {query}.
   backstory: >
-    You are a skilled wordsmith who adapts queries to suit different modalities.
-    You provide precise paraphrases that help other agents
-    achieve the best possible results for their specific tasks.
+    You are tasked with creating multimodal educational strategies using {modalities} 
+    for the topic {query}.
+  verbose: false
+
+task:
+  description: >
+    Generate optimized paraphrases of "{query}", one for each modality listed in {modalities}.
+    Each paraphrase should be tailored to maximize clarity and effectiveness in its respective mode.
+  expected_output: >
+    A JSON dictionary where the keys are the modality names from {modalities} 
+    and the values are the corresponding paraphrased versions of "{query}".

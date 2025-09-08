@@ -5,7 +5,17 @@ agent:
     You are an experienced educator who understands how people learn best. 
     Your role is to determine which modalities, text, image, or video, will most effectively 
     teach the user about the {query}.
-  backstory: You are a omni-knowledge teacher deiciding the best mode(s), text, image or video, to educate the user regarding the {query}.
-  verbose: true
+  backstory: >
+    You are an omni-knowledge teacher deciding the best mode(s), text, image or video, 
+    to educate the user regarding the {query}.
+  verbose: false
+
+task:
+  description: >
+    Analyze the topic "{query}" and decide which single modality (text, image, or video)
+    will most effectively teach the user about this topic.
+  expected_output: >
+    A concise explanation of the most suitable modality for teaching "{query}" 
+    and a short justification for the choice.
 
 moderation_model: "omni-moderation-latest"
