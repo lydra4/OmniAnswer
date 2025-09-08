@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -34,9 +35,11 @@ def main(cfg: DictConfig):
         llm=llm,
     )
     task = modality_agent.create_task(query=query)
-    crew = Crew(agents=[modality_agent.agent], tasks=[task], verbose=True)
+    crew = Crew(agents=[modality_agent.agent], tasks=[task])
     result = crew.kickoff()
-    print(result)
+    result_json = result.json
+    parsed_result = json.loads(result_json)
+    print(parsed_result["items"])
 
 
 if __name__ == "__main__":
