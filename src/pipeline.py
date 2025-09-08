@@ -2,14 +2,13 @@ import logging
 import os
 
 import hydra
-from crewai import Crew
 from dotenv import load_dotenv
 from omegaconf import DictConfig
 
-from agents.base_agent.base_agent_task import BaseAgentTask
+from agents.modality_agent import ModalityAgent
 from moderation.content_moderator import ContentModeratior
-from utils.general_utils import load_llm, parse_json_list, setup_logging
 from schemas.schemas import StringListOutput
+from utils.general_utils import load_llm, setup_logging
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
@@ -29,17 +28,13 @@ def main(cfg: DictConfig):
     content_moderator.moderate_query(query=query)
 
     llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
-    modality_agent = BaseAgentTask(
+    modality_agent = ModalityAgent(
         cfg=cfg.modality_agent,
         logger=logger,
         llm=llm,
         output=StringListOutput,
     )
-    task = modality_agent.create_task(query=query)
-    crew = Crew(agents=[modality_agent.agent], tasks=[task])
-    result = crew.kickoff()
-    parsed_result = parse_json_list(output=result)
-    print(parsed_result)
+    modality_agent.run_query(query=query)
 
 
 if __name__ == "__main__":
