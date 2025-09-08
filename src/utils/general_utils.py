@@ -1,6 +1,7 @@
+import json
 import logging
-import logging.config
 import os
+from typing import List
 
 import yaml
 from crewai import LLM
@@ -45,3 +46,9 @@ def load_llm(model_name: str, temperature: float):
         temperature=temperature,
         api_key=api_key,
     )
+
+
+def parse_json_list(output: str) -> List:
+    result_json = output.json
+    parsed_result = json.loads(result_json)
+    return parsed_result["items"]
