@@ -19,14 +19,22 @@ class BaseAgentTask:
         self.logger = logger
         self.llm = llm
         self.tools = tools or []
+        self.agent = self._create_agent()
 
     @agent
     def _create_agent(self) -> Agent:
-        return Agent(**self.cfg.agent)
+        return Agent(
+            llm=self.llm,
+            tools=self.tools,
+            **self.cfg.agent,
+        )
 
     @task
-    def create_task(self) -> Task:
+    def create_task(self, query: str, **kwargs) -> Task:
+        rendered = {
+            k: str(v).format(query=query, **kwargs) for k, v in self.cfg.task.items()
+        }
         return Task(
-            **self.cfg.task,
-            agent=self._create_agent(),
+            **rendered,
+            agent=self.agent,
         )
