@@ -3,9 +3,7 @@ import logging.config
 import os
 
 import yaml
-from crewai.project import llm
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_openai import OpenAI
+from crewai import LLM
 
 logger = logging.getLogger(__name__)
 
@@ -28,23 +26,22 @@ def setup_logging(
         logger.info("Logging config file is not found. Basic config is used.")
 
 
-@llm
 def load_llm(model_name: str, temperature: float):
-    model = model_name.strip().lower()
-    if model.startswith("gemini-"):
-        return ChatGoogleGenerativeAI(
-            api_key=os.getenv("GEMINI_API_KEY"),
-            model=model,
-            temperature=temperature,
-        )
+    model_name_clean = model_name.strip().lower()
 
-    elif model.startswith("gpt-"):
-        return OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            model=model,
-            temperature=temperature,
-        )
+    if model_name_clean.startswith("gemini-"):
+        model = f"gemini/{model_name_clean}"
+        api_key = os.getenv("GEMINI_API_KEY")
+    elif model_name_clean.startswith("gpt-"):
+        model = f"openai/{model_name_clean}"
+        api_key = os.getenv("OPENAI_API_KEY")
     else:
         raise ValueError(
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
+
+    return LLM(
+        model=model,
+        temperature=temperature,
+        api_key=api_key,
+    )

@@ -4,8 +4,6 @@ crewai==0.165.1
 deepeval==3.3.0
 nltk==3.9.1
 torchvision==0.22.1
-langchain-google-genai==2.1.10
-langchain-openai==0.3.32
 
 # APIs and Services
 serpapi==0.1.5  
