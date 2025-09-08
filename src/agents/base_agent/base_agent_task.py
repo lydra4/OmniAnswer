@@ -4,6 +4,11 @@ from typing import List, Optional
 from crewai import Agent, Task
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
+from pydantic import BaseModel
+
+
+class StringListOutput(BaseModel):
+    items: List[str]
 
 
 class BaseAgentTask:
@@ -21,11 +26,13 @@ class BaseAgentTask:
         self.agent = self._create_agent()
 
     def _create_agent(self) -> Agent:
-        return Agent(
+        agent = Agent(
             llm=self.llm,
             tools=self.tools,
             **self.cfg.agent,
         )
+        self.logger.info(f"{self.cfg.agent.role} successfully initialized.")
+        return agent
 
     def create_task(self, query: str, **kwargs) -> Task:
         rendered = {
@@ -34,4 +41,5 @@ class BaseAgentTask:
         return Task(
             **rendered,
             agent=self.agent,
+            output_json=StringListOutput,
         )
