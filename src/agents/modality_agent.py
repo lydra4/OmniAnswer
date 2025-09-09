@@ -27,10 +27,10 @@ class ModalityAgent(BaseAgentTask):
 
     def run_query(self, query: str, **kwargs) -> List[str]:
         self.logger.info(f"Running on query: '{query}'.")
-        result = self.agent.kickoff(query)
-        print(result.raw)
+        task = super().create_task(query=query, **kwargs)
+        result = task.execute_sync()
         parsed_result = parse_json_list(output=result)
-        self._logger.info(
-            f"For the query:'{query}', best modes of learning: '{parsed_result}'."
+        self.logger.info(
+            f"For the query:'{query}', best modes of learning: {parsed_result}."
         )
         return parsed_result
