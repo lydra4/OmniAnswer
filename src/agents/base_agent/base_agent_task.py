@@ -1,4 +1,5 @@
 import logging
+from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from crewai import Agent, Task
@@ -7,7 +8,7 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 
 
-class BaseAgentTask:
+class BaseAgentTask(ABC):
     def __init__(
         self,
         cfg: DictConfig,
@@ -31,6 +32,10 @@ class BaseAgentTask:
         )
         self.logger.info(f"{self.cfg.agent.role} successfully initialized.")
         return agent
+
+    @abstractmethod
+    def _parse_result(self, result):
+        pass
 
     def create_task(self, query: str, **kwargs) -> Task:
         rendered = {
