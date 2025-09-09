@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import List, Optional
 
@@ -5,7 +6,6 @@ from crewai.tools import BaseTool
 from omegaconf import DictConfig
 
 from agents.base_agent.base_agent_task import BaseAgentTask
-from utils.general_utils import parse_json_list
 
 
 class ModalityAgent(BaseAgentTask):
@@ -25,11 +25,16 @@ class ModalityAgent(BaseAgentTask):
             tools=tools,
         )
 
+    def _parse_result(self, result: str) -> List[str]:
+        result_json = result.json
+        parsed_result = json.loads(result_json)
+        return parsed_result["items"]
+
     def run_query(self, query: str, **kwargs) -> List[str]:
         self.logger.info(f"Running on query: '{query}'.")
         task = super().create_task(query=query, **kwargs)
         result = task.execute_sync()
-        parsed_result = parse_json_list(output=result)
+        parsed_result = self._parse_result(result=result)
         self.logger.info(
             f"For the query:'{query}', best modes of learning: {parsed_result}."
         )
