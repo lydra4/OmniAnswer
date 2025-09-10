@@ -2,25 +2,28 @@ import logging
 import os
 from typing import Any, List, Optional
 
-from crewai_tools import SerperDevTool
+from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 
-from agents.base_agent import BaseAgent
+from agents.base_agent.base_agent_task import BaseAgentTask
 
 
-class TextAgent(BaseAgent):
+class TextAgent(BaseAgentTask):
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
         llm,
+        output,
         tools: Optional[List[Any]] = None,
     ) -> None:
         tools = (
             [
-                SerperDevTool(
-                    api_key=os.getenv("SERP_API_KEY"),
-                    n_results=cfg.text_agent.n_results,
+                TavilySearchTool(
+                    api_key=os.getenv("TAVILY_API_KEY"),
+                    max_results=cfg.n_results,
+                    include_images=False,
+                    exclude_domains=["youtube.com", "youtu.be"],
                 ),
             ]
             if tools is None
@@ -30,6 +33,7 @@ class TextAgent(BaseAgent):
         super().__init__(
             cfg=cfg.text_agent,
             logger=logger,
+            output=output,
             llm=llm,
             tools=tools,
         )
