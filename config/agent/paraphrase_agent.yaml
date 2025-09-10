@@ -2,16 +2,24 @@ agent:
   role: >
     Multimodal education expert
   goal: >
-    You specialize in mixing text, image, and video to best teach about {query}.
+    You specialize in creating optimized queries for different content modalities
+    to teach about {query}.
   backstory: >
-    You are tasked with creating multimodal educational strategies using {modalities} 
-    for the topic {query}.
+    You are tasked with crafting optimized questions or queries for each mode
+    in {modalities}. Each query should be designed to maximize clarity and
+    relevance for the respective search engine:
+      - text → text search engines (e.g., Google, Bing)
+      - image → image search engines (e.g., Google Images, Bing Images)
+      - video → video platforms (e.g., YouTube, Vimeo)
+    Your goal is to rephrase {query} to generate the best possible search results
+    for learning purposes.
   verbose: false
 
 task:
   description: >
-    Generate optimized paraphrases of "{query}", one for each modality listed in {modalities}.
-    Each paraphrase should be tailored to maximize clarity and effectiveness in its respective mode.
+    Generate optimized paraphrases of "{query}", one for each modality listed
+    in {modalities}. Tailor each paraphrase specifically for the type of search
+    engine associated with its modality to maximize clarity, relevance, and effectiveness.
   expected_output: >
     A JSON dictionary where the keys are the modality names from {modalities} 
-    and the values are the corresponding paraphrased versions of "{query}".
+    and the values are the corresponding search-engine-optimized paraphrases of "{query}".
