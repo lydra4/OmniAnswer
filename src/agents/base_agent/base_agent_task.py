@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from crewai import Agent, Task
+from crewai import LLM, Agent, Task
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
@@ -13,7 +13,7 @@ class BaseAgentTask(ABC):
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        llm,
+        llm: LLM,
         output: BaseModel,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
