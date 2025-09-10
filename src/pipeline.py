@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 from omegaconf import DictConfig
 
 from agents.modality_agent import ModalityAgent
+from agents.paraphrase_agent import ParaphraseAgent
 from moderation.content_moderator import ContentModeratior
-from schemas.schemas import StringListOutput
+from schemas.schemas import DictOutput, StringListOutput
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -34,7 +35,15 @@ def main(cfg: DictConfig):
         llm=llm,
         output=StringListOutput,
     )
-    modality_agent.run_query(query=query)
+    modalities = modality_agent.run_query(query=query)
+
+    paraphrase_agent = ParaphraseAgent(
+        cfg=cfg,
+        logger=logger,
+        llm=llm,
+        output=DictOutput,
+    )
+    paraphrase_agent.run_query(query=query, modalities=modalities)
 
 
 if __name__ == "__main__":
