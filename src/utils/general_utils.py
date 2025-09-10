@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Union
 
 import yaml
 from crewai import LLM
@@ -25,7 +26,7 @@ def setup_logging(
         logger.info("Logging config file is not found. Basic config is used.")
 
 
-def load_llm(model_name: str, temperature: float):
+def load_llm(model_name: str, temperature: Union[int, float]):
     model_name_clean = model_name.strip().lower()
 
     if model_name_clean.startswith("gemini-"):
@@ -39,8 +40,10 @@ def load_llm(model_name: str, temperature: float):
             f"Unsupported model: {model_name}. Supported models are OpenAI and Gemini."
         )
 
-    return LLM(
+    llm = LLM(
         model=model,
         temperature=temperature,
         api_key=api_key,
     )
+    logger.info(f"'{model_name}' loaded at temperature: {temperature}.")
+    return llm
