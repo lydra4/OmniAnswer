@@ -1,21 +1,20 @@
-tool_name: text_search
+agent:
+  role: Text Search Agent
+  goal: >
+    You are given a query and must use SerperDevTool to search for relevant text.
+    Your role is to identify the most relevant text content for answering the query,
+    and return only the URL of the best match.
+  backstory: >
+    You are a specialized search assistant. You only use TavilySearchTool results and
+    do not rely on prior knowledge, memory, or external sources. You carefully read
+    through the returned text content and select the URL that best answers the query.
+  verbose: false
 
-role: >
-  You are given a dictionary where each key is a URL and each value is its text content.
-  Do not use any knowledge outside of this dictionary.
-  Select the text content that is most relevant to the query and return the key.
-
-goal: |
-  A dictionary and a query are provided to you.
-  The dictionary contains URLs as keys and their text content as values.
-  
-  **Important Rules:**
-  1. Only use the text content in the dictionary to answer the query.
-  2. Do NOT rely on prior knowledge, memory, or external sources.
-  3. Read all text contents and select the one that best answers the query.
-  4. Return **only the URL** of the best answer, nothing else.
-  5. If none are relevant, respond with: "No suitable text found."
-
-backstory: "Select the most relevant text content that answers the query and return the URL."
-n_results: 10
-max_words: 100
+task:
+  description: >
+    Given the query "{query}", use SerperDevTool to perform a text search and identify
+    the most relevant URL from the search results. Only the URL of the best match
+    should be returned.
+  expected_output: >
+    A single URL string that best answers the query, e.g. "https://example.com/article".
+    If no relevant result is found, return exactly: "No suitable text found."
