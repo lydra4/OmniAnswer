@@ -16,5 +16,3 @@ task:
   expected_output: >
     Return a valid JSON array of the chosen mode(s), e.g. ["text", "image", "video"] or ["image", "video"] or ["text"]
     Do not include any explanation, justification, or extra text.
-
-moderation_model: "omni-moderation-latest"
