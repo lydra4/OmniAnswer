@@ -30,7 +30,7 @@ class BaseAgentTask(ABC):
             tools=self.tools,
             **self.cfg.agent,
         )
-        self.logger.info(f"{self.cfg.agent.role} successfully initialized.")
+        self.logger.info(f"'{self.cfg.agent.role}' successfully initialized.")
         return agent
 
     @abstractmethod
