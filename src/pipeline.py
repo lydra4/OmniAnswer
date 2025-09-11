@@ -7,8 +7,9 @@ from omegaconf import DictConfig
 
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
+from agents.text_agent import TextAgent
 from moderation.content_moderator import ContentModeratior
-from schemas.schemas import DictOutput, StringListOutput
+from schemas.schemas import DictOutput, StringListOutput, StringOutput
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -38,12 +39,17 @@ def main(cfg: DictConfig):
     modalities = modality_agent.run_query(query=query)
 
     paraphrase_agent = ParaphraseAgent(
-        cfg=cfg,
+        cfg=cfg.paraphrase_agent,
         logger=logger,
         llm=llm,
         output=DictOutput,
     )
-    paraphrase_agent.run_query(query=query, modalities=modalities)
+    paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
+
+    text_agent = TextAgent(
+        cfg=cfg.text_agent, logger=logger, llm=llm, output=StringOutput
+    )
+    text_result = text_agent.run_query(query=paraphrased_queries["text"])
 
 
 if __name__ == "__main__":
