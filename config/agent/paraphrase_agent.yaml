@@ -1,6 +1,5 @@
 agent:
-  role: >
-    Multimodal education expert
+  role: Paraphrase Agent
   goal: >
     You specialize in creating optimized queries for different content modalities
     to teach about {query}.
