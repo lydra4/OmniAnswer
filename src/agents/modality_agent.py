@@ -2,8 +2,10 @@ import json
 import logging
 from typing import List, Optional
 
+from crewai import LLM
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
+from pydantic import BaseModel
 
 from agents.base_agent.base_agent_task import BaseAgentTask
 
@@ -13,8 +15,8 @@ class ModalityAgent(BaseAgentTask):
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        llm,
-        output,
+        llm: LLM,
+        output: BaseModel,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
         super().__init__(
@@ -31,7 +33,6 @@ class ModalityAgent(BaseAgentTask):
         return parsed_result["items"]
 
     def run_query(self, query: str, **kwargs) -> List[str]:
-        self.logger.info(f"Running on query: '{query}'.")
         task = super().create_task(query=query, **kwargs)
         result = task.execute_sync()
         parsed_result = self._parse_result(result=result)

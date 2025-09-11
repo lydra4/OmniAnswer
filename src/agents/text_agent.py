@@ -1,9 +1,12 @@
+import json
 import logging
 import os
 from typing import Any, List, Optional
 
+from crewai import LLM
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
+from pydantic import BaseModel
 
 from agents.base_agent.base_agent_task import BaseAgentTask
 
@@ -13,15 +16,15 @@ class TextAgent(BaseAgentTask):
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        llm,
-        output,
+        llm: LLM,
+        output: BaseModel,
         tools: Optional[List[Any]] = None,
     ) -> None:
         tools = (
             [
                 TavilySearchTool(
                     api_key=os.getenv("TAVILY_API_KEY"),
-                    max_results=cfg.n_results,
+                    max_results=cfg.max_results,
                     include_images=False,
                     exclude_domains=["youtube.com", "youtu.be"],
                 ),
@@ -31,19 +34,21 @@ class TextAgent(BaseAgentTask):
         )
 
         super().__init__(
-            cfg=cfg.text_agent,
+            cfg=cfg,
             logger=logger,
             output=output,
             llm=llm,
             tools=tools,
         )
 
+    def _parse_result(self, result: str) -> str:
+        result_json = result.json
+        parsed_result = json.loads(result_json)
+        return parsed_result["items"]
+
     def run_query(self, query: str, **kwargs):
-        response = super().run(message=query)
-        url = response.content.strip()
-
-        if not url.startswith("http"):
-            self.logger.warning(f"Invalid response: {url}.")
-
-        self.logger.info(f"For text: {url}.")
-        return url
+        task = super().create_task(query=query, **kwargs)
+        result = task.execute_sync()
+        parsed_result = self._parse_result(result=result)
+        self.logger.info(f"For text: '{parsed_result}'.")
+        return parsed_result

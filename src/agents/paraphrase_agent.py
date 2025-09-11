@@ -2,8 +2,10 @@ import json
 import logging
 from typing import Dict, List, Optional
 
+from crewai import LLM
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
+from pydantic import BaseModel
 
 from agents.base_agent.base_agent_task import BaseAgentTask
 
@@ -13,12 +15,12 @@ class ParaphraseAgent(BaseAgentTask):
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        llm,
-        output,
+        llm: LLM,
+        output: BaseModel,
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
         super().__init__(
-            cfg=cfg.paraphrase_agent,
+            cfg=cfg,
             logger=logger,
             llm=llm,
             output=output,
@@ -35,9 +37,6 @@ class ParaphraseAgent(BaseAgentTask):
         if not modalities:
             raise ValueError("Modalities is empty.")
 
-        self.logger.info(
-            f'Running ParaphraseAgent for query: "{query}" and modalities: "{modalities}"'
-        )
         task = super().create_task(query=query, modalities=modalities)
         result = task.execute_sync()
         parsed_result = self._parse_result(result=result)
