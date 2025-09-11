@@ -9,3 +9,7 @@ class StringListOutput(BaseModel):
 
 class DictOutput(BaseModel):
     items: Dict[str, str]
+
+
+class StringOutput(BaseModel):
+    items: str
