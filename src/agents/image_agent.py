@@ -1,14 +1,13 @@
 import logging
 from typing import Any, List, Optional
 
-from dotenv import load_dotenv
 from omegaconf import DictConfig
 
-from agents.base_agent import BaseAgent
+from agents.base_agent.base_agent_task import BaseAgentTask
 from tools.image_search import ImageSearch
 
 
-class ImageAgent(BaseAgent):
+class ImageAgent(BaseAgentTask):
     def __init__(
         self,
         cfg: DictConfig,
@@ -16,14 +15,16 @@ class ImageAgent(BaseAgent):
         llm,
         tools: Optional[List[Any]] = None,
     ):
-        load_dotenv()
-        tools = [ImageSearch(cfg=cfg)] if tools is None else tools
+        tools = [ImageSearch(num_results=cfg.num_results)] if tools is None else tools
         super().__init__(
             cfg=cfg.image_agent,
             logger=logger,
             llm=llm,
             tools=tools,
         )
+
+    def _parse_result(self):
+        pass
 
     def run_query(self, query: str, **kwargs):
         response = super().run(message=query)
