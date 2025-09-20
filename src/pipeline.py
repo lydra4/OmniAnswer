@@ -48,11 +48,19 @@ def main(cfg: DictConfig):
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
     text_agent = TextAgent(
-        cfg=cfg.text_agent, logger=logger, llm=llm, output=StringOutput
+        cfg=cfg.text_agent,
+        logger=logger,
+        llm=llm,
+        output=StringOutput,
     )
     # text_result = text_agent.run_query(query=paraphrased_queries["text"])
 
-    image_agent = ImageAgent(cfg=cfg.image_agent, logger=logger, llm=llm)
+    image_agent = ImageAgent(
+        cfg=cfg.image_agent,
+        logger=logger,
+        llm=llm,
+        output=StringListOutput,
+    )
     image_agent.run_query(query=paraphrased_queries["image"])
 
 
