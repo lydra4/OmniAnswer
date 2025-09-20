@@ -1,4 +1,4 @@
-image_agent:
+agent:
   role: Image Search Agent
   goal: >
     You are given a query and must use the Image Search tool to find the single
@@ -13,12 +13,11 @@ image_agent:
 task:
     description: >
       Given the query "{query}", use the Image Search tool to perform an image
-      search and review all returned URLs. Evaluate which image best matches the
-      query based on clarity, relevance, and visual content. Then return ONLY the
-      single most suitable image URL.
+      search and review all returned URLs. Evaluate the best {num_results} images
+      matches the query based on clarity, relevance, and visual content.
     expected_output: >
-      A single URL string of the best matching image,
-      e.g. "https://images.pexels.com/photos/12345/example.jpg".
+      A list of URLs containing the best matching images,
+      e.g. ["https://images.pexels.com/photos/12345/example_1.jpg", "https://images.pexels.com/photos/12345/example_2.jpg"]
       If no relevant result is found, return exactly:
       "No suitable image found."
 num_results: 5
