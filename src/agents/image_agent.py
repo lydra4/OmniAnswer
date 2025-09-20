@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 from omegaconf import DictConfig
 
 from agents.base_agent.base_agent_task import BaseAgentTask
-from tools.image_search import ImageSearch
+from tools.image_search import image_search
 
 
 class ImageAgent(BaseAgentTask):
@@ -15,7 +15,7 @@ class ImageAgent(BaseAgentTask):
         llm,
         tools: Optional[List[Any]] = None,
     ):
-        tools = [ImageSearch(num_results=cfg.num_results)] if tools is None else tools
+        tools = [image_search] if tools is None else tools
         super().__init__(
             cfg=cfg.image_agent,
             logger=logger,
