@@ -2,7 +2,7 @@ import os
 from typing import List
 
 from crewai.tools import tool
-from pexelsapi.pexels import Pexels
+from google_images_search import GoogleImagesSearch
 
 
 @tool("image_search")
@@ -17,7 +17,16 @@ async def image_search(query: str, num_results: int) -> List[str]:
     Returns:
         List[str]: A list of image URLs.
     """
-    pexels = Pexels(api_key=os.getenv("PEXELS_API_KEY"))
-    search_results = pexels.search_photos(query=query, per_page=num_results)
-    images_urls = [result["src"]["medium"] for result in search_results["photos"]]
+    gis = GoogleImagesSearch(
+        developer_key=os.getenv("GEMINI_API_KEY"),
+        custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
+    )
+    search_params = {
+        "q": query,
+        "num": num_results,
+        "fileType": "jpg|gif|png",
+        "safe": "active",
+    }
+    gis.search(search_params=search_params)
+    images_urls = [image.url for image in gis.results()]
     return images_urls
