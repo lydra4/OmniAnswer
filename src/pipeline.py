@@ -5,6 +5,7 @@ import hydra
 from dotenv import load_dotenv
 from omegaconf import DictConfig
 
+from agents.image_agent import ImageAgent
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
 from agents.text_agent import TextAgent
@@ -49,7 +50,10 @@ def main(cfg: DictConfig):
     text_agent = TextAgent(
         cfg=cfg.text_agent, logger=logger, llm=llm, output=StringOutput
     )
-    text_result = text_agent.run_query(query=paraphrased_queries["text"])
+    # text_result = text_agent.run_query(query=paraphrased_queries["text"])
+
+    image_agent = ImageAgent(cfg=cfg.image_agent, logger=logger, llm=llm)
+    image_agent.run_query(query=paraphrased_queries["image"])
 
 
 if __name__ == "__main__":
