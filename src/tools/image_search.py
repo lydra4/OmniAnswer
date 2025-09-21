@@ -8,14 +8,14 @@ from google_images_search import GoogleImagesSearch
 @tool("image_search")
 async def image_search(query: str, num_results: int) -> List[str]:
     """
-    Search for images using the Pexels API.
+    Search for images using the Google Images Search API (via Custom Search Engine).
 
     Args:
-        query (str): The search term (e.g., "cats", "sunset").
-        num_results (int): Number of images to return.
+        query (str): The search term (e.g., "cats", "sunset", "architecture diagram").
+        num_results (int): The maximum number of image results to return.
 
     Returns:
-        List[str]: A list of image URLs.
+        List[str]: A list of image URLs corresponding to the search results.
     """
     gis = GoogleImagesSearch(
         developer_key=os.getenv("GEMINI_API_KEY"),
