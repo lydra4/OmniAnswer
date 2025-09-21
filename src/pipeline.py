@@ -53,15 +53,15 @@ def main(cfg: DictConfig):
         llm=llm,
         output=StringOutput,
     )
-    # text_result = text_agent.run_query(query=paraphrased_queries["text"])
+    text_result = text_agent.run_query(query=paraphrased_queries["text"])
 
     image_agent = ImageAgent(
         cfg=cfg.image_agent,
         logger=logger,
         llm=llm,
-        output=StringListOutput,
+        output=StringOutput,
     )
-    image_agent.run_query(query=paraphrased_queries["image"])
+    image_result = image_agent.run_query(query=paraphrased_queries["image"])
 
 
 if __name__ == "__main__":
