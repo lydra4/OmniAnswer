@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import Any, List, Optional
 
@@ -28,12 +29,16 @@ class ImageAgent(BaseAgentTask):
         )
         self.cfg = cfg
 
-    def _parse_result(self):
-        pass
+    def _parse_result(self, result: str) -> str:
+        result_json = result.json
+        parsed_result = json.loads(result_json)
+        return parsed_result["items"]
 
     def run_query(self, query: str, **kwargs):
         task = super().create_task(
             query=query, num_results=self.cfg.num_results, **kwargs
         )
         result = task.execute_sync()
-        print(result)
+        parsed_result = self._parse_result(result=result)
+        self.logger.info(f"For image: '{parsed_result}'.")
+        return parsed_result
