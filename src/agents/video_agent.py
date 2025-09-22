@@ -1,38 +1,36 @@
 import logging
 from typing import Any, List, Optional
 
+from crewai import LLM
 from crewai_tools import YoutubeVideoSearchTool
 from omegaconf import DictConfig
+from pydantic import BaseModel
 
-from agents.base_agent import BaseAgent
-from utils.general_utils import extract_video_urls
+from agents.base_agent.base_agent_task import BaseAgentTask
 
 
-class VideoAgent(BaseAgent):
+class VideoAgent(BaseAgentTask):
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        llm,
+        llm: LLM,
+        output: BaseModel,
         tools: Optional[List[Any]] = None,
-    ):
+    ) -> None:
         tools = [YoutubeVideoSearchTool()] if tools is None else tools
         super().__init__(
-            cfg=cfg.video_agent,
+            cfg=cfg,
             logger=logger,
             llm=llm,
+            output=output,
             tools=tools,
         )
 
+    def _parse_result(self):
+        pass
+
     def run_query(self, query: str, **kwargs):
-        self.logger.info(f"Looking up videos with query: {query}.")
-        response = super().run(query)
-        video_urls = extract_video_urls(text=response.content)
-
-        if not video_urls:
-            self.logger.warning("No video URLs found.")
-
-        top_url = video_urls[0]
-        self.logger.info(f"URL of video: {[top_url]}")
-
-        return top_url
+        task = super().create_task(query=query, **kwargs)
+        result = task.execute_sync()
+        print(result)
