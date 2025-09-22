@@ -40,14 +40,17 @@ class TextAgent(BaseAgentTask):
             llm=llm,
             tools=tools,
         )
+        self.cfg = cfg
 
     def _parse_result(self, result: str) -> str:
         result_json = result.json
         parsed_result = json.loads(result_json)
-        return parsed_result["items"]
+        return parsed_result["url"]
 
     def run_query(self, query: str, **kwargs):
-        task = super().create_task(query=query, **kwargs)
+        task = super().create_task(
+            query=query, max_results=self.cfg.max_results, **kwargs
+        )
         result = task.execute_sync()
         parsed_result = self._parse_result(result=result)
         self.logger.info(f"For text: '{parsed_result}'.")

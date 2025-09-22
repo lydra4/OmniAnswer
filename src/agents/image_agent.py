@@ -32,7 +32,7 @@ class ImageAgent(BaseAgentTask):
     def _parse_result(self, result: str) -> str:
         result_json = result.json
         parsed_result = json.loads(result_json)
-        return parsed_result["items"]
+        return parsed_result["url"]
 
     def run_query(self, query: str, **kwargs):
         task = super().create_task(
