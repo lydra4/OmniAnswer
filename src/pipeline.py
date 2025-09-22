@@ -47,6 +47,9 @@ def main(cfg: DictConfig):
         output=DictOutput,
     )
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
+    paraphrased_queries["video"] = (
+        "Tutorial on Model Context Protocol for agentic workflows"
+    )
 
     if "text" in paraphrased_queries:
         text_agent = TextAgent(
