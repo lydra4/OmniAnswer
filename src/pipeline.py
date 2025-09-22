@@ -55,7 +55,7 @@ def main(cfg: DictConfig):
             llm=llm,
             output=StringOutput,
         )
-        text_result = text_agent.run_query(query=paraphrased_queries["text"])
+        # text_result = text_agent.run_query(query=paraphrased_queries["text"])
 
     if "image" in paraphrased_queries:
         image_agent = ImageAgent(
@@ -64,7 +64,7 @@ def main(cfg: DictConfig):
             llm=llm,
             output=StringOutput,
         )
-        image_result = image_agent.run_query(query=paraphrased_queries["image"])
+        # image_result = image_agent.run_query(query=paraphrased_queries["image"])
 
     if "video" in paraphrased_queries:
         video_agent = VideoAgent(
