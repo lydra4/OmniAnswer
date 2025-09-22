@@ -36,8 +36,8 @@ class TextAgent(BaseAgentTask):
         super().__init__(
             cfg=cfg,
             logger=logger,
-            output=output,
             llm=llm,
+            output=output,
             tools=tools,
         )
         self.cfg = cfg
