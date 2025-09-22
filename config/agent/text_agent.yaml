@@ -1,7 +1,7 @@
 agent:
   role: Text Search Agent
   goal: >
-    You are given a query and must use SerperDevTool to search for relevant text.
+    You are given a query and must use TavilySearchTool to search for relevant text.
     Your role is to identify the most relevant text content for answering the query,
     and return only the URL of the best match.
   backstory: >
