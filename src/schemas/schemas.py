@@ -12,4 +12,4 @@ class DictOutput(BaseModel):
 
 
 class StringOutput(BaseModel):
-    items: str
+    url: str
