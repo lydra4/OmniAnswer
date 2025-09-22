@@ -45,5 +45,5 @@ def load_llm(model_name: str, temperature: Union[int, float]):
         temperature=temperature,
         api_key=api_key,
     )
-    logger.info(f"'{model_name}' loaded at temperature: {temperature}.")
+    logger.info(f"'{model_name}' loaded at temperature: '{temperature}'.")
     return llm
