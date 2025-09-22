@@ -9,6 +9,7 @@ from agents.image_agent import ImageAgent
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
 from agents.text_agent import TextAgent
+from agents.video_agent import VideoAgent
 from moderation.content_moderator import ContentModeratior
 from schemas.schemas import DictOutput, StringListOutput, StringOutput
 from utils.general_utils import load_llm, setup_logging
@@ -64,6 +65,15 @@ def main(cfg: DictConfig):
             output=StringOutput,
         )
         image_result = image_agent.run_query(query=paraphrased_queries["image"])
+
+    if "video" in paraphrased_queries:
+        video_agent = VideoAgent(
+            cfg=cfg.video_agent,
+            logger=logger,
+            llm=llm,
+            output=StringOutput,
+        )
+        video_agent.run_query(query=paraphrased_queries["video"])
 
 
 if __name__ == "__main__":
