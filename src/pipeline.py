@@ -47,21 +47,23 @@ def main(cfg: DictConfig):
     )
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
-    text_agent = TextAgent(
-        cfg=cfg.text_agent,
-        logger=logger,
-        llm=llm,
-        output=StringOutput,
-    )
-    text_result = text_agent.run_query(query=paraphrased_queries["text"])
+    if "text" in paraphrased_queries:
+        text_agent = TextAgent(
+            cfg=cfg.text_agent,
+            logger=logger,
+            llm=llm,
+            output=StringOutput,
+        )
+        text_result = text_agent.run_query(query=paraphrased_queries["text"])
 
-    image_agent = ImageAgent(
-        cfg=cfg.image_agent,
-        logger=logger,
-        llm=llm,
-        output=StringOutput,
-    )
-    image_result = image_agent.run_query(query=paraphrased_queries["image"])
+    if "image" in paraphrased_queries:
+        image_agent = ImageAgent(
+            cfg=cfg.image_agent,
+            logger=logger,
+            llm=llm,
+            output=StringOutput,
+        )
+        image_result = image_agent.run_query(query=paraphrased_queries["image"])
 
 
 if __name__ == "__main__":
