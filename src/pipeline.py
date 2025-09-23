@@ -76,7 +76,7 @@ def main(cfg: DictConfig):
             llm=llm,
             output=StringOutput,
         )
-        video_agent.run_query(query=paraphrased_queries["video"])
+        video_result = video_agent.run_query(query=paraphrased_queries["video"])
 
 
 if __name__ == "__main__":
