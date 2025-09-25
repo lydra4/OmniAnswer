@@ -2,17 +2,14 @@ import logging
 import os
 
 import hydra
-from crewai import Agent, Crew, Task
-from crewai_tools import TavilySearchTool
 from dotenv import load_dotenv
 from omegaconf import DictConfig
 
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
+from crew.orchestrator import Orchestrator
 from moderation.content_moderator import ContentModeratior
 from schemas.schemas import DictOutput, StringListOutput
-from tools.image_search import image_search
-from tools.video_search import video_search
 from utils.general_utils import load_llm, setup_logging
 
 
@@ -48,58 +45,9 @@ def main(cfg: DictConfig):
         output=DictOutput,
     )
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
-    paraphrased_queries["video"] = (
-        "Tutorial on Model Context Protocol for agentic workflows"
-    )
 
-    tasks = []
-    agents = []
-    if "text" in paraphrased_queries:
-        text_agent = Agent(
-            llm=llm,
-            tools=[
-                TavilySearchTool(
-                    api_key=os.getenv("TAVILY_API_KEY"),
-                    max_results=cfg.text_agent.max_results,
-                    include_images=False,
-                    exclude_domains=["youtube.com", "youtu.be"],
-                )
-            ],
-            **cfg.text_agent.agent,
-        )
-        agents.append(text_agent)
-        tasks.append(
-            Task(
-                description=paraphrased_queries["text"],
-                agent=text_agent,
-                expected_output=cfg.text_agent.task.expected_output,
-            )
-        )
-
-    if "image" in paraphrased_queries:
-        image_agent = Agent(llm=llm, tools=[image_search], **cfg.image_agent.agent)
-        agents.append(image_agent)
-        tasks.append(
-            Task(
-                description=paraphrased_queries["image"],
-                agent=image_agent,
-                expected_output=cfg.image_agent.task.expected_output,
-            )
-        )
-
-    if "video" in paraphrased_queries:
-        video_agent = Agent(llm=llm, tools=[video_search], **cfg.video_agent.agent)
-        agents.append(video_agent)
-        tasks.append(
-            Task(
-                description=paraphrased_queries["video"],
-                agent=video_agent,
-                expected_output=cfg.video_agent.task.expected_output,
-            )
-        )
-
-    crew = Crew(agents=agents, tasks=tasks, verbose=False)
-    result = crew.kickoff()
+    orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
+    result = orchestrator.run(paraphrase_queries=paraphrased_queries)
     print(result)
 
 
