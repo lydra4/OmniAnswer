@@ -47,8 +47,7 @@ def main(cfg: DictConfig):
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
-    result = orchestrator.run(paraphrase_queries=paraphrased_queries)
-    print(result)
+    orchestrator.run(paraphrase_queries=paraphrased_queries)
 
 
 if __name__ == "__main__":
