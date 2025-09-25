@@ -1,15 +1,18 @@
 import logging
 import os
-from typing import Dict, List
+from typing import Dict
 
-from crewai import LLM, Agent, Crew, Task
+from crewai import LLM, Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 
+from schemas.schemas import StringOutput
 from tools.image_search import image_search
 from tools.video_search import video_search
 
 
+@CrewBase
 class Orchestrator:
     def __init__(
         self,
@@ -20,11 +23,10 @@ class Orchestrator:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
-        self.tasks: List[Task] = []
-        self.agents: List[Agent] = []
 
-    def _init_text_agent_task(self, query: str) -> None:
-        text_agent = Agent(
+    @agent
+    def text_agent(self) -> Agent:
+        return Agent(
             llm=self.llm,
             tools=[
                 TavilySearchTool(
@@ -36,54 +38,66 @@ class Orchestrator:
             ],
             **self.cfg.text_agent.agent,
         )
-        self.agents.append(text_agent)
-        self.tasks.append(
-            Task(
-                description=query,
-                agent=text_agent,
-                expected_output=self.cfg.text_agent.task.expected_output,
-            )
-        )
 
-    def _init_image_agent_task(self, query: str) -> None:
-        image_agent = Agent(
+    @agent
+    def image_agent(self) -> Agent:
+        return Agent(
             llm=self.llm,
             tools=[image_search],
             **self.cfg.image_agent.agent,
         )
-        self.agents.append(image_agent)
-        self.tasks.append(
-            Task(
-                description=query,
-                agent=image_agent,
-                expected_output=self.cfg.image_agent.task.expected_output,
-            )
-        )
 
-    def _init_video_agent_task(self, query: str) -> None:
-        video_agent = Agent(
+    @agent
+    def video_agent(self) -> Agent:
+        return Agent(
             llm=self.llm,
             tools=[video_search],
             **self.cfg.video_agent.agent,
         )
-        self.agents.append(video_agent)
-        self.tasks.append(
-            Task(
-                description=query,
-                agent=video_agent,
-                expected_output=self.cfg.video_agent.task.expected_output,
-            )
+
+    @task
+    def text_task(self) -> Task:
+        return Task(
+            description="{text_query}",
+            agent=self.text_agent,
+            expected_output=self.cfg.text_agent.task.expected_output,
+            output_pydantic=StringOutput,
         )
 
-    def _setup_agents_tasks(self, paraphrase_queries: Dict[str, str]):
-        if "text" in paraphrase_queries:
-            self._init_text_agent_task(query=paraphrase_queries["text"])
-        if "image" in paraphrase_queries:
-            self._init_image_agent_task(query=paraphrase_queries["image"])
-        if "video" in paraphrase_queries:
-            self._init_video_agent_task(query=paraphrase_queries["video"])
+    @task
+    def image_task(self) -> Task:
+        return Task(
+            description="{image_query}",
+            agent=self.image_agent,
+            expected_output=self.cfg.image_agent.task.expected_output,
+            output_pydantic=StringOutput,
+        )
+
+    @task
+    def video_task(self) -> Task:
+        return Task(
+            description="{video_query}",
+            agent=self.video_agent,
+            expected_output=self.cfg.video_agent.task.expected_output,
+            output_pydantic=StringOutput,
+        )
+
+    @crew
+    def crew(self) -> Crew:
+        return Crew(
+            agents=[self.text_agent, self.image_agent, self.video_agent],
+            tasks=[self.text_task, self.image_task, self.video_task],
+            process=Process.sequential,
+            verbose=True,
+        )
 
     def run(self, paraphrase_queries: Dict[str, str]):
-        self._setup_agents_tasks(paraphrase_queries=paraphrase_queries)
-        crew = Crew(agents=self.agents, tasks=self.tasks, verbose=True)
-        return crew.kickoff()
+        research_crew = self.crew()
+        results = research_crew.kickoff(
+            inputs={
+                "text_query": paraphrase_queries.get("text", ""),
+                "image_query": paraphrase_queries.get("image", ""),
+                "video_query": paraphrase_queries.get("video", ""),
+            }
+        )
+        print(f"Results: {results}")
