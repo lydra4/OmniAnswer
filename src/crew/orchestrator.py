@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Dict, List
 
-from crewai import LLM, Agent, Task
+from crewai import LLM, Agent, Crew, Task
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 
@@ -16,12 +16,10 @@ class Orchestrator:
         cfg: DictConfig,
         logger: logging.Logger,
         llm: LLM,
-        paraphrase_queries: Dict[str, str],
     ) -> None:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
-        self.paraphrase_queries = paraphrase_queries
         self.tasks: List[Task] = []
         self.agents: List[Agent] = []
 
@@ -76,6 +74,16 @@ class Orchestrator:
                 expected_output=self.cfg.video_agent.task.expected_output,
             )
         )
-        
-    def run(self):
-        
+
+    def _setup_agents_tasks(self, paraphrase_queries: Dict[str, str]):
+        if "text" in paraphrase_queries:
+            self._init_text_agent_task(query=paraphrase_queries["text"])
+        if "image" in paraphrase_queries:
+            self._init_image_agent_task(query=paraphrase_queries["image"])
+        if "video" in paraphrase_queries:
+            self._init_video_agent_task(query=paraphrase_queries["video"])
+
+    def run(self, paraphrase_queries: Dict[str, str]):
+        self._setup_agents_tasks(paraphrase_queries=paraphrase_queries)
+        crew = Crew(agents=self.agents, tasks=self.tasks, verbose=True)
+        return crew.kickoff()
