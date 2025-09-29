@@ -13,7 +13,7 @@ agent:
 
 task:
   description: >
-    Given the query "{query}", use the video_search tool to perform a video search
+    Given the query "{video_query}", use the video_search tool to perform a video search
     and identify the most relevant URL from the search results.
     Only the single best video URL should be returned.
   expected_output: >

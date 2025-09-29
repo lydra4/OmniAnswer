@@ -12,7 +12,7 @@ agent:
 
 task:
   description: >
-    Given the query "{query}", use TavilySearchTool to perform a text search and identify
+    Given the query "{text_query}", use TavilySearchTool to perform a text search and identify
     the most relevant URL from the search results. Only the URL of the best match
     should be returned.
   expected_output: >

@@ -12,7 +12,7 @@ agent:
 
 task:
     description: >
-      Given the query "{query}", use the Image Search tool to perform an image
+      Given the query "{image_query}", use the Image Search tool to perform an image
       search and review all returned URLs. Evaluate the best image that
       matches the query based on clarity, relevance, and visual content.
     expected_output: >
