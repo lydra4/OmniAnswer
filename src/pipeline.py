@@ -44,7 +44,7 @@ def main(cfg: DictConfig):
         llm=llm,
         output=DictOutput,
     )
-    paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
+    # paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
     paraphrased_queries = {
         "text": "model context protocol for agentic workflows",
