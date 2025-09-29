@@ -46,6 +46,11 @@ def main(cfg: DictConfig):
     )
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
+    paraphrased_queries = {
+        "text": "model context protocol for agentic workflows",
+        "image": "agentic workflow context management diagram",
+    }
+
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
     orchestrator.run(paraphrase_queries=paraphrased_queries)
 
