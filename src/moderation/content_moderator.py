@@ -28,3 +28,5 @@ class ContentModeratior:
         if true_categories:
             self.logger.error(f"Rejected query due to {' and '.join(true_categories)}.")
             raise ValueError(f"Rejected query due to {' and '.join(true_categories)}.")
+        else:
+            self.logger.info(f"Query:'{query}' passed.")
