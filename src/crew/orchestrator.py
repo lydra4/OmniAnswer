@@ -7,8 +7,8 @@ from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 
 from schemas.schemas import StringOutput
-from tools.image_search import image_search
-from tools.video_search import video_search
+from tools.image_search import ImageSearchTool
+from tools.video_search import VideoSearchTool
 
 
 class Orchestrator:
@@ -21,38 +21,43 @@ class Orchestrator:
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
+        self.text_search = TavilySearchTool(
+            api_key=os.getenv("TAVILY_API_KEY"),
+            max_results=self.cfg.text_agent.max_results,
+            include_images=False,
+            exclude_domains=["youtube.com", "youtu.be"],
+        )
+        self.image_search = ImageSearchTool(
+            num_results=self.cfg.image_agent.num_results
+        )
+        self.video_search = VideoSearchTool(
+            max_results=self.cfg.video_agent.max_results
+        )
 
     def text_agent(self) -> Agent:
         return Agent(
             llm=self.llm,
-            tools=[
-                TavilySearchTool(
-                    api_key=os.getenv("TAVILY_API_KEY"),
-                    max_results=self.cfg.text_agent.max_results,
-                    include_images=False,
-                    exclude_domains=["youtube.com", "youtu.be"],
-                )
-            ],
+            tools=[self.text_search],
             **self.cfg.text_agent.agent,
         )
 
     def image_agent(self) -> Agent:
         return Agent(
             llm=self.llm,
-            tools=[image_search],
+            tools=[self.image_search],
             **self.cfg.image_agent.agent,
         )
 
     def video_agent(self) -> Agent:
         return Agent(
             llm=self.llm,
-            tools=[video_search],
+            tools=[self.video_search],
             **self.cfg.video_agent.agent,
         )
 
     def text_task(self) -> Task:
         return Task(
-            description="{text_query}",
+            description=self.cfg.text_agent.task.description,
             agent=self.text_agent(),
             expected_output=self.cfg.text_agent.task.expected_output,
             output_pydantic=StringOutput,
@@ -60,7 +65,7 @@ class Orchestrator:
 
     def image_task(self) -> Task:
         return Task(
-            description="Find {num_results} images for: {image_query}",
+            description=self.cfg.image_agent.task.description,
             agent=self.image_agent(),
             expected_output=self.cfg.image_agent.task.expected_output,
             output_pydantic=StringOutput,
@@ -68,7 +73,7 @@ class Orchestrator:
 
     def video_task(self) -> Task:
         return Task(
-            description="Find {max_results} images for: {video_query}",
+            description=self.cfg.video_agent.task.description,
             agent=self.video_agent(),
             expected_output=self.cfg.video_agent.task.expected_output,
             output_pydantic=StringOutput,
@@ -88,16 +93,6 @@ class Orchestrator:
             inputs={
                 "text_query": paraphrase_queries.get("text", ""),
                 "image_query": paraphrase_queries.get("image", ""),
-                "num_results": self.cfg.image_agent.num_results,
                 "video_query": paraphrase_queries.get("video", ""),
-                "max_results": self.cfg.video_agent.max_results,
             }
         )
-        outout = {
-            mode: result
-            for mode, result in zip(
-                paraphrase_queries.keys(),
-                results,
-            )
-        }
-        print(outout)
