@@ -1,32 +1,37 @@
 import os
-from typing import List
+from typing import Dict, List, Type, Union
 
-from crewai.tools import tool
+from crewai.tools import BaseTool
 from google_images_search import GoogleImagesSearch
+from pydantic import BaseModel, Field
 
 
-@tool("image_search")
-async def image_search(query: str, num_results: int) -> List[str]:
-    """
-    Search for images using the Google Images Search API (via Custom Search Engine).
+class ImageSearchSchema(BaseModel):
+    query: str = Field(description="The search query for finding images.")
 
-    Args:
-        query (str): The search term (e.g., "cats", "sunset", "architecture diagram").
-        num_results (int): The maximum number of image results to return.
 
-    Returns:
-        List[str]: A list of image URLs corresponding to the search results.
-    """
-    gis = GoogleImagesSearch(
-        developer_key=os.getenv("GEMINI_API_KEY"),
-        custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
+class ImageSearchTool(BaseTool):
+    name: str = "Image Search"
+    description: str = (
+        "Searches Google Images for a given query and returns a list of image URLs."
     )
-    search_params = {
-        "q": query,
-        "num": num_results,
-        "fileType": "jpg|gif|png",
-        "safe": "active",
-    }
-    gis.search(search_params=search_params)
-    images_urls = [image.url for image in gis.results()]
-    return images_urls
+    args_schema: Type[BaseModel] = ImageSearchSchema
+
+    def __init__(self, num_results: int) -> None:
+        super().__init__()
+        self.num_results = num_results
+        self.gis = GoogleImagesSearch(
+            developer_key=os.getenv("GEMINI_API_KEY"),
+            custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
+        )
+        self.search_params: Dict[str, Union[int, str]] = {
+            "num": num_results,
+            "fileType": "jpg|gif|png",
+            "safe": "active",
+        }
+
+    def _run(self, query: str) -> List[str]:
+        self.search_params["q"] = query
+        self.gis.search(search_params=self.search_params)
+        image_urls = [image.url for image in self.gis.results()]
+        return image_urls
