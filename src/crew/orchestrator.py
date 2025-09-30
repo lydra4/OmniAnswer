@@ -92,3 +92,7 @@ class Orchestrator:
                 "video_query": paraphrase_queries.get("video", ""),
             }
         )
+        results_dict = {
+            mode: result[1] for mode, result in zip(paraphrase_queries.keys(), results)
+        }
+        print(results_dict)
