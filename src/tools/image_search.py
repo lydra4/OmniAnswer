@@ -3,11 +3,12 @@ from typing import Dict, List, Type, Union
 
 from crewai.tools import BaseTool
 from google_images_search import GoogleImagesSearch
-from pydantic import BaseModel, Field
+from omegaconf import DictConfig
+from pydantic import BaseModel, Field, PrivateAttr
 
 
 class ImageSearchSchema(BaseModel):
-    query: str = Field(description="The search query for finding images.")
+    query: str = Field(..., description="The search query for finding images.")
 
 
 class ImageSearchTool(BaseTool):
@@ -15,23 +16,36 @@ class ImageSearchTool(BaseTool):
     description: str = (
         "Searches Google Images for a given query and returns a list of image URLs."
     )
+    developer_key: str = Field(
+        default_factory=lambda: os.getenv("GEMINI_API_KEY"),
+        description="API Key for searching google image",
+    )
+    custom_search_cx: str = Field(
+        default_factory=lambda: os.getenv("GOOGLE_CSE_ID"),
+        description="Specify search engine configuration to use",
+    )
+    cfg: DictConfig
+    _gis: GoogleImagesSearch = PrivateAttr()
     args_schema: Type[BaseModel] = ImageSearchSchema
 
-    def __init__(self, num_results: int) -> None:
-        super().__init__()
-        self.num_results = num_results
-        self.gis = GoogleImagesSearch(
-            developer_key=os.getenv("GEMINI_API_KEY"),
-            custom_search_cx=os.getenv("GOOGLE_CSE_ID"),
+    def __init__(
+        self,
+        cfg: DictConfig,
+    ) -> None:
+        super().__init__(cfg=cfg)
+        self._gis: GoogleImagesSearch = GoogleImagesSearch(
+            developer_key=self.developer_key,
+            custom_search_cx=self.custom_search_cx,
         )
-        self.search_params: Dict[str, Union[int, str]] = {
-            "num": num_results,
+        self.cfg = cfg
+
+    def _run(self, query: str) -> List[str]:
+        search_params: Dict[str, Union[int, str]] = {
+            "q": query,
+            "num": self.cfg.num_results,
             "fileType": "jpg|gif|png",
             "safe": "active",
         }
-
-    def _run(self, query: str) -> List[str]:
-        self.search_params["q"] = query
-        self.gis.search(search_params=self.search_params)
+        self._gis.search(search_params=search_params)
         image_urls = [image.url for image in self.gis.results()]
         return image_urls
