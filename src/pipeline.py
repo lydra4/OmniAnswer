@@ -49,6 +49,7 @@ def main(cfg: DictConfig):
     paraphrased_queries = {
         "text": "model context protocol for agentic workflows",
         "image": "agentic workflow context management diagram",
+        "video": "agentic workflow model context protocol tutorial",
     }
 
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
