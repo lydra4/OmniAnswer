@@ -3,7 +3,8 @@ from typing import List, Type
 
 from crewai.tools import BaseTool
 from googleapiclient.discovery import build
-from pydantic import BaseModel, Field
+from omegaconf import DictConfig
+from pydantic import BaseModel, Field, PrivateAttr
 
 
 class VideoSearchSchema(BaseModel):
@@ -13,23 +14,31 @@ class VideoSearchSchema(BaseModel):
 class VideoSearchTool(BaseTool):
     name: str = "Video Search"
     description: str = "Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs."
-    args_schema: Type(BaseModel) = VideoSearchSchema
+    serviceName: str = "youtube"
+    version: str = "v3"
+    developerKey: str = Field(
+        default_factory=lambda: os.getenv("GEMINI_API_KEY"),
+        description="API Key for searching Youtube videos",
+    )
+    cfg: DictConfig
+    _youtube: build = PrivateAttr()
+    args_schema: Type[BaseModel] = VideoSearchSchema
 
-    def __init__(self, max_results: int) -> None:
-        super().__init__()
-        self.max_results = max_results
-        self.youtube = build(
-            serviceName="youtube",
-            version="v3",
-            developerKey=os.getenv("GEMINI_API_KEY"),
+    def __init__(self, cfg: DictConfig) -> None:
+        super().__init__(cfg=cfg)
+        self._youtube = build(
+            serviceName=self.serviceName,
+            version=self.version,
+            developerKey=self.developerKey,
         )
+        self.cfg = cfg
 
     def _run(self, query: str) -> List[str]:
         results = (
-            self.youtube.search()
+            self._youtube.search()
             .list(
                 q=query,
-                maxResults=self.max_results,
+                maxResults=self.cfg.max_results,
                 part="snippet",
             )
             .execute()

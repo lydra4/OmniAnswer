@@ -47,5 +47,5 @@ class ImageSearchTool(BaseTool):
             "safe": "active",
         }
         self._gis.search(search_params=search_params)
-        image_urls = [image.url for image in self.gis.results()]
+        image_urls = [image.url for image in self._gis.results()]
         return image_urls
