@@ -1,4 +1,4 @@
-name: omnianswer-crewai
+name: omnianswer
 channels:
   - conda-forge
   - defaults
