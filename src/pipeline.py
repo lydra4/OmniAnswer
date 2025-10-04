@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
         llm=llm,
         output=StringListOutput,
     )
-    modalities = modality_agent.run_query(query=query)
+    # modalities = modality_agent.run_query(query=query)
 
     paraphrase_agent = ParaphraseAgent(
         cfg=cfg.paraphrase_agent,
