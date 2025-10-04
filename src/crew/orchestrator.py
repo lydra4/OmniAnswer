@@ -80,7 +80,6 @@ class Orchestrator:
             agents=[self.text_agent(), self.image_agent(), self.video_agent()],
             tasks=[self.text_task(), self.image_task(), self.video_task()],
             process=Process.sequential,
-            verbose=True,
         )
 
     def run(self, paraphrase_queries: Dict[str, str]):
@@ -92,7 +91,9 @@ class Orchestrator:
                 "video_query": paraphrase_queries.get("video", ""),
             }
         )
+        tasks_output = results.tasks_output
         results_dict = {
-            mode: result[1] for mode, result in zip(paraphrase_queries.keys(), results)
+            mode: result.pydantic.url
+            for mode, result in zip(paraphrase_queries.keys(), tasks_output)
         }
         print(results_dict)
