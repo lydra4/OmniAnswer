@@ -8,13 +8,12 @@ agent:
     You are a specialized search assistant. You ONLY use the Image Search tool
     and evaluate each returned image carefully. You have no prior knowledge or 
     memory and rely solely on the tool output.
-  verbose: false
+  verbose: True
 
 task:
     description: >
-      Given the query "{image_query}", use the Image Search tool to perform an image
-      search and review all returned URLs. Evaluate the best image that
-      matches the query based on clarity, relevance, and visual content.
+      Given the query "{image_query}", use the image_search tool to perform an image
+      search and review all returned URLs.
     expected_output: >
       A URL containing the best matching images,
       e.g. "https://images.pexels.com/photos/12345/example.jpg"

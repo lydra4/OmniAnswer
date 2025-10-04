@@ -8,15 +8,12 @@ agent:
     You are a specialized search assistant. You only use TavilySearchTool results and
     do not rely on prior knowledge, memory, or external sources. You carefully read
     through the returned text content and select the URL that best answers the query.
-  verbose: false
+  verbose: True
 
 task:
   description: >
-    Given the query "{text_query}", use TavilySearchTool to perform a text search and identify
-    the most relevant URL from the search results. Only the URL of the best match
-    should be returned.
+    Given the query "{text_query}", use TavilySearchTool to perform a text search.
   expected_output: >
     A single URL string that best answers the query, e.g. "https://example.com/article".
     If no relevant result is found, return exactly: "No suitable text found."
-
 max_results: 5

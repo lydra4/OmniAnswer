@@ -9,7 +9,7 @@ agent:
     results and do not rely on prior knowledge, memory, or external sources.
     You carefully examine the returned video results and select the URL
     that best matches the query.
-  verbose: false
+  verbose: True
 
 task:
   description: >
