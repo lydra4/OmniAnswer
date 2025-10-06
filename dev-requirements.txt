@@ -8,3 +8,6 @@ pre-commit==4.2.0
 
 # Unit testing
 pytest==8.4.1
+
+# Evaluation
+torchmetrics == 1.8.2
