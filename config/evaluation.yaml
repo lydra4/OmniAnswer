@@ -1,8 +1,0 @@
-defaults:
-  - _self_
-  - evaluation/image_evaluator@image_evaluator
-  - evaluation/text_evaluator@text_evaluator
-
-output_path: "./data/processed/multimodal_output.json"
-model: gemini-2.0-flash-lite
-temperature: 1.0
