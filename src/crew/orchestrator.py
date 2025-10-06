@@ -86,7 +86,7 @@ class Orchestrator:
         self,
         query: str,
         paraphrase_queries: Dict[str, str],
-    ):
+    ) -> Dict[str, str]:
         research_crew = self.crew()
         results = research_crew.kickoff(
             inputs={
@@ -103,3 +103,4 @@ class Orchestrator:
         self.logger.info(
             f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
         )
+        return results_dict
