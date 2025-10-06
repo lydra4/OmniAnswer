@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
         llm=llm,
         output=StringListOutput,
     )
-    # modalities = modality_agent.run_query(query=query)
+    modalities = modality_agent.run_query(query=query)
 
     paraphrase_agent = ParaphraseAgent(
         cfg=cfg.paraphrase_agent,
@@ -44,13 +44,7 @@ def main(cfg: DictConfig):
         llm=llm,
         output=DictOutput,
     )
-    # paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
-
-    paraphrased_queries = {
-        "text": "model context protocol for agentic workflows",
-        "image": "agentic workflow context management diagram",
-        "video": "agentic workflow model context protocol tutorial",
-    }
+    paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
     orchestrator.run(paraphrase_queries=paraphrased_queries)
