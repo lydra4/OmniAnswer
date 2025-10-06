@@ -82,7 +82,11 @@ class Orchestrator:
             process=Process.sequential,
         )
 
-    def run(self, paraphrase_queries: Dict[str, str]):
+    def run(
+        self,
+        query: str,
+        paraphrase_queries: Dict[str, str],
+    ):
         research_crew = self.crew()
         results = research_crew.kickoff(
             inputs={
@@ -96,4 +100,6 @@ class Orchestrator:
             mode: result.pydantic.url
             for mode, result in zip(paraphrase_queries.keys(), tasks_output)
         }
-        print(results_dict)
+        self.logger.info(
+            f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
+        )
