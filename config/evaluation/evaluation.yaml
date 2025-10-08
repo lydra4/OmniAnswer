@@ -1,2 +1,4 @@
 text_model_name: "bert-base-uncased"
 image_model_name: "openai/clip-vit-base-patch32"
+
+output_path: ./data/08-10-25-0911/
