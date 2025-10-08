@@ -1,5 +1,7 @@
+import json
 import logging
 import os
+from datetime import datetime
 from typing import Dict
 
 from crewai import LLM, Agent, Crew, Process, Task
@@ -29,6 +31,13 @@ class Orchestrator:
         )
         self.image_search = ImageSearchTool(cfg=self.cfg.image_agent)
         self.video_search = VideoSearchTool(cfg=self.cfg.video_agent)
+        self.outout_path = os.path.join(
+            self.cfg.output_path, datetime.now().strftime("%d-%m-%y-%H%M")
+        )
+        os.makedirs(
+            self.outout_path,
+            exist_ok=True,
+        )
 
     def text_agent(self) -> Agent:
         return Agent(
@@ -86,7 +95,7 @@ class Orchestrator:
         self,
         query: str,
         paraphrase_queries: Dict[str, str],
-    ) -> Dict[str, str]:
+    ) -> None:
         research_crew = self.crew()
         results = research_crew.kickoff(
             inputs={
@@ -103,4 +112,11 @@ class Orchestrator:
         self.logger.info(
             f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
         )
-        return results_dict
+
+        evaluation_dict = {
+            query: result.pydantic.url
+            for query, result in zip(paraphrase_queries.values(), tasks_output)
+        }
+        output_file = os.path.join(self.outout_path, "evaluation_dict.json")
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(evaluation_dict, f, indent=4)
