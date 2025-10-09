@@ -50,21 +50,27 @@ class EvaluationPipeline:
             except Exception as e:
                 self.logger.error(f"Error occured: {e}.")
 
-    def _scrap_text(self, url: str) -> str:
+    def _scrap_text(self, url: str, num_words: int) -> str:
+        self.logger.info(f"Web scraping '{url}'.")
         response = self.text_scrap_client.get(url=url, params={"render": True})
         soup = BeautifulSoup(response, "html.parser")
         article = soup.find("article")
         paragraphs = [p.get_text(strip=True) for p in article.find_all("p")]
         text_content = " ".join(paragraphs)
-        return " ".join(text_content.split()[: self.cfg.text.num_words])
+        self.logger.info("Web scrap successfull.")
+        return " ".join(text_content.split()[:num_words])
+
+    def _evaluate_text(self, num_words: int):
+        url, query = next(
+            (result_dict["url"], result_dict["paraphrase"])
+            for result_dict in self.result_dict["results"]
+            if result_dict["modality"] == "text"
+        )
+        text_content = self._scrap_text(url=url, num_words=num_words)
+        bert_score = self.text_metric([query], [text_content])
+        print(bert_score)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
-        text_url = next(
-            result_dict["url"]
-            for result_dict in self.result_dict["results"]
-            if result_dict["modality"] == "text"
-        )
-        text_content = self._scrap_text(url=text_url)
-        print(text_content)
+        self._evaluate_text(num_words=self.cfg.text.num_words)
