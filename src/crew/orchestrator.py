@@ -113,10 +113,18 @@ class Orchestrator:
             f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
         )
 
-        evaluation_dict = {
-            query: result.pydantic.url
-            for query, result in zip(paraphrase_queries.values(), tasks_output)
-        }
+        evaluation_dict = {"query": query}
+        results = [
+            {
+                "modality": mode,
+                "paraphrase": paraphrase_query,
+                "url": task_output.pydantic.url,
+            }
+            for mode, paraphrase_query, task_output in zip(
+                paraphrase_queries.keys(), paraphrase_queries.values(), tasks_output
+            )
+        ]
+        evaluation_dict["results"] = results
         output_file = os.path.join(self.outout_path, "evaluation_dict.json")
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(evaluation_dict, f, indent=4)
