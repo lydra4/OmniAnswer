@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Dict
+from typing import Dict, List
 
 import torch
 from bs4 import BeautifulSoup
@@ -21,22 +21,24 @@ class EvaluationPipeline:
         self.logger = logger
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.result_dict = self._load_results_dict(path=self.cfg.output_path)
-
-        if "text" in self.result_dict.keys():
+        modes: List[str] = [
+            result_dict["modality"] for result_dict in self.result_dict["results"]
+        ]
+        if "text" in modes:
             self.text_scrap_client: ScraperAPIClient = ScraperAPIClient(
                 api_key=os.getenv("SCRAPER_API_KEY")
             )
             self.text_metric: BERTScore = BERTScore(
-                model_name_or_path=self.cfg.text_model_name,
+                model_name_or_path=self.cfg.text.text_model_name,
                 device=self.device,
             )
 
-        if "image" in self.result_dict.keys():
+        if "image" in modes:
             self.image_metrics = CLIPScore(
-                model_name_or_path=self.cfg.image_model_name, device=self.device
+                model_name_or_path=self.cfg.image.image_model_name
             )
 
-        if "video" in self.result_dict.keys():
+        if "video" in modes:
             pass
 
     def _load_results_dict(self, path: str) -> Dict[str, str]:
@@ -59,3 +61,10 @@ class EvaluationPipeline:
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
+        text_url = next(
+            result_dict["url"]
+            for result_dict in self.result_dict["results"]
+            if result_dict["modality"] == "text"
+        )
+        text_content = self._scrap_text(url=text_url)
+        print(text_content)
