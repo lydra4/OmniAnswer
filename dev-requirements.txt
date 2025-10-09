@@ -11,4 +11,5 @@ pytest==8.4.2
 
 # Evaluation
 torchmetrics==1.8.2
+torchmetrics[text]
 scraperapi-sdk==1.5.4
