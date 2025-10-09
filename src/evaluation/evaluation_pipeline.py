@@ -4,7 +4,9 @@ import os
 from typing import Dict
 
 import torch
+from bs4 import BeautifulSoup
 from omegaconf import DictConfig
+from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 
@@ -21,7 +23,10 @@ class EvaluationPipeline:
         self.result_dict = self._load_results_dict(path=self.cfg.output_path)
 
         if "text" in self.result_dict.keys():
-            self.text_metric = BERTScore(
+            self.text_scrap_client: ScraperAPIClient = ScraperAPIClient(
+                api_key=os.getenv("SCRAPER_API_KEY")
+            )
+            self.text_metric: BERTScore = BERTScore(
                 model_name_or_path=self.cfg.text_model_name,
                 device=self.device,
             )
@@ -42,3 +47,15 @@ class EvaluationPipeline:
                     return json.load(f)
             except Exception as e:
                 self.logger.error(f"Error occured: {e}.")
+
+    def _scrap_text(self, url: str) -> str:
+        response = self.text_scrap_client.get(url=url, params={"render": True})
+        soup = BeautifulSoup(response, "html.parser")
+        article = soup.find("article")
+        paragraphs = [p.get_text(strip=True) for p in article.find_all("p")]
+        text_content = " ".join(paragraphs)
+        return " ".join(text_content.split()[: self.cfg.text.num_words])
+
+    def evaluate(self):
+        original_query = self.result_dict["query"]
+        self.logger.info(f"Evaluating query:'{original_query}'.")
