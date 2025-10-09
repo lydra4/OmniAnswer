@@ -2,6 +2,7 @@ import logging
 import os
 
 import hydra
+from dotenv import load_dotenv
 from omegaconf import DictConfig
 
 from evaluation.evaluation_pipeline import EvaluationPipeline
@@ -12,6 +13,7 @@ from utils.general_utils import setup_logging
     version_base=None, config_path="../config/evaluation", config_name="evaluation.yaml"
 )
 def main(cfg: DictConfig):
+    load_dotenv()
     logger = logging.getLogger(__name__)
     setup_logging(
         logging_config_path=os.path.join(
