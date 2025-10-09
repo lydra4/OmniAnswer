@@ -1,4 +1,8 @@
-text_model_name: "bert-base-uncased"
-image_model_name: "openai/clip-vit-base-patch32"
+text:
+  text_model_name: "bert-base-uncased"
+  num_words: 100
 
-output_path: ./data/08-10-25-0911/
+image:
+  image_model_name: "openai/clip-vit-base-patch32"
+
+output_path: ./data/09-10-25-0354/
