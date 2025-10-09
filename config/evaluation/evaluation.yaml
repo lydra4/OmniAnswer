@@ -5,4 +5,4 @@ text:
 image:
   image_model_name: "openai/clip-vit-base-patch32"
 
-output_path: ./data/09-10-25-0354/
+output_path: ./data/09-10-25-0440/
