@@ -1,13 +1,14 @@
 # Code Formatting and Linting
-black==25.1.0
-ruff==0.12.4
-pylint==3.3.7
+black==25.9.0
+ruff==0.14.0
+pylint==3.3.9
 
 # Pre-commit Hooks
-pre-commit==4.2.0
+pre-commit==4.3.0
 
 # Unit testing
-pytest==8.4.1
+pytest==8.4.2
 
 # Evaluation
-torchmetrics == 1.8.2
+torchmetrics==1.8.2
+scraperapi-sdk==1.5.4
