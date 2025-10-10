@@ -1,14 +1,18 @@
 import json
 import logging
 import os
+from io import BytesIO
 from typing import Dict, List
 
+import requests
 import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
+from PIL import Image
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
+from torchvision.transforms.functional import pil_to_tensor
 
 
 class EvaluationPipeline:
@@ -35,7 +39,7 @@ class EvaluationPipeline:
 
         if "image" in modes:
             self.image_metrics = CLIPScore(
-                model_name_or_path=self.cfg.image.image_model_name
+                model_name_or_path=self.cfg.image.image_model_name,
             )
 
         if "video" in modes:
@@ -60,7 +64,7 @@ class EvaluationPipeline:
         self.logger.info("Web scrap successfull.")
         return " ".join(text_content.split()[:num_words])
 
-    def _evaluate_text(self, num_words: int):
+    def _evaluate_text(self, num_words: int) -> None:
         url, query = next(
             (result_dict["url"], result_dict["paraphrase"])
             for result_dict in self.result_dict["results"]
@@ -71,7 +75,32 @@ class EvaluationPipeline:
         precision = bert_score["precision"]
         self.logger.info(f"The text score is {precision:.2f}.")
 
+    def _scrap_image(self, url: str) -> torch.Tensor:
+        self.logger.info(f"Web scraping '{url}'.")
+        try:
+            response = requests.get(url=url, timeout=10)
+            response.raise_for_status()
+            with BytesIO(response.content) as image_memory:
+                image = Image.open(image_memory).convert("RGB")
+            self.logger.info("Web scrap successfull.")
+            image_tensor = pil_to_tensor(pic=image)
+            return image_tensor.unsqueeze(0)
+        except Exception as e:
+            raise ValueError(f"Error occurred: {e}.") from e
+
+    def _evaluate_image(self) -> None:
+        url, query = next(
+            (result_dict["url"], result_dict["paraphrase"])
+            for result_dict in self.result_dict["results"]
+            if result_dict["modality"] == "image"
+        )
+        image_tensor = self._scrap_image(url=url)
+        raw_score = self.image_metrics(image_tensor, query)
+        score = raw_score.detach().item()
+        self.logger.info(f"The image score is {score:.2f}.")
+
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
         self._evaluate_text(num_words=self.cfg.text.num_words)
+        self._evaluate_image()
