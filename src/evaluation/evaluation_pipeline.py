@@ -68,7 +68,8 @@ class EvaluationPipeline:
         )
         text_content = self._scrap_text(url=url, num_words=num_words)
         bert_score = self.text_metric([query], [text_content])
-        print(bert_score)
+        precision = bert_score["precision"]
+        self.logger.info(f"The text score is {precision:.2f}.")
 
     def evaluate(self):
         original_query = self.result_dict["query"]
