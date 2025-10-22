@@ -48,11 +48,11 @@ class EvaluationPipeline:
 
         if "video" in modes:
             self.video_processor = XCLIPProcessor.from_pretrained(
-                self.cfg.video.video_model_name
-            )
+                pretrained_model_name_or_path=self.cfg.video.video_model_name,
+            ).to(self.device)
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
-            )
+            ).to(self.device)
 
     def _load_results_dict(self, path: str) -> Dict[str, str]:
         result_dict_path = os.path.join(path, "evaluation_dict.json")
