@@ -15,6 +15,7 @@ from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
+from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
 
 
@@ -46,7 +47,12 @@ class EvaluationPipeline:
             )
 
         if "video" in modes:
-            pass
+            self.video_processor = XCLIPProcessor.from_pretrained(
+                self.cfg.video.video_model_name
+            )
+            self.video_model = XCLIPModel.from_pretrained(
+                self.cfg.video.video_model_name
+            )
 
     def _load_results_dict(self, path: str) -> Dict[str, str]:
         result_dict_path = os.path.join(path, "evaluation_dict.json")
