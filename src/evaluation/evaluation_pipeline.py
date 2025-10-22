@@ -49,7 +49,7 @@ class EvaluationPipeline:
         if "video" in modes:
             self.video_processor = XCLIPProcessor.from_pretrained(
                 pretrained_model_name_or_path=self.cfg.video.video_model_name,
-            ).to(self.device)
+            )
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
             ).to(self.device)
