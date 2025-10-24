@@ -2,9 +2,10 @@ import json
 import logging
 import os
 from io import BytesIO
-from typing import Dict, List, TypedDict, Union
+from typing import List, Union
 
 import av
+import numpy as np
 import requests
 import torch
 from av.container.input import InputContainer
@@ -13,22 +14,12 @@ from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
 from pytubefix import YouTube
+from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
-
-
-class ResultItem(TypedDict):
-    modality: str
-    paraphrase: str
-    url: str
-
-
-class ResultDictFile(TypedDict):
-    query: str
-    results: List[ResultItem]
 
 
 class EvaluationPipeline:
@@ -63,7 +54,7 @@ class EvaluationPipeline:
 
         if "video" in modes:
             self.video_processor = XCLIPProcessor.from_pretrained(
-                pretrained_model_name_or_path=self.cfg.video.video_model_name,
+                pretrained_model_name_or_path=self.cfg.video.video_model_name
             )
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
@@ -128,7 +119,7 @@ class EvaluationPipeline:
         score = raw_score.detach().item()
         self.logger.info(f"The image score is {score:.2f}.")
 
-    def _scrap_video(self, url: str):
+    def _scrap_video(self, url: str, duration: int) -> Union[None, List[np.ndarray]]:
         yt = YouTube(url=url)
         stream = (
             yt.streams.filter(progressive=False, only_video=True, file_extension="mp4")
@@ -152,12 +143,23 @@ class EvaluationPipeline:
 
         frames = []
         for frame in container.decode(video=0):
-            if (
-                float(frame.pts or 0) * float(frame.time_base or 0)
-            ) > self.cfg.video.duration:
+            if (float(frame.pts or 0) * float(frame.time_base or 0)) > duration:
                 break
             img = frame.to_ndarray(format="rgb24")
             frames.append(img)
+        return frames
+
+    def _evaluate_video(self, duration: int):
+        url, query = next(
+            (result_dict["url"], result_dict["paraphrase"])
+            for result_dict in self.result_dict["results"]
+            if result_dict["modality"] == "video"
+        )
+        frames = self._scrap_video(url=url, duration=self.cfg.video.duration)
+        inputs = self.video_processor(
+            text=[query],
+            videos=frames,
+        )
 
     def evaluate(self):
         original_query = self.result_dict["query"]
