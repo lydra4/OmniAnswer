@@ -54,7 +54,8 @@ class EvaluationPipeline:
 
         if "video" in modes:
             self.video_processor = XCLIPProcessor.from_pretrained(
-                pretrained_model_name_or_path=self.cfg.video.video_model_name
+                pretrained_model_name_or_path=self.cfg.video.video_model_name,
+                use_fast=True,
             )
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
@@ -120,7 +121,7 @@ class EvaluationPipeline:
         self.logger.info(f"The image score is {score:.2f}.")
 
     def _scrap_video(self, url: str, duration: int) -> Union[None, List[np.ndarray]]:
-        yt = YouTube(url=url)
+        yt = YouTube(url=url, use_po_token=True)
         stream = (
             yt.streams.filter(progressive=False, only_video=True, file_extension="mp4")
             .order_by("resolution")
@@ -168,6 +169,7 @@ class EvaluationPipeline:
             similarity = torch.nn.functional.cosine_similarity(
                 video_embeds, text_embeds
             )
+            print(similarity)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
