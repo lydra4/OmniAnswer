@@ -2,11 +2,13 @@ import json
 import logging
 import os
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, TypedDict, Union
 
 import av
 import requests
 import torch
+from av.container.input import InputContainer
+from av.container.output import OutputContainer
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
@@ -18,6 +20,17 @@ from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 
 
+class ResultItem(TypedDict):
+    modality: str
+    paraphrase: str
+    url: str
+
+
+class ResultDictFile(TypedDict):
+    query: str
+    results: List[ResultItem]
+
+
 class EvaluationPipeline:
     def __init__(
         self,
@@ -26,15 +39,18 @@ class EvaluationPipeline:
     ) -> None:
         self.cfg = cfg
         self.logger = logger
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.result_dict = self._load_results_dict(path=self.cfg.output_path)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.result_dict: ResultDictFile = self._load_results_dict(
+            path=self.cfg.output_path
+        )
         modes: List[str] = [
             result_dict["modality"] for result_dict in self.result_dict["results"]
         ]
         if "text" in modes:
-            self.text_scrap_client: ScraperAPIClient = ScraperAPIClient(
-                api_key=os.getenv("SCRAPER_API_KEY")
-            )
+            api_key = os.getenv("SCRAPER_API_KEY")
+            if api_key is None:
+                raise ValueError("Scraper API Key must be set")
+            self.text_scrap_client: ScraperAPIClient = ScraperAPIClient(api_key=api_key)
             self.text_metric: BERTScore = BERTScore(
                 model_name_or_path=self.cfg.text.text_model_name,
                 device=self.device,
@@ -51,9 +67,9 @@ class EvaluationPipeline:
             )
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
-            ).to(self.device)
+            )
 
-    def _load_results_dict(self, path: str) -> Dict[str, str]:
+    def _load_results_dict(self, path: str) -> ResultDictFile:
         result_dict_path = os.path.join(path, "evaluation_dict.json")
         if os.path.exists(result_dict_path):
             try:
@@ -61,12 +77,17 @@ class EvaluationPipeline:
                     return json.load(f)
             except Exception as e:
                 self.logger.error(f"Error occured: {e}.")
+                raise
+        return {"query": "", "results": []}
 
     def _scrap_text(self, url: str, num_words: int) -> str:
         self.logger.info(f"Web scraping '{url}'.")
         response = self.text_scrap_client.get(url=url, params={"render": True})
         soup = BeautifulSoup(response, "html.parser")
         article = soup.find("article")
+        if article is None:
+            self.logger.warning(f"No article tag found at {url}, return empty text.")
+            return ""
         paragraphs = [p.get_text(strip=True) for p in article.find_all("p")]
         text_content = " ".join(paragraphs)
         self.logger.info("Web scrap successfull.")
@@ -108,8 +129,35 @@ class EvaluationPipeline:
         self.logger.info(f"The image score is {score:.2f}.")
 
     def _scrap_video(self, url: str):
-        yt = YouTube()
-        container = av.open()
+        yt = YouTube(url=url)
+        stream = (
+            yt.streams.filter(progressive=False, only_video=True, file_extension="mp4")
+            .order_by("resolution")
+            .desc()
+            .first()
+        )
+        if stream is None:
+            self.logger.warning(f"No match video stream found for URL:{url}.")
+            return
+        video_buffer = BytesIO()
+        stream.stream_to_buffer(video_buffer)
+        container: InputContainer | OutputContainer | None = None
+        try:
+            container = av.open(video_buffer, format="mp4")
+        except Exception as e:
+            self.logger.error(f"Failed to open video container for {url}: {e}.")
+
+        if container is None:
+            return
+
+        frames = []
+        for frame in container.decode(video=0):
+            if (
+                float(frame.pts or 0) * float(frame.time_base or 0)
+            ) > self.cfg.video.duration:
+                break
+            img = frame.to_ndarray(format="rgb24")
+            frames.append(img)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
