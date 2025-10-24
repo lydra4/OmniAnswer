@@ -2,12 +2,11 @@ import json
 import logging
 from typing import Dict, List, Optional
 
+from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
-
-from agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class ParaphraseAgent(BaseAgentTask):

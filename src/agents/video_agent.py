@@ -2,11 +2,10 @@ import json
 import logging
 from typing import Any, List, Optional
 
+from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
 from omegaconf import DictConfig
 from pydantic import BaseModel
-
-from agents.base_agent.base_agent_task import BaseAgentTask
 from tools.video_search import video_search
 
 

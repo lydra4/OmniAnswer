@@ -7,7 +7,6 @@ from typing import Dict
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
-
 from schemas.schemas import StringOutput
 from tools.image_search import ImageSearchTool
 from tools.video_search import VideoSearchTool

@@ -3,12 +3,11 @@ import logging
 import os
 from typing import Any, List, Optional
 
+from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
-
-from agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class TextAgent(BaseAgentTask):
