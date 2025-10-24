@@ -9,4 +9,4 @@ video:
   duration: 5
   video_model_name: "microsoft/xclip-base-patch32"
 
-output_path: ./data/09-10-25-0440/
+output_path: ./data/13-10-25-0027/
