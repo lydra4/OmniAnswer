@@ -1,15 +1,18 @@
-from typing import Dict, List
+from typing import List, TypedDict
 
 from pydantic import BaseModel
 
 
-class StringListOutput(BaseModel):
-    items: List[str]
-
-
-class DictOutput(BaseModel):
-    items: Dict[str, str]
-
-
 class StringOutput(BaseModel):
     url: str
+
+
+class ResultItem(TypedDict):
+    modality: str
+    paraphrase: str
+    url: str
+
+
+class ResultDictFile(TypedDict):
+    query: str
+    results: List[ResultItem]
