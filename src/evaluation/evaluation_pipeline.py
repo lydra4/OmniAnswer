@@ -160,9 +160,18 @@ class EvaluationPipeline:
             text=[query],
             videos=frames,
         )
+        with torch.no_grad():
+            outputs = self.video_model(**inputs)
+            video_embeds = outputs.video_embeds
+            text_embeds = outputs.text_embeds
+
+            similarity = torch.nn.functional.cosine_similarity(
+                video_embeds, text_embeds
+            )
 
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
         self._evaluate_text(num_words=self.cfg.text.num_words)
         self._evaluate_image()
+        self._evaluate_video(duration=self.cfg.video.duration)
