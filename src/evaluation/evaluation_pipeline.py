@@ -155,7 +155,7 @@ class EvaluationPipeline:
             for result_dict in self.result_dict["results"]
             if result_dict["modality"] == "video"
         )
-        frames = self._scrap_video(url=url, duration=self.cfg.video.duration)
+        frames = self._scrap_video(url=url, duration=duration)
         inputs = self.video_processor(
             text=[query],
             videos=frames,
