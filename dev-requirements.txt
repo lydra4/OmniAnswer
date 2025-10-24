@@ -14,4 +14,5 @@ torchmetrics==1.8.2
 torchmetrics[text]
 scraperapi-sdk==1.5.4
 torchvision==0.23.0
-yt-dlp==2025.9.26
+pytubefix==10.0.1
+av==16.0.1
