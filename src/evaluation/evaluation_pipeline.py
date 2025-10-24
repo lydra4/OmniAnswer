@@ -1,22 +1,21 @@
-import io
 import json
 import logging
 import os
-import subprocess
 from io import BytesIO
 from typing import Dict, List
 
+import av
 import requests
 import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
+from pytubefix import YouTube
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
-from yt_dlp import YoutubeDL
 
 
 class EvaluationPipeline:
@@ -109,33 +108,8 @@ class EvaluationPipeline:
         self.logger.info(f"The image score is {score:.2f}.")
 
     def _scrap_video(self, url: str):
-        yl_opts = {
-            "format": "bestvideo+bestaudio/best",
-            "quiet": True,
-            "outtmpl": "-",
-        }
-        with YoutubeDL(yl_opts) as ydl:
-            info = ydl.extract_info(url=url, download=False)
-
-        video_url = info["requested_formats"][0]["url"]
-        cmd = [
-            "ffmpeg",
-            "-ss",
-            "0",
-            "-t",
-            f"{self.cfg.video.duration}",
-            "-i",
-            video_url,
-        ]
-        result = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
-            check=True,
-        )
-        buf = io.BytesIO(result.stdout)
-        buf.seek(0)
-        return buf
+        yt = YouTube()
+        container = av.open()
 
     def evaluate(self):
         original_query = self.result_dict["query"]
