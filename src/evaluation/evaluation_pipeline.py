@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess
 from io import BytesIO
 from typing import List, Union
 
@@ -8,18 +9,16 @@ import av
 import numpy as np
 import requests
 import torch
-from av.container.input import InputContainer
-from av.container.output import OutputContainer
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
-from pytubefix import YouTube
 from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
+from yt_dlp import YoutubeDL
 
 
 class EvaluationPipeline:
@@ -121,30 +120,57 @@ class EvaluationPipeline:
         self.logger.info(f"The image score is {score:.2f}.")
 
     def _scrap_video(self, url: str, duration: int) -> Union[None, List[np.ndarray]]:
-        yt = YouTube(url=url, use_po_token=True)
-        stream = (
-            yt.streams.filter(progressive=False, only_video=True, file_extension="mp4")
-            .order_by("resolution")
-            .desc()
-            .first()
-        )
-        if stream is None:
-            self.logger.warning(f"No match video stream found for URL:{url}.")
-            return
-        video_buffer = BytesIO()
-        stream.stream_to_buffer(video_buffer)
-        container: InputContainer | OutputContainer | None = None
-        try:
-            container = av.open(video_buffer, format="mp4")
-        except Exception as e:
-            self.logger.error(f"Failed to open video container for {url}: {e}.")
+        ydl_opts = {
+            "noplaylist": True,
+            "quiet": True,
+            "cookiefile": "./data/cookies/all_cookies.txt",
+        }
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url=url, download=False)
+        formats = info.get("formats", [])
+        video_formats = [
+            f for f in formats if f.get("vcodec") and f["vcodec"] != "none"
+        ]
+        if not video_formats:
+            raise RuntimeError("No video formats found")
 
-        if container is None:
-            return
+        best = max(video_formats, key=lambda f: f.get("height") or 0)
+        stream_url = best["url"]
 
+        cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-i",
+            stream_url,
+            "-t",
+            str(duration),
+            "-vf",
+            "-c:v",
+            "libx264",
+            "-preset",
+            "veryfast",
+            "-f",
+            "mp4",
+            "pipe:1",
+        ]
+
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout_data, stderr_data = proc.communicate(timeout=60 + duration)
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"ffmpeg failed: {stderr_data.decode('utf8', errors='ignore')}"
+            )
+
+        video_buffer = BytesIO(stdout_data)
+
+        # 3) open with av and get frames (same pattern as your current code)
+        container = av.open(video_buffer, format="mp4")
         frames = []
         for frame in container.decode(video=0):
-            if (float(frame.pts or 0) * float(frame.time_base or 0)) > duration:
+            pts_seconds = float(frame.pts or 0) * float(frame.time_base or 0)
+            if pts_seconds > duration:
                 break
             img = frame.to_ndarray(format="rgb24")
             frames.append(img)
@@ -169,7 +195,7 @@ class EvaluationPipeline:
             similarity = torch.nn.functional.cosine_similarity(
                 video_embeds, text_embeds
             )
-            print(similarity)
+        print(similarity)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
