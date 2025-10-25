@@ -14,7 +14,6 @@
 # Except their sub-folders (structure, but not files inside)
 !**/logs/**/
 !**/models/**/
-!**/data/**/
 
 # Allow .txt files inside any data folder
 !**/data/**/*.txt
