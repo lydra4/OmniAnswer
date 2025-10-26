@@ -12,13 +12,14 @@ import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
-from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
+
+from schemas.schemas import ResultDictFile
 
 
 class EvaluationPipeline:
@@ -72,7 +73,7 @@ class EvaluationPipeline:
         return {"query": "", "results": []}
 
     def _scrap_text(self, url: str, num_words: int) -> str:
-        self.logger.info(f"Web scraping '{url}'.")
+        self.logger.info(f"Web scraping url:'{url}'.")
         response = self.text_scrap_client.get(url=url, params={"render": True})
         soup = BeautifulSoup(response, "html.parser")
         article = soup.find("article")
@@ -124,6 +125,22 @@ class EvaluationPipeline:
             "noplaylist": True,
             "quiet": True,
             "cookiefile": "./data/cookies/all_cookies.txt",
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["web"],
+                    "player_skip": ["web_safari"],
+                }
+            },
+            "format": "bestvideo[ext=mp4][height<=720]+bestaudio/best",
+            "merge_output_format": "mp4",
+            "retries": 3,
+            "headers": {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/123.0.0.0 Safari/537.36"
+                ),
+            },
         }
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url=url, download=False)
