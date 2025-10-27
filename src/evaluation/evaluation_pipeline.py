@@ -6,7 +6,6 @@ from io import BytesIO
 from typing import List
 
 import av
-import numpy as np
 import requests
 import torch
 from bs4 import BeautifulSoup
@@ -149,7 +148,7 @@ class EvaluationPipeline:
         best = max(video_formats, key=lambda f: f.get("height") or 0)
         return best["url"]
 
-    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[np.ndarray]:
+    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -185,7 +184,7 @@ class EvaluationPipeline:
                 break
             img = frame.to_ndarray(format="rgb24")
             frames.append(img)
-        return frames
+        return [Image.fromarray(f.astype("uint8"), mode="RGB") for f in frames]
 
     def _evaluate_video(self, duration: int):
         url, query = next(
@@ -197,7 +196,8 @@ class EvaluationPipeline:
         frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         inputs = self.video_processor(
             text=[query],
-            videos=frames,
+            images=frames,
+            return_tensors="pt",
         )
         with torch.no_grad():
             outputs = self.video_model(**inputs)
@@ -212,6 +212,6 @@ class EvaluationPipeline:
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
-        self._evaluate_text(num_words=self.cfg.text.num_words)
-        self._evaluate_image()
+        # self._evaluate_text(num_words=self.cfg.text.num_words)
+        # self._evaluate_image()
         self._evaluate_video(duration=self.cfg.video.duration)
