@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from io import BytesIO
-from typing import List, Union
+from typing import List
 
 import av
 import numpy as np
@@ -12,14 +12,13 @@ import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
+from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
-
-from schemas.schemas import ResultDictFile
 
 
 class EvaluationPipeline:
@@ -120,20 +119,16 @@ class EvaluationPipeline:
         score = raw_score.detach().item()
         self.logger.info(f"The image score is {score:.2f}.")
 
-    def _scrap_video(self, url: str, duration: int) -> Union[None, List[np.ndarray]]:
+    def _get_stream_url(self, url: str) -> str:
         ydl_opts = {
             "noplaylist": True,
             "quiet": True,
             "cookiefile": "./data/cookies/all_cookies.txt",
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["web"],
-                    "player_skip": ["web_safari"],
-                }
-            },
-            "format": "bestvideo[ext=mp4][height<=720]+bestaudio/best",
-            "merge_output_format": "mp4",
+            "format": "bestvideo[height<=720]/bestvideo/best",
             "retries": 3,
+            "forceipv4": True,
+            "geo_bypass": True,
+            "nocheckcertificate": True,
             "headers": {
                 "User-Agent": (
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -144,7 +139,7 @@ class EvaluationPipeline:
         }
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url=url, download=False)
-        formats = info.get("formats", [])
+        formats = info["formats"]
         video_formats = [
             f for f in formats if f.get("vcodec") and f["vcodec"] != "none"
         ]
@@ -152,8 +147,9 @@ class EvaluationPipeline:
             raise RuntimeError("No video formats found")
 
         best = max(video_formats, key=lambda f: f.get("height") or 0)
-        stream_url = best["url"]
+        return best["url"]
 
+    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[np.ndarray]:
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -163,13 +159,12 @@ class EvaluationPipeline:
             stream_url,
             "-t",
             str(duration),
-            "-vf",
             "-c:v",
             "libx264",
             "-preset",
             "veryfast",
             "-f",
-            "mp4",
+            "mpegts",
             "pipe:1",
         ]
 
@@ -182,8 +177,7 @@ class EvaluationPipeline:
 
         video_buffer = BytesIO(stdout_data)
 
-        # 3) open with av and get frames (same pattern as your current code)
-        container = av.open(video_buffer, format="mp4")
+        container = av.open(video_buffer, format="mpegts")
         frames = []
         for frame in container.decode(video=0):
             pts_seconds = float(frame.pts or 0) * float(frame.time_base or 0)
@@ -199,7 +193,8 @@ class EvaluationPipeline:
             for result_dict in self.result_dict["results"]
             if result_dict["modality"] == "video"
         )
-        frames = self._scrap_video(url=url, duration=duration)
+        stream_url = self._get_stream_url(url=url)
+        frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         inputs = self.video_processor(
             text=[query],
             videos=frames,
