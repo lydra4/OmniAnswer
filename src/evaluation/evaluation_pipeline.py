@@ -6,6 +6,7 @@ from io import BytesIO
 from typing import List
 
 import av
+import numpy as np
 import requests
 import torch
 from bs4 import BeautifulSoup
@@ -148,7 +149,7 @@ class EvaluationPipeline:
         best = max(video_formats, key=lambda f: f.get("height") or 0)
         return best["url"]
 
-    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
+    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[np.ndarray]:
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -184,7 +185,7 @@ class EvaluationPipeline:
                 break
             img = frame.to_ndarray(format="rgb24")
             frames.append(img)
-        return [Image.fromarray(f.astype("uint8"), mode="RGB") for f in frames]
+        return frames
 
     def _evaluate_video(self, duration: int):
         url, query = next(
@@ -196,18 +197,15 @@ class EvaluationPipeline:
         frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         inputs = self.video_processor(
             text=[query],
-            images=frames,
+            images=[frames],
             return_tensors="pt",
+            padding=True,
         )
+        print(inputs)
         with torch.no_grad():
             outputs = self.video_model(**inputs)
-            video_embeds = outputs.video_embeds
-            text_embeds = outputs.text_embeds
 
-            similarity = torch.nn.functional.cosine_similarity(
-                video_embeds, text_embeds
-            )
-        print(similarity)
+        print(outputs)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
