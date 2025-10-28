@@ -197,7 +197,7 @@ class EvaluationPipeline:
         frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         inputs = self.video_processor(
             text=[query],
-            images=[frames],
+            videos=[frames],
             return_tensors="pt",
             padding=True,
         )
