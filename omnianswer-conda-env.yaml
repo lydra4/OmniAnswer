@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python=3.11.12
   - pip=24.3
-  - conda-forge::mamba
+  - ffmpeg
   - pip:
       - -r requirements.txt
       - -r dev-requirements.txt
