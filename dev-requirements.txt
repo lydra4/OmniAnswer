@@ -16,5 +16,4 @@ scraperapi-sdk==1.5.4
 torchvision==0.23.0
 
 yt-dlp @ git+https://github.com/yt-dlp/yt-dlp.git
-imageio-ffmpeg==0.6.0
 av==16.0.1
