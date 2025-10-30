@@ -197,15 +197,13 @@ class EvaluationPipeline:
         frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         inputs = self.video_processor(
             text=[query],
-            videos=[frames],
+            videos=frames,
             return_tensors="pt",
             padding=True,
         )
         print(inputs)
         with torch.no_grad():
             outputs = self.video_model(**inputs)
-
-        print(outputs)
 
     def evaluate(self):
         original_query = self.result_dict["query"]
