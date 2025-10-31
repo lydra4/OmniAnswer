@@ -59,6 +59,9 @@ class EvaluationPipeline:
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
             )
+            self.clip_length = getattr(
+                self.video_model.config.vision_config, "num_frames", None
+            )
 
     def _load_results_dict(self, path: str) -> ResultDictFile:
         result_dict_path = os.path.join(path, "evaluation_dict.json")
@@ -127,7 +130,6 @@ class EvaluationPipeline:
             "format": "bestvideo[height<=720]/bestvideo/best",
             "retries": 3,
             "forceipv4": True,
-            "geo_bypass": True,
             "nocheckcertificate": True,
             "headers": {
                 "User-Agent": (
@@ -149,7 +151,26 @@ class EvaluationPipeline:
         best = max(video_formats, key=lambda f: f.get("height") or 0)
         return best["url"]
 
-    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[np.ndarray]:
+    def _sample_frame_indices(self, clip_length: int, segment_length: int):
+        indices = np.linspace(start=0, stop=(segment_length - 1), num=clip_length)
+        indices = indices.astype(np.int64)
+        return indices
+
+    def _read_video_pyav(
+        self, container: av.container.input.InputContainer, indices: np.ndarray
+    ) -> np.ndarray:
+        frames = []
+        container.seek(0)
+        start_index = indices[0]
+        end_index = indices[-1]
+        for i, frame in enumerate(container.decode(video=0)):
+            if i > end_index:
+                break
+            if i >= start_index and i in indices:
+                frames.append(frame)
+        return np.stack([x.to_ndarray(format="rgb24") for x in frames])
+
+    def _load_video_to_ram(self, stream_url: str, duration: int) -> np.ndarray:
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -176,15 +197,17 @@ class EvaluationPipeline:
             )
 
         video_buffer = BytesIO(stdout_data)
-
         container = av.open(video_buffer, format="mpegts")
-        frames = []
-        for frame in container.decode(video=0):
-            pts_seconds = float(frame.pts or 0) * float(frame.time_base or 0)
-            if pts_seconds > duration:
-                break
-            img = frame.to_ndarray(format="rgb24")
-            frames.append(img)
+        segment_length = container.streams.video[0].frames
+        if self.clip_length is None:
+            raise ValueError("Video Model must specify 'num_frames' in config.")
+        if not segment_length or segment_length <= 0:
+            segment_length = self.clip_length
+        indices = self._sample_frame_indices(
+            clip_length=self.clip_length, segment_length=segment_length
+        )
+        frames = self._read_video_pyav(container=container, indices=indices)
+
         return frames
 
     def _evaluate_video(self, duration: int):
