@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from io import BytesIO
-from typing import List
+from typing import List, Tuple
 
 import av
 import numpy as np
@@ -187,33 +187,30 @@ class EvaluationPipeline:
             frames.append(img)
         return frames
 
-    def _sample_frame_indices(self, clip_length: int, segment_length: int):
-        indices = np.linspace(start=0, stop=(segment_length - 1), num=clip_length)
-        return indices.astype(np.int64)
+    def _sample_frame_indices(
+        self,
+        video: List[Image.Image],
+        clip_length: int,
+        segment_length: int,
+    ) -> List[Image.Image]:
+        indices = np.linspace(
+            start=0, stop=(segment_length - 1), num=clip_length
+        ).astype(np.int64)
+        index_frames = [video[i] for i in indices]
+        return index_frames
 
-    def _evaluate_video(self, duration: int):
-        url, query = next(
-            (result_dict["url"], result_dict["paraphrase"])
-            for result_dict in self.result_dict["results"]
-            if result_dict["modality"] == "video"
-        )
-        stream_url = self._get_stream_url(url=url)
-        frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
-        indices = self._sample_frame_indices(
-            clip_length=self.clip_length, segment_length=len(frames)
-        )
-        index_frames = [frames[i] for i in indices]
-
-        processed_video = self.video_processor.video_processor.preprocess(
-            index_frames, return_tensors="pt"
+    def _preprocess_video_text(
+        self, video: List[Image.Image], query: str
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        procesed_video = self.video_processor.video_processor.preprocess(
+            video, return_tensors="pt"
         )
         processed_text = self.video_processor.tokenizer(
             [query], return_tensors="pt", padding=True
         )
 
-        # Merge into a single inputs dict expected by XCLIPModel
         inputs = {
-            "pixel_values": processed_video["pixel_values"],
+            "pixel_values": procesed_video["pixel_values"],
             "input_ids": processed_text["input_ids"],
             "attention_mask": processed_text["attention_mask"],
         }
@@ -222,8 +219,25 @@ class EvaluationPipeline:
 
         text_embeds = outputs["text_embeds"].squeeze(1)
         video_embeds = outputs["video_embeds"]
+        return text_embeds, video_embeds
 
-        # normalize and compute cosine similarity per batch
+    def _evaluate_video(self, duration: int):
+        url, query = next(
+            (result_dict["url"], result_dict["paraphrase"])
+            for result_dict in self.result_dict["results"]
+            if result_dict["modality"] == "video"
+        )
+        stream_url = self._get_stream_url(url=url)
+        video = self._load_video_to_ram(stream_url=stream_url, duration=duration)
+        index_frames = self._sample_frame_indices(
+            video=video,
+            clip_length=self.clip_length,
+            segment_length=len(video),
+        )
+        text_embeds, video_embeds = self._preprocess_video_text(
+            video=index_frames, query=query
+        )
+
         text_embeds_norm = torch.nn.functional.normalize(text_embeds, p=2, dim=-1)
         video_embeds_norm = torch.nn.functional.normalize(video_embeds, p=2, dim=-1)
         sim = torch.nn.functional.cosine_similarity(
