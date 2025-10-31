@@ -12,14 +12,13 @@ import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
+from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
-
-from schemas.schemas import ResultDictFile
 
 
 class EvaluationPipeline:
@@ -244,9 +243,7 @@ class EvaluationPipeline:
             text_embeds_norm, video_embeds_norm, dim=-1
         ).item()
 
-        print(sim)
-
-        return sim
+        self.logger.info(f"The video score is {sim:.2f}.")
 
     def evaluate(self):
         original_query = self.result_dict["query"]
