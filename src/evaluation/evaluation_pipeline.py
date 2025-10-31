@@ -12,13 +12,14 @@ import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
-from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
 from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
+
+from schemas.schemas import ResultDictFile
 
 
 class EvaluationPipeline:
@@ -29,7 +30,6 @@ class EvaluationPipeline:
     ) -> None:
         self.cfg = cfg
         self.logger = logger
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.result_dict: ResultDictFile = self._load_results_dict(
             path=self.cfg.output_path
         )
@@ -42,8 +42,7 @@ class EvaluationPipeline:
                 raise ValueError("Scraper API Key must be set")
             self.text_scrap_client: ScraperAPIClient = ScraperAPIClient(api_key=api_key)
             self.text_metric: BERTScore = BERTScore(
-                model_name_or_path=self.cfg.text.text_model_name,
-                device=self.device,
+                model_name_or_path=self.cfg.text.text_model_name
             )
 
         if "image" in modes:
@@ -151,26 +150,7 @@ class EvaluationPipeline:
         best = max(video_formats, key=lambda f: f.get("height") or 0)
         return best["url"]
 
-    def _sample_frame_indices(self, clip_length: int, segment_length: int):
-        indices = np.linspace(start=0, stop=(segment_length - 1), num=clip_length)
-        indices = indices.astype(np.int64)
-        return indices
-
-    def _read_video_pyav(
-        self, container: av.container.input.InputContainer, indices: np.ndarray
-    ) -> np.ndarray:
-        frames = []
-        container.seek(0)
-        start_index = indices[0]
-        end_index = indices[-1]
-        for i, frame in enumerate(container.decode(video=0)):
-            if i > end_index:
-                break
-            if i >= start_index and i in indices:
-                frames.append(frame)
-        return np.stack([x.to_ndarray(format="rgb24") for x in frames])
-
-    def _load_video_to_ram(self, stream_url: str, duration: int) -> np.ndarray:
+    def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -198,17 +178,18 @@ class EvaluationPipeline:
 
         video_buffer = BytesIO(stdout_data)
         container = av.open(video_buffer, format="mpegts")
-        segment_length = container.streams.video[0].frames
-        if self.clip_length is None:
-            raise ValueError("Video Model must specify 'num_frames' in config.")
-        if not segment_length or segment_length <= 0:
-            segment_length = self.clip_length
-        indices = self._sample_frame_indices(
-            clip_length=self.clip_length, segment_length=segment_length
-        )
-        frames = self._read_video_pyav(container=container, indices=indices)
-
+        frames = []
+        for frame in container.decode(video=0):
+            pts_seconds = float(frame.pts or 0) * float(frame.time_base or 0)
+            if pts_seconds > duration:
+                break
+            img = Image.fromarray(frame.to_ndarray(format="rgb24"))
+            frames.append(img)
         return frames
+
+    def _sample_frame_indices(self, clip_length: int, segment_length: int):
+        indices = np.linspace(start=0, stop=(segment_length - 1), num=clip_length)
+        return indices.astype(np.int64)
 
     def _evaluate_video(self, duration: int):
         url, query = next(
@@ -218,15 +199,40 @@ class EvaluationPipeline:
         )
         stream_url = self._get_stream_url(url=url)
         frames = self._load_video_to_ram(stream_url=stream_url, duration=duration)
-        inputs = self.video_processor(
-            text=[query],
-            videos=frames,
-            return_tensors="pt",
-            padding=True,
+        indices = self._sample_frame_indices(
+            clip_length=self.clip_length, segment_length=len(frames)
         )
-        print(inputs)
+        index_frames = [frames[i] for i in indices]
+
+        processed_video = self.video_processor.video_processor.preprocess(
+            index_frames, return_tensors="pt"
+        )
+        processed_text = self.video_processor.tokenizer(
+            [query], return_tensors="pt", padding=True
+        )
+
+        # Merge into a single inputs dict expected by XCLIPModel
+        inputs = {
+            "pixel_values": processed_video["pixel_values"],
+            "input_ids": processed_text["input_ids"],
+            "attention_mask": processed_text["attention_mask"],
+        }
         with torch.no_grad():
             outputs = self.video_model(**inputs)
+
+        text_embeds = outputs["text_embeds"].squeeze(1)
+        video_embeds = outputs["video_embeds"]
+
+        # normalize and compute cosine similarity per batch
+        text_embeds_norm = torch.nn.functional.normalize(text_embeds, p=2, dim=-1)
+        video_embeds_norm = torch.nn.functional.normalize(video_embeds, p=2, dim=-1)
+        sim = torch.nn.functional.cosine_similarity(
+            text_embeds_norm, video_embeds_norm, dim=-1
+        ).item()
+
+        print(sim)
+
+        return sim
 
     def evaluate(self):
         original_query = self.result_dict["query"]
