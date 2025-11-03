@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 from agents.modality_agent import ModalityAgent
 from agents.paraphrase_agent import ParaphraseAgent
 from crew.orchestrator import Orchestrator
+from evaluation.evaluation_pipeline import EvaluationPipeline
 from moderation.content_moderator import ContentModeratior
 from schemas.schemas import DictOutput, StringListOutput
 from utils.general_utils import load_llm, setup_logging
@@ -47,7 +48,12 @@ def main(cfg: DictConfig):
     paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
 
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
-    orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
+    result_dict = orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
+    if cfg.evaluation:
+        evaluation_pipeline = EvaluationPipeline(
+            cfg=cfg, logger=logger, result_dict=result_dict
+        )
+        evaluation_pipeline.evaluate()
 
 
 if __name__ == "__main__":
