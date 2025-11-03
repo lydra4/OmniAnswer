@@ -1,13 +1,12 @@
-import json
 import logging
 import os
-from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
-from schemas.schemas import StringOutput
+
+from schemas.schemas import ResultDictFile, ResultItem, StringOutput
 from tools.image_search import ImageSearchTool
 from tools.video_search import VideoSearchTool
 
@@ -30,13 +29,6 @@ class Orchestrator:
         )
         self.image_search = ImageSearchTool(cfg=self.cfg.image_agent)
         self.video_search = VideoSearchTool(cfg=self.cfg.video_agent)
-        self.outout_path = os.path.join(
-            self.cfg.output_path, datetime.now().strftime("%d-%m-%y-%H%M")
-        )
-        os.makedirs(
-            self.outout_path,
-            exist_ok=True,
-        )
 
     def text_agent(self) -> Agent:
         return Agent(
@@ -94,16 +86,16 @@ class Orchestrator:
         self,
         query: str,
         paraphrase_queries: Dict[str, str],
-    ) -> None:
+    ) -> ResultDictFile:
         research_crew = self.crew()
-        results = research_crew.kickoff(
+        crew_results = research_crew.kickoff(
             inputs={
                 "text_query": paraphrase_queries.get("text", ""),
                 "image_query": paraphrase_queries.get("image", ""),
                 "video_query": paraphrase_queries.get("video", ""),
             }
         )
-        tasks_output = results.tasks_output
+        tasks_output = crew_results.tasks_output
         results_dict = {
             mode: result.pydantic.url
             for mode, result in zip(paraphrase_queries.keys(), tasks_output)
@@ -112,18 +104,15 @@ class Orchestrator:
             f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
         )
 
-        evaluation_dict = {"query": query}
-        results = [
+        results: List[ResultItem] = [
             {
                 "modality": mode,
                 "paraphrase": paraphrase_query,
-                "url": task_output.pydantic.url,
+                "url": str(task_output.pydantic.url),
             }
             for mode, paraphrase_query, task_output in zip(
                 paraphrase_queries.keys(), paraphrase_queries.values(), tasks_output
             )
         ]
-        evaluation_dict["results"] = results
-        output_file = os.path.join(self.outout_path, "evaluation_dict.json")
-        with open(output_file, "w", encoding="utf-8") as f:
-            json.dump(evaluation_dict, f, indent=4)
+        result_dict: ResultDictFile = {"query": query, "results": results}
+        return result_dict
