@@ -10,3 +10,4 @@ model: gemini-2.5-pro
 temperature: 1.0
 moderation_model: omni-moderation-latest
 output_path: ./data/
+evaluation: True
