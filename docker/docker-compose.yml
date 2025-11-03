@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  omnianswer:
+    build:
+      context: ..                             
+      dockerfile: docker/omnianswer.Dockerfile
+    env_file:
+      - ../src/.env
+    working_dir: /home/omnianswer
+    command: ["python", "src/pipeline.py"]
+    environment:
+      PYTHONUNBUFFERED: "1"
