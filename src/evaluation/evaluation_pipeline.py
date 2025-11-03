@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from io import BytesIO
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Union, Optional,
 
 import av
 import numpy as np
@@ -12,7 +12,6 @@ import torch
 from bs4 import BeautifulSoup
 from omegaconf import DictConfig
 from PIL import Image
-from schemas.schemas import ResultDictFile
 from scraperapi_sdk import ScraperAPIClient
 from torchmetrics.multimodal.clip_score import CLIPScore
 from torchmetrics.text.bert import BERTScore
@@ -20,18 +19,19 @@ from torchvision.transforms.functional import pil_to_tensor
 from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
 
+from schemas.schemas import ResultDictFile
+
 
 class EvaluationPipeline:
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
+        result_dict: ResultDictFile
     ) -> None:
         self.cfg = cfg
         self.logger = logger
-        self.result_dict: ResultDictFile = self._load_results_dict(
-            path=self.cfg.output_path
-        )
+        self.result_dict = result_dict
         modes: List[str] = [
             result_dict["modality"] for result_dict in self.result_dict["results"]
         ]
@@ -85,7 +85,7 @@ class EvaluationPipeline:
         self.logger.info("Web scrap successfull.")
         return " ".join(text_content.split()[:num_words])
 
-    def _evaluate_text(self, num_words: int) -> None:
+    def _evaluate_text(self, num_words: int) -> float:
         url, query = next(
             (result_dict["url"], result_dict["paraphrase"])
             for result_dict in self.result_dict["results"]
@@ -95,6 +95,7 @@ class EvaluationPipeline:
         bert_score = self.text_metric([query], [text_content])
         precision = bert_score["precision"]
         self.logger.info(f"The text score is {precision:.2f}.")
+        return precision
 
     def _scrap_image(self, url: str) -> torch.Tensor:
         self.logger.info(f"Web scraping '{url}'.")
@@ -109,7 +110,7 @@ class EvaluationPipeline:
         except Exception as e:
             raise ValueError(f"Error occurred: {e}.") from e
 
-    def _evaluate_image(self) -> None:
+    def _evaluate_image(self) -> float:
         url, query = next(
             (result_dict["url"], result_dict["paraphrase"])
             for result_dict in self.result_dict["results"]
@@ -119,6 +120,7 @@ class EvaluationPipeline:
         raw_score = self.image_metrics(image_tensor, query)
         score = raw_score.detach().item()
         self.logger.info(f"The image score is {score:.2f}.")
+        return score
 
     def _get_stream_url(self, url: str) -> str:
         ydl_opts = {
@@ -220,7 +222,7 @@ class EvaluationPipeline:
         video_embeds = outputs["video_embeds"]
         return text_embeds, video_embeds
 
-    def _evaluate_video(self, duration: int):
+    def _evaluate_video(self, duration: int) -> float:
         url, query = next(
             (result_dict["url"], result_dict["paraphrase"])
             for result_dict in self.result_dict["results"]
@@ -244,10 +246,11 @@ class EvaluationPipeline:
         ).item()
 
         self.logger.info(f"The video score is {sim:.2f}.")
+        return sim
 
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
-        # self._evaluate_text(num_words=self.cfg.text.num_words)
-        # self._evaluate_image()
+        self._evaluate_text(num_words=self.cfg.text.num_words)
+        self._evaluate_image()
         self._evaluate_video(duration=self.cfg.video.duration)
