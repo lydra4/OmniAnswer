@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import Dict, List, TypedDict
 
 from pydantic import BaseModel
 
@@ -16,3 +16,11 @@ class ResultItem(TypedDict):
 class ResultDictFile(TypedDict):
     query: str
     results: List[ResultItem]
+
+
+class DictOutput(BaseModel):
+    items: Dict[str, str]
+
+
+class StringListOutput(BaseModel):
+    items: List[str]
