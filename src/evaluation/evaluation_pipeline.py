@@ -3,7 +3,7 @@ import logging
 import os
 import subprocess
 from io import BytesIO
-from typing import List, Tuple, Dict, Union, Optional,
+from typing import List, Tuple
 
 import av
 import numpy as np
@@ -27,7 +27,7 @@ class EvaluationPipeline:
         self,
         cfg: DictConfig,
         logger: logging.Logger,
-        result_dict: ResultDictFile
+        result_dict: ResultDictFile,
     ) -> None:
         self.cfg = cfg
         self.logger = logger
