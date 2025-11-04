@@ -5,9 +5,10 @@ defaults:
   - agent/paraphrase_agent@paraphrase_agent
   - agent/text_agent@text_agent
   - agent/video_agent@video_agent
+  - evaluation/evaluation@evaluation
 
 model: gemini-2.5-pro
 temperature: 1.0
 moderation_model: omni-moderation-latest
 output_path: ./data/
-evaluation: True
+evaluate: True
