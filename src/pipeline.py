@@ -49,9 +49,9 @@ def main(cfg: DictConfig):
 
     orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
     result_dict = orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
-    if cfg.evaluation:
+    if cfg.evaluate:
         evaluation_pipeline = EvaluationPipeline(
-            cfg=cfg, logger=logger, result_dict=result_dict
+            cfg=cfg.evaluation, logger=logger, result_dict=result_dict
         )
         evaluation_pipeline.evaluate()
 
