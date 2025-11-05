@@ -17,3 +17,4 @@ torchvision==0.23.0
 
 yt-dlp @ git+https://github.com/yt-dlp/yt-dlp.git
 av==16.0.1
+mlflow==3.5.1
