@@ -51,7 +51,11 @@ def main(cfg: DictConfig):
     result_dict = orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
     if cfg.evaluate:
         evaluation_pipeline = EvaluationPipeline(
-            cfg=cfg.evaluation, logger=logger, result_dict=result_dict
+            cfg=cfg,
+            logger=logger,
+            result_dict=result_dict,
+            llm_name=cfg.model,
+            temperature=cfg.temperature,
         )
         evaluation_pipeline.evaluate()
 
