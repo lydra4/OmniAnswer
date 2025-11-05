@@ -1,3 +1,5 @@
+mlflow_directory: ./mlflow/
+
 text:
   text_model_name: "bert-base-uncased"
   num_words: 100
