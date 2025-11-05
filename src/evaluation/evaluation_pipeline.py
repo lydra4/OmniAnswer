@@ -2,10 +2,13 @@ import json
 import logging
 import os
 import subprocess
+from datetime import datetime
 from io import BytesIO
-from typing import List, Tuple
+from typing import List, Optional, Tuple
+from zoneinfo import ZoneInfo
 
 import av
+import mlflow
 import numpy as np
 import requests
 import torch
@@ -28,10 +31,15 @@ class EvaluationPipeline:
         cfg: DictConfig,
         logger: logging.Logger,
         result_dict: ResultDictFile,
+        llm_name: str,
+        temperature: int | float,
     ) -> None:
-        self.cfg = cfg
+        self.cfg = cfg.evaluation
         self.logger = logger
         self.result_dict = result_dict
+        self.llm_name = llm_name
+        self.temperature = temperature
+        self.mlflow_directory: str = self.cfg.mlflow_directory
         modes: List[str] = [
             result_dict["modality"] for result_dict in self.result_dict["results"]
         ]
@@ -90,12 +98,17 @@ class EvaluationPipeline:
         self.logger.info("Web scrap successful.")
         return clean_text
 
-    def _evaluate_text(self, num_words: int) -> float:
+    def _evaluate_text(self, num_words: int) -> Optional[float]:
         url, query = next(
-            (result_dict["url"], result_dict["paraphrase"])
-            for result_dict in self.result_dict["results"]
-            if result_dict["modality"] == "text"
+            (
+                (result_dict["url"], result_dict["paraphrase"])
+                for result_dict in self.result_dict["results"]
+                if result_dict["modality"] == "text"
+            ),
+            (None, None),
         )
+        if url is None:
+            return None
         text_content = self._scrap_text(url=url, num_words=num_words)
         bert_score = self.text_metric([query], [text_content])
         precision = bert_score["precision"]
@@ -103,7 +116,7 @@ class EvaluationPipeline:
         return precision
 
     def _scrap_image(self, url: str) -> torch.Tensor:
-        self.logger.info(f"Web scraping '{url}'.")
+        self.logger.info(f"Image scraping '{url}'.")
         try:
             response = requests.get(url=url, timeout=10)
             response.raise_for_status()
@@ -115,12 +128,17 @@ class EvaluationPipeline:
         except Exception as e:
             raise ValueError(f"Error occurred: {e}.") from e
 
-    def _evaluate_image(self) -> float:
+    def _evaluate_image(self) -> Optional[float]:
         url, query = next(
-            (result_dict["url"], result_dict["paraphrase"])
-            for result_dict in self.result_dict["results"]
-            if result_dict["modality"] == "image"
+            (
+                (result_dict["url"], result_dict["paraphrase"])
+                for result_dict in self.result_dict["results"]
+                if result_dict["modality"] == "image"
+            ),
+            (None, None),
         )
+        if url is None:
+            return None
         image_tensor = self._scrap_image(url=url)
         raw_score = self.image_metrics(image_tensor, query)
         score = raw_score.detach().item()
@@ -227,12 +245,17 @@ class EvaluationPipeline:
         video_embeds = outputs["video_embeds"]
         return text_embeds, video_embeds
 
-    def _evaluate_video(self, duration: int) -> float:
+    def _evaluate_video(self, duration: int) -> Optional[float]:
         url, query = next(
-            (result_dict["url"], result_dict["paraphrase"])
-            for result_dict in self.result_dict["results"]
-            if result_dict["modality"] == "video"
+            (
+                (result_dict["url"], result_dict["paraphrase"])
+                for result_dict in self.result_dict["results"]
+                if result_dict["modality"] == "video"
+            ),
+            (None, None),
         )
+        if url is None:
+            return None
         stream_url = self._get_stream_url(url=url)
         video = self._load_video_to_ram(stream_url=stream_url, duration=duration)
         index_frames = self._sample_frame_indices(
@@ -256,6 +279,25 @@ class EvaluationPipeline:
     def evaluate(self):
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
-        self._evaluate_text(num_words=self.cfg.text.num_words)
-        self._evaluate_image()
-        self._evaluate_video(duration=self.cfg.video.duration)
+
+        text_sim = self._evaluate_text(num_words=self.cfg.text.num_words)
+        image_sim = self._evaluate_image()
+        video_sim = self._evaluate_video(duration=self.cfg.video.duration)
+
+        timestamp = datetime.now(ZoneInfo("Asia/Singapore")).strftime("%d-%m-%Y-%H-%M")
+        mlflow_tracking_path = os.path.join(self.mlflow_directory, timestamp)
+        os.makedirs(name=mlflow_tracking_path, exist_ok=True)
+
+        mlflow.set_tracking_uri(uri=f"file:{mlflow_tracking_path}")
+
+        experiment_run = f"{self.llm_name}_{self.temperature}"
+        mlflow.set_experiment(experiment_name=experiment_run)
+        with mlflow.start_run(run_name=experiment_run):
+            mlflow.log_param("llm", self.llm_name)
+            mlflow.log_param("temperature", self.temperature)
+            if text_sim is not None:
+                mlflow.log_metric("Text Similarity", text_sim)
+            if image_sim is not None:
+                mlflow.log_metric("Image Similarity", image_sim)
+            if video_sim is not None:
+                mlflow.log_metric("Video Similarity", video_sim)
