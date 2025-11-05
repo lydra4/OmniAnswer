@@ -77,13 +77,18 @@ class EvaluationPipeline:
         response = self.text_scrap_client.get(url=url, params={"render": True})
         soup = BeautifulSoup(response, "html.parser")
         article = soup.find("article")
-        if article is None:
-            self.logger.warning(f"No article tag found at {url}, return empty text.")
-            return ""
-        paragraphs = [p.get_text(strip=True) for p in article.find_all("p")]
-        text_content = " ".join(paragraphs)
-        self.logger.info("Web scrap successfull.")
-        return " ".join(text_content.split()[:num_words])
+        if article:
+            text = " ".join(p.get_text(strip=True) for p in article.find_all("p"))
+        else:
+            self.logger.warning(
+                f"No <article> tag found at {url}, falling back to <body>."
+            )
+            body = soup.find("body")
+            text = body.get_text(separator=" ", strip=True) if body else ""
+
+        clean_text = " ".join(text.split()[:num_words])
+        self.logger.info("Web scrap successful.")
+        return clean_text
 
     def _evaluate_text(self, num_words: int) -> float:
         url, query = next(
