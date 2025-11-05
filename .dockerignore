@@ -16,7 +16,7 @@ aisg-context/k8s/secrets
 *.deb
 
 # Ignore local MLflow logs
-**/mlruns
+**/mlflow
 
 # Ignore outputs from OmegaConf/Hydra
 outputs
