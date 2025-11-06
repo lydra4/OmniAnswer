@@ -1,7 +1,8 @@
 import logging
 import os
-from typing import Union
+from typing import List, Optional, Union
 
+import mlflow
 import yaml
 from crewai import LLM
 
@@ -47,3 +48,32 @@ def load_llm(model_name: str, temperature: Union[int, float]):
     )
     logger.info(f"'{model_name}' loaded at temperature: '{temperature}'.")
     return llm
+
+
+def init_mlflow(
+    directory: str,
+    experiment_name: str,
+    llm_name: str,
+    temperature: int | float,
+    modes: List[str],
+    text_similarity: Optional[float] = None,
+    image_similarity: Optional[float] = None,
+    video_similarity: Optional[float] = None,
+) -> None:
+    os.makedirs(name=directory, exist_ok=True)
+    mlflow.set_tracking_uri(uri=f"file:{directory}")
+    mlflow.set_experiment(experiment_name=experiment_name)
+
+    metrics = {
+        "Text Similarity": text_similarity,
+        "Image Similarity": image_similarity,
+        "Video Similarity": video_similarity,
+    }
+
+    run_name = f"{llm_name}-{temperature}"
+    with mlflow.start_run(run_name=run_name):
+        mlflow.log_params({"llm": llm_name, "temperature": temperature})
+        mlflow.set_tag("modes", ",".join(modes))
+        for metric_name, value in metrics.items():
+            if value is not None:
+                mlflow.log_metric(metric_name, value)
