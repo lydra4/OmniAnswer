@@ -2,13 +2,10 @@ import json
 import logging
 import os
 import subprocess
-from datetime import datetime
 from io import BytesIO
 from typing import List, Optional, Tuple
-from zoneinfo import ZoneInfo
 
 import av
-import mlflow
 import numpy as np
 import requests
 import torch
@@ -23,6 +20,7 @@ from transformers import XCLIPModel, XCLIPProcessor
 from yt_dlp import YoutubeDL
 
 from schemas.schemas import ResultDictFile
+from utils.general_utils import init_mlflow
 
 
 class EvaluationPipeline:
@@ -40,10 +38,14 @@ class EvaluationPipeline:
         self.llm_name = llm_name
         self.temperature = temperature
         self.mlflow_directory: str = self.cfg.mlflow_directory
-        modes: List[str] = [
+        self.modes: List[str] = [
             result_dict["modality"] for result_dict in self.result_dict["results"]
         ]
-        if "text" in modes:
+        self.experiment_name: str = getattr(
+            self.cfg, "experiment_name", "evaluation_ablation"
+        )
+
+        if "text" in self.modes:
             api_key = os.getenv("SCRAPER_API_KEY")
             if api_key is None:
                 raise ValueError("Scraper API Key must be set")
@@ -52,12 +54,12 @@ class EvaluationPipeline:
                 model_name_or_path=self.cfg.text.text_model_name
             )
 
-        if "image" in modes:
+        if "image" in self.modes:
             self.image_metrics = CLIPScore(
                 model_name_or_path=self.cfg.image.image_model_name,
             )
 
-        if "video" in modes:
+        if "video" in self.modes:
             self.video_processor = XCLIPProcessor.from_pretrained(
                 pretrained_model_name_or_path=self.cfg.video.video_model_name,
                 use_fast=True,
@@ -284,20 +286,13 @@ class EvaluationPipeline:
         image_sim = self._evaluate_image()
         video_sim = self._evaluate_video(duration=self.cfg.video.duration)
 
-        timestamp = datetime.now(ZoneInfo("Asia/Singapore")).strftime("%d-%m-%Y-%H-%M")
-        mlflow_tracking_path = os.path.join(self.mlflow_directory, timestamp)
-        os.makedirs(name=mlflow_tracking_path, exist_ok=True)
-
-        mlflow.set_tracking_uri(uri=f"file:{mlflow_tracking_path}")
-
-        experiment_run = f"{self.llm_name}_{self.temperature}"
-        mlflow.set_experiment(experiment_name=experiment_run)
-        with mlflow.start_run(run_name=experiment_run):
-            mlflow.log_param("llm", self.llm_name)
-            mlflow.log_param("temperature", self.temperature)
-            if text_sim is not None:
-                mlflow.log_metric("Text Similarity", text_sim)
-            if image_sim is not None:
-                mlflow.log_metric("Image Similarity", image_sim)
-            if video_sim is not None:
-                mlflow.log_metric("Video Similarity", video_sim)
+        init_mlflow(
+            directory=self.mlflow_directory,
+            experiment_name=self.experiment_name,
+            llm_name=self.llm_name,
+            temperature=self.temperature,
+            modes=self.modes,
+            text_similarity=text_sim,
+            image_similarity=image_sim,
+            video_similarity=video_sim,
+        )
