@@ -4,14 +4,11 @@ import os
 import hydra
 from dotenv import load_dotenv
 from omegaconf import DictConfig
+from tqdm import tqdm
 
-from agents.modality_agent import ModalityAgent
-from agents.paraphrase_agent import ParaphraseAgent
-from crew.orchestrator import Orchestrator
 from evaluation.evaluation_pipeline import EvaluationPipeline
-from moderation.content_moderator import ContentModeratior
-from schemas.schemas import DictOutput, StringListOutput
-from utils.general_utils import load_llm, setup_logging
+from utils.general_utils import setup_logging
+from utils.pipeline_utils import init_components, process_file
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
@@ -25,40 +22,32 @@ def main(cfg: DictConfig):
     )
     logger.info("Setting up logging configuration.")
 
-    query = "Please explain model context protocol in the context of agentic workflow."
-
-    content_moderator = ContentModeratior(cfg=cfg, logger=logger)
-    content_moderator.moderate_query(query=query)
-
-    llm = load_llm(model_name=cfg.model, temperature=cfg.temperature)
-    modality_agent = ModalityAgent(
-        cfg=cfg.modality_agent,
-        logger=logger,
-        llm=llm,
-        output=StringListOutput,
+    content_moderator, modality_agent, paraphrase_agent, orchestrator = init_components(
+        cfg=cfg, logger=logger
     )
-    modalities = modality_agent.run_query(query=query)
 
-    paraphrase_agent = ParaphraseAgent(
-        cfg=cfg.paraphrase_agent,
-        logger=logger,
-        llm=llm,
-        output=DictOutput,
-    )
-    paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
+    queries = process_file(path=cfg.questions)
 
-    orchestrator = Orchestrator(cfg=cfg, logger=logger, llm=llm)
-    result_dict = orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
-
-    if cfg.evaluate:
-        evaluation_pipeline = EvaluationPipeline(
-            cfg=cfg,
-            logger=logger,
-            result_dict=result_dict,
-            llm_name=cfg.model,
-            temperature=cfg.temperature,
+    for query in tqdm(queries):
+        content_moderator.moderate_query(query=query)
+        modalities = modality_agent.run_query(query=query)
+        paraphrased_queries = paraphrase_agent.run_query(
+            query=query, modalities=modalities
         )
-        evaluation_pipeline.evaluate()
+
+        result_dict = orchestrator.run(
+            query=query, paraphrase_queries=paraphrased_queries
+        )
+
+        if cfg.evaluate:
+            evaluation_pipeline = EvaluationPipeline(
+                cfg=cfg,
+                logger=logger,
+                result_dict=result_dict,
+                llm_name=cfg.model,
+                temperature=cfg.temperature,
+            )
+            evaluation_pipeline.evaluate()
 
 
 if __name__ == "__main__":
