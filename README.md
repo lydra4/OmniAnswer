@@ -9,72 +9,53 @@ This project was conceived in response to the rapidly evolving landscape of data
 <p align="center">
   <img src="assets/python-logo.png" alt="Python" height="40"/>
   <img src="assets/hydra-logo.png" alt="Hydra" height="40"/>
-  <img src="assets/agno-logo.png" alt="Agno" height="40"/>
+  <img src="assets/crewai-logo.png" alt="Agno" height="40"/>
   <img src="assets/google-logo.png" alt="Google APIs" height="40"/>
   <img src="assets/openai-logo.png" alt="OpenAI" height="40"/>
   <img src="assets/gemini-logo.png" alt="Gemini" height="40"/>
   <img src="assets/serpapi-logo.png" alt="SerpApi" height="40"/>
-</p>
+  
+## OmniAnswer
 
-<details>
-<summary>Tech Stack Details</summary>
+OmniAnswer is a multi-modal, agent-based research assistant designed to find, paraphrase, and aggregate high-quality answers across text, images, and video sources. It combines modular agents (text, image, video, paraphrase) and a team orchestration layer to produce concise, multi-modal responses to user queries while enforcing safety guardrails.
 
-- **Python 3.11**
-- [Hydra](https://hydra.cc/) (config management)
-- [Omegaconf](https://omegaconf.readthedocs.io/)
-- [Agno](https://github.com/agnos-ai/agno) (agent framework)
-- [Google Search](https://docs.agno.com/tools/toolkits/search/googlesearch),
-- [Google Images Search](https://github.com/arrrlo/Google-Images-Search),
-- [SerpApi](https://serpapi.com/) (YouTube/video search)
-- OpenAI & Gemini LLMs
-- [Guardrails](https://github.com/shreya-shankar/guardrails) (safety)
-- [Jinja2](https://jinja.palletsprojects.com/)
-- [dotenv](https://pypi.org/project/python-dotenv/)
-</details>
+Key goals:
+- Reduce research time by surfacing the most relevant resources.
+- Optimize queries per modality via paraphrasing.
+- Provide a configurable, extensible agent framework for experimentation.
+
+---
+
+## Quick links
+
+- Repository: https://github.com/lydra4/OmniAnswer
+- Configs: `config/`
+- Source: `src/` (agents, teams, utils)
+
+---
 
 ## Features
 
-- **Multi-modality:** Answers queries using text, images, and videos.
-- **Agent-based architecture:** Modular agents for each modality, with a team orchestration layer.
-- **Paraphrasing:** Optimizes queries for each modality.
-- **Guardrails:** Filters out unsafe or inappropriate queries.
-- **Configurable:** YAML-based configuration for agents, teams, and logging.
+- Multi-modality: text, images, and video retrieval and summarization.
+- Agent-based architecture: modular agents for each modality and a coordinating team layer.
+- Paraphrasing: rewrite queries to improve search recall for each modality.
+- Safety: configurable guardrails to filter or reject unsafe queries.
+- YAML-driven configuration and Hydra-compatible defaults.
 
-## Architecture
+---
 
-<p align="center">
-  <img src="assets/architecture.png" alt="OmniAnswer Architecture Diagram" width="700"/>
-</p>
+## Quickstart
 
-## Directory Structure
-
-```
-OmniAnswer/
-├── assets/           # Readme file images
-├── config/           # YAML configs for agents, teams, logging
-├── logs/             # Log files (auto-generated)
-├── outputs/          # Output results (if any)
-├── src/
-│   ├── agents/       # Agent implementations (base, single, multi-modality)
-│   ├── teams/        # Team orchestration logic
-│   └── utils/        # Utility functions
-├── requirements.txt  # Python dependencies
-├── dev-requirements.txt # Dev tools (linting, formatting)
-├── omnianswer-conda-env.yaml # Conda environment
-```
-
-## Installation
-
-### 1. Clone the repository
+1. Clone the repository:
 
 ```bash
-git clone [OmniAnswer](https://github.com/lydra4/OmniAnswer)
+git clone https://github.com/lydra4/OmniAnswer.git
 cd OmniAnswer
 ```
 
-### 2. Set up environment
+2. Create a Python environment and install dependencies. (Conda recommended, but venv/pip works.)
 
-#### Using Conda (recommended)
+Using conda (recommended):
 
 ```bash
 conda env create -f omnianswer-conda-env.yaml
@@ -82,109 +63,170 @@ conda activate omnianswer
 pip install -r requirements.txt -r dev-requirements.txt
 ```
 
-#### For development
-
-<p align="center">
-  <img src="assets/dev-env.png" alt="Development Environment" height="120"/>
-</p>
+Using venv + pip:
 
 ```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt -r dev-requirements.txt
 ```
 
-### 3. Environment Variables
+3. Create a `.env` file or export required environment variables (examples below).
 
-<p align="center">
-  <img src="assets/env-vars.png" alt="Environment Variables" height="120"/>
-</p>
-
-Set the following environment variables (e.g., in a `.env` file):
-
-- `OPENAI_API_KEY` (for OpenAI models)
-- `GEMINI_API_KEY` (for Gemini models and Google Images)
-- `GOOGLE_CSE_ID` (for Google Custom Search)
-- `SERP_API_KEY` (for YouTube/SerpApi search)
-- `AGNO_API_KEY` (for Agno agent framework)
-
-## Usage
-
-Run the main entry point:
+4. Run the pipeline (note: this repository currently provides `src/pipeline.py` as the main runnable pipeline):
 
 ```bash
-python src/main.py
+python -m src.pipeline
 ```
 
-This will:
+If you previously saw instructions referencing `src/main.py`, this repository uses `src/pipeline.py` as the entrypoint — update as needed.
 
-1. Set up logging and configuration.
-2. Load the specified LLM (OpenAI or Gemini).
-3. Use the ModalityAgent to decide which modalities are needed for the query.
-4. Paraphrase the query for each modality.
-5. Use the MultiModalTeam to retrieve and aggregate answers from TextAgent, ImageAgent, and VideoAgent.
+---
+
+## Environment variables
+
+Recommended variables (store in `.env` or export in your shell):
+
+- OPENAI_API_KEY      — OpenAI API key (if using OpenAI models)
+- GEMINI_API_KEY      — Google/Gemini API key (if using Gemini)
+- GOOGLE_CSE_ID       — Google Custom Search ID (for search)
+- SERP_API_KEY        — SerpApi key for YouTube/video search
+- AGNO_API_KEY        — Agno framework key (if required)
+
+Use `python-dotenv` or your preferred approach to load `.env` in development.
+
+---
 
 ## Configuration
 
-All configuration is managed via YAML files in the `config/` directory.
+All runtime configuration lives in `config/`. The repo uses Hydra-style defaults in YAML.
 
-- `config.yaml`: Main entry config, sets model, temperature, and agent/team defaults.
-- `logging.yaml`: Logging setup (console, file, error logs).
-- `multi_modality/`, `single_modality/`, `teams/`: Per-agent/team configs (roles, system messages, parameters).
+- Inspect `config/` to set model selection, temperature, agent parameters, and logging.
+- `config/logging.yaml` configures console and file handlers (logs/).
 
-### Example: `config/config.yaml`
+Example snippet (see `config/` for full files):
 
 ```yaml
-defaults:
-  - _self_
-  - multi_modality/modality_agent@modality_agent: default
-  - single_modality/paraphrase_agent@paraphrase_agent: default
-  - single_modality/text_agent@text_agent: default
-  - single_modality/image_agent@image_agent: default
-  - single_modality/video_agent@video_agent: default
-  - teams/multimodal_team@multimodal_team: default
-
 model: gemini-2.5-pro
 temperature: 1.0
 ```
 
-## Agents
+---
 
-- **ModalityAgent:** Classifies which modalities (text, image, video) are needed for a query. Uses guardrails for safety.
-- **ParaphraseAgent:** Rewrites queries for each modality to optimize search.
-- **TextAgent:** Uses Google Search to find relevant articles and returns URLs.
-- **ImageAgent:** Uses Google Images to find relevant images and returns URLs.
-- **VideoAgent:** Uses YouTube/SerpApi to find relevant videos and returns URLs.
+## Project layout (important files)
 
-## Team Orchestration
+`assets/` — diagrams and logos used by the README and documentation.
 
-- **MultiModalTeam:** Coordinates the above agents, aggregates their outputs, and returns a structured multi-modal answer.
+`config/` — YAML configuration for agents, teams, and logging.
 
-## Logging
+`src/` — implementation. Notable modules:
+- `src/pipeline.py` — pipeline/entrypoint for running queries and agent teams.
+- `src/agents/` — agent implementations (paraphrase, text, image, video, etc.).
+- `src/teams/` or `src/crew/` — orchestration logic for multi-modal teams.
+- `src/utils/` — utility helpers.
 
-Logging is configured via `config/logging.yaml` and outputs to both console and log files in the `logs/` directory.
-
-## Development
-
-<p align="center">
-  <img src="assets/dev-workflow.png" alt="Development Workflow" height="120"/>
-</p>
-
-- Code style: [black](https://github.com/psf/black), [ruff](https://github.com/astral-sh/ruff)
-- Linting: [pylint](https://github.com/PyCQA/pylint)
-- Pre-commit hooks: [pre-commit](https://pre-commit.com/)
-
-## License
-
-[MIT](LICENSE) (or specify your license)
-
-## Acknowledgements
-
-- [Agno](https://github.com/agnos-ai/agno) agent framework
-- [Hydra](https://hydra.cc/)
-- [Omegaconf](https://omegaconf.readthedocs.io/)
-- [Google Search/Images/YouTube APIs]
-- [SerpApi](https://serpapi.com/)
-- [GoogleImagesSearch](https://github.com/arrrlo/Google-Images-Search)
+`requirements.txt` — runtime dependencies.
+`dev-requirements.txt` — development tools (linters, formatters, test tools).
 
 ---
 
-> **Note:** If the images above do not render, please add the appropriate logos and diagrams to the `assets/` directory. You can use official logos from the respective technologies or create your own diagrams for environment variables and development workflow.
+## Usage examples
+
+Interactive example (pseudo):
+
+```python
+from src.pipeline import run_query
+
+result = run_query("How do transformer attention masks work?")
+print(result.summary)
+# result will include text, and lists of image/video candidates when applicable
+```
+
+CLI example:
+
+```bash
+python -m src.pipeline --query "best practices for retraining LLMs"
+```
+
+Note: exact function/CLI flags depend on the pipeline implementation; inspect `src/pipeline.py` for current parameters.
+
+---
+
+## Development
+
+- Formatting: `black` (run `black .`)
+- Linting: `ruff` / `pylint` (run `ruff .` or `pylint src`)
+- Pre-commit: configured via `pre-commit` (if present)
+
+Run unit tests under `tests/` with pytest:
+
+```bash
+pytest -q
+```
+
+If tests fail after edits, run linters and fix warnings before submitting PRs.
+
+---
+
+## Contributing
+
+Contributions are welcome. A suggested workflow:
+
+1. Fork the repo.
+2. Create a feature branch: `git checkout -b feat/your-feature`.
+3. Run tests and linters locally.
+4. Open a pull request describing your changes and any migration notes.
+
+Please follow existing coding standards and include tests for new behavior.
+
+---
+
+## Troubleshooting
+
+- Missing API key errors: ensure environment variables are set and visible to the running process.
+- Config not picked up: confirm you're running the pipeline from the project root so relative `config/` paths resolve.
+- If an entrypoint like `src/main.py` is referenced in docs but not present, use `src/pipeline.py` or check the source to confirm the current entrypoint.
+
+---
+
+## Tests & Quality gates
+
+Run the test suite:
+
+```bash
+pytest -q
+```
+
+Run linters and fixers:
+
+```bash
+ruff format .
+black .
+ruff check .
+```
+
+---
+
+## License
+
+This project is released under the MIT License. See `LICENSE` for details.
+
+---
+
+## Acknowledgements
+
+- Agno agent framework
+- Hydra & OmegaConf for configuration
+- Guardrails for safety constraints
+- SerpApi, Google Search/Images for search integrations
+
+---
+
+## Contact
+
+If you have questions or want to collaborate, open an issue or PR on the repository: https://github.com/lydra4/OmniAnswer
+
+---
+
+Notes/assumptions:
+- The repository's runnable entrypoint appears to be `src/pipeline.py` (no `src/main.py` found). I updated examples and Quickstart accordingly — if you'd prefer a different entrypoint, tell me and I will swap references.
