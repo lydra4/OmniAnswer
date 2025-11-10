@@ -2,9 +2,10 @@ import logging
 import os
 from typing import List, Optional, Union
 
-import mlflow
 import yaml
 from crewai import LLM
+
+import mlflow
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def setup_logging(
         logger.info("Logging config file is not found. Basic config is used.")
 
 
-def load_llm(model_name: str, temperature: Union[int, float]):
+def load_llm(model_name: str, temperature: Union[int, float]) -> LLM:
     model_name_clean = model_name.strip().lower()
 
     if model_name_clean.startswith("gemini-"):
