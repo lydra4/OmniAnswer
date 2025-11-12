@@ -3,48 +3,56 @@ from unittest.mock import MagicMock
 import pytest
 from omegaconf import OmegaConf
 
-from src.agents.multi_modality.modality_agent import ModalityAgent
-
-modality_agent_cfg = OmegaConf.create(
-    {
-        "modality_agent": {
-            "name": "ModalityAgent",
-            "role": "test role",
-            "description": "test description",
-            "system_message": "test system message",
-            "guardrails": {
-                "banned_words": [],
-                "toxic_threshold": 1.0,
-            },
-        }
-    }
-)
+from agents.modality_agent import ModalityAgent
 
 
 @pytest.fixture
-def agent():
+def modality_agent_cfg():
+    return OmegaConf.create(
+        {
+            "agent": {
+                "name": "ModalityAgent",
+                "role": "test role",
+                "description": "test description",
+                "system_message": "test system message",
+                "guardrails": {
+                    "banned_words": [],
+                    "toxic_threshold": 1.0,
+                },
+            }
+        }
+    )
+
+
+@pytest.fixture
+def modality_agent_fixture(modality_agent_cfg):
     logger = MagicMock()
     llm = MagicMock()
-    modality_agent = ModalityAgent(cfg=modality_agent_cfg, logger=logger, llm=llm)
-    modality_agent.guard = MagicMock(
-        validate=lambda x: MagicMock(validation_passed=True)
+    agent = ModalityAgent(
+        cfg=modality_agent_cfg,
+        logger=logger,
+        llm=llm,
+        output=MagicMock(),
     )
-    return modality_agent
+    agent.guard = MagicMock(validate=lambda _: MagicMock(validation_passed=True))
+    return agent
 
 
-def test_modality_agent_routing(modality_agent_fixture, monkeypatch):
-    monkeypatch.setattr(
-        agent, "guard", MagicMock(validate=lambda x: MagicMock(validation_passed=True))
-    )
-
+@pytest.mark.parametrize(
+    "query,expected",
+    [
+        ("text", ["text", "image"]),
+        ("image", ["image"]),
+    ],
+)
+def test_modality_agent_routing(modality_agent_fixture, monkeypatch, query, expected):
     monkeypatch.setattr(
         ModalityAgent,
-        "run",
+        "run_query",
         lambda _, query: ["text", "image"] if query == "text" else ["image"],
     )
 
-    assert modality_agent_fixture.run("text") == ["text", "image"]
-    assert modality_agent_fixture.run("image") == ["image"]
+    assert modality_agent_fixture.run_query(query) == expected
 
 
 def test_modality_agent_unsupported_modality(modality_agent_fixture, monkeypatch):
@@ -53,7 +61,7 @@ def test_modality_agent_unsupported_modality(modality_agent_fixture, monkeypatch
             raise ValueError("Rejected query due to: unsupported modality")
         return [query]
 
-    monkeypatch.setattr(ModalityAgent, "run", fake_run)
+    monkeypatch.setattr(ModalityAgent, "run_query", fake_run)
 
     with pytest.raises(ValueError):
-        modality_agent_fixture.run("audio")
+        modality_agent_fixture.run_query("audio")
