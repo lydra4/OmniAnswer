@@ -43,7 +43,7 @@ jobs:
       - name: Build Docker Image
         run: | 
           docker build -t omnianswer:${{ github.sha }} \
-          -f OmniAnswer/docker/omnianswer.Dockerfile \
+          -f docker/omnianswer.Dockerfile \
           .
       
       - name: Test Docker Image
