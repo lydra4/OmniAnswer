@@ -28,6 +28,7 @@ def test_create_task_renders_template_and_returns_task(
     agent = AgentTaskImpl(cfg=cfg, logger=logger, llm=llm, output=output)
 
     task = agent.create_task("hello")
+    assert agent is not None
     assert task["prompt"] == "Query: hello"
     assert task["meta"] == "static"
     assert task["agent"] == "agent-object"
