@@ -16,6 +16,7 @@ python-dotenv==1.1.1
 # Utilities and Data Processing
 rich==13.9.4
 pycountry==24.6.1
+pydantic==2.12.3
 
 # Platform-specific Dependencies
 # windows-curses==2.4.1
