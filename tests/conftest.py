@@ -1,6 +1,10 @@
 import sys
 import types
 from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import pytest
+from pydantic import BaseModel
 
 
 def install_fake_crewai():
@@ -32,11 +36,6 @@ def install_fake_crewai():
 
 
 install_fake_crewai()
-
-from unittest.mock import MagicMock
-
-import pytest
-from pydantic import BaseModel
 
 
 class DummyOutput(BaseModel):
