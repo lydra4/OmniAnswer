@@ -48,4 +48,6 @@ jobs:
       
       - name: Test Docker Image
         run: | 
-          docker run --rm omnianswer:${{ github.sha }} pytest -q
+          docker run --rm \
+          omnianswer:${{ github.sha }} \
+          bash -c "pip install pytest && pytest -q"
