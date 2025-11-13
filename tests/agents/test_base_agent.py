@@ -50,8 +50,9 @@ def test_create_agent_calls_agent_with_llm_and_tools_and_cfg_keys(
 
     ba_mod.Agent.assert_called_once()
     called_kwargs = ba_mod.Agent.call_args.kwargs
-    assert called_kwargs.get("llm") is llm
     tools_arg = called_kwargs.get("tools")
+    assert agent is not None
+    assert called_kwargs.get("llm") is llm
     assert isinstance(tools_arg, list)
     assert len(tools_arg) == 1
     assert isinstance(tools_arg[0], BaseTool)
@@ -71,6 +72,7 @@ def test_create_task_fills_query_in_multiple_fields(logger, llm, ba_mod, dummy_o
     agent = AgentTaskImpl(cfg=cfg, logger=logger, llm=llm, output=output)
 
     task = agent.create_task("Q123")
+    assert agent is not None
     assert task["p1"] == "A Q123"
     assert task["p2"] == "B Q123 end"
 
