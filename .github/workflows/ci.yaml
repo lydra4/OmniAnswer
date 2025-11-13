@@ -49,8 +49,7 @@ jobs:
       - name: Test Docker Image
         run: | 
           docker run --rm \
-          --user root \
           -v "${{ github.workspace }}:/home/omnianswer" \
-          -e PYTHONPATH="/home/omnianswer" \
+          -e PYTHONPATH="/home/omnianswer:/home/omnianswer/src" \
           "omnianswer:${{ github.sha }}" \
-          bash -c "pip install pytest && pytest -q tests"
+          bash -c "pytest -q tests"
