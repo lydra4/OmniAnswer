@@ -33,7 +33,7 @@ jobs:
           pip install -r requirements.txt -r dev-requirements.txt
 
       - name: Lint with Ruff
-        run: ruff check src tests -- --format=github
+        run: ruff check --format=github src tests
 
       - name: Run Unit Tests
         run: |
