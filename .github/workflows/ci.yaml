@@ -35,6 +35,9 @@ jobs:
       - name: Lint with Ruff
         run: ruff check --output-format=github src tests
 
+      - name: Type Check
+        run: mypy src
+
       - name: Run Unit Tests
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)/src
