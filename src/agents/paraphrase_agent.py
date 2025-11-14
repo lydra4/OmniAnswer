@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from crewai import LLM
 from crewai.tasks.task_output import TaskOutput
@@ -34,9 +34,10 @@ class ParaphraseAgent(BaseAgentTask):
             raise ValueError("No result found from paraphrase task.")
 
         parsed_result = json.loads(result_json)
-        return parsed_result["items"]
+        items: Dict[str, str] = parsed_result["items"]
+        return items
 
-    def run_query(self, query: str, **kwargs) -> Dict[str, str]:
+    def run_query(self, query: str, **kwargs: Any) -> Dict[str, str]:
         modalities = kwargs.get("modalities", [])
         if not modalities:
             raise ValueError("Modalities is empty.")

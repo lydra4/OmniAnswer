@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from crewai import LLM
 from crewai.tasks.task_output import TaskOutput
@@ -34,9 +34,10 @@ class ModalityAgent(BaseAgentTask):
             raise ValueError("No result found from modality agent.")
 
         parsed_result = json.loads(result_json)
-        return parsed_result["items"]
+        items: List[str] = parsed_result["items"]
+        return items
 
-    def run_query(self, query: str, **kwargs) -> List[str]:
+    def run_query(self, query: str, **kwargs: Any) -> List[str]:
         task = super().create_task(query=query, **kwargs)
         result = task.execute_sync()
         parsed_result = self._parse_result(result=result)

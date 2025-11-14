@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
 from crewai import LLM, Agent, Task
+from crewai.tasks.task_output import TaskOutput
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
@@ -34,7 +35,7 @@ class BaseAgentTask(ABC):
         return agent
 
     @abstractmethod
-    def _parse_result(self, result) -> Any:
+    def _parse_result(self, result: TaskOutput) -> Any:
         pass
 
     def create_task(self, query: str, **kwargs: Any) -> Task:

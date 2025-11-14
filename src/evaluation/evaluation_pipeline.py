@@ -126,7 +126,8 @@ class EvaluationPipeline:
                 image = Image.open(image_memory).convert("RGB")
             self.logger.info("Web scrap successfull.")
             image_tensor = pil_to_tensor(pic=image)
-            return image_tensor.unsqueeze(0)
+            clean_image_tensor: torch.Tensor = image_tensor.unsqueeze(0)
+            return clean_image_tensor
         except Exception as e:
             raise ValueError(f"Error occurred: {e}.") from e
 
@@ -174,8 +175,8 @@ class EvaluationPipeline:
             raise RuntimeError("No video formats found")
 
         best = max(video_formats, key=lambda f: f.get("height") or 0)
-        url: str = best["url"]
-        return url
+        video_url: str = best["url"]
+        return video_url
 
     def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
         cmd = [
@@ -204,7 +205,7 @@ class EvaluationPipeline:
             )
 
         video_buffer = BytesIO(stdout_data)
-        container = av.open(video_buffer, format="mpegts")
+        container = av.open(video_buffer, format="mpegts", mode="r")
         frames = []
         for frame in container.decode(video=0):
             pts_seconds = float(frame.pts or 0) * float(frame.time_base or 0)
@@ -232,7 +233,7 @@ class EvaluationPipeline:
         procesed_video = self.video_processor.video_processor.preprocess(
             video, return_tensors="pt"
         )
-        processed_text = self.video_processor.tokenizer(
+        processed_text = self.video_processor.tokenizer(  # type: ignore [attr-defined]
             [query], return_tensors="pt", padding=True
         )
 

@@ -49,9 +49,10 @@ class TextAgent(BaseAgentTask):
             raise ValueError("No result found from text search.")
 
         parsed_result = json.loads(result_json)
-        return parsed_result["url"]
+        url: str = parsed_result["url"]
+        return url
 
-    def run_query(self, query: str, **kwargs) -> str:
+    def run_query(self, query: str, **kwargs: Any) -> str:
         task = super().create_task(
             query=query, max_results=self.cfg.max_results, **kwargs
         )
