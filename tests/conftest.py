@@ -34,6 +34,18 @@ def install_fake_crewai():
     tools_mod.BaseTool = object
     sys.modules["crewai.tools"] = tools_mod
 
+    tasks_mod = types.ModuleType("crewai.tasks")
+    sys.modules["crewai.tasks"] = tasks_mod
+
+    task_output_mod = types.ModuleType("crewai.tasks.task_output")
+    
+    class TaskOutput:
+        def __init__(self, json=None):
+            self.json = json
+    
+    task_output_mod.TaskOutput = TaskOutput
+    sys.modules["crewai.tasks.task_output"] = task_output_mod
+
 
 install_fake_crewai()
 
