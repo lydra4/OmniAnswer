@@ -67,9 +67,7 @@ class EvaluationPipeline:
             self.video_model = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
             )
-            self.clip_length = getattr(
-                self.video_model.config.vision_config, "num_frames", None
-            )
+            self.clip_length: int = self.video_model.config.vision_config.num_frames
 
     def _load_results_dict(self, path: str) -> ResultDictFile:
         result_dict_path = os.path.join(path, "evaluation_dict.json")
