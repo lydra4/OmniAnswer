@@ -23,3 +23,4 @@ mlflow==3.5.1
 mypy==1.18.2
 types-PyYAML==6.0.12.20250915
 types-requests==2.32.4.20250913
+pre-commit==4.3.0
