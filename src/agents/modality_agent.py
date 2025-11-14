@@ -2,11 +2,13 @@ import json
 import logging
 from typing import List, Optional
 
-from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
+from crewai.tasks.task_output import TaskOutput
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
+
+from agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class ModalityAgent(BaseAgentTask):
@@ -26,8 +28,11 @@ class ModalityAgent(BaseAgentTask):
             tools=tools,
         )
 
-    def _parse_result(self, result: str) -> List[str]:
+    def _parse_result(self, result: TaskOutput) -> List[str]:
         result_json = result.json
+        if result_json is None:
+            raise ValueError("No result found from modality agent.")
+
         parsed_result = json.loads(result_json)
         return parsed_result["items"]
 

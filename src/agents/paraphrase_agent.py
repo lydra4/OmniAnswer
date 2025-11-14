@@ -2,11 +2,13 @@ import json
 import logging
 from typing import Dict, List, Optional
 
-from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
+from crewai.tasks.task_output import TaskOutput
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
+
+from agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class ParaphraseAgent(BaseAgentTask):
@@ -26,8 +28,11 @@ class ParaphraseAgent(BaseAgentTask):
             tools=tools,
         )
 
-    def _parse_result(self, result: str) -> Dict[str, str]:
+    def _parse_result(self, result: TaskOutput) -> Dict[str, str]:
         result_json = result.json
+        if result_json is None:
+            raise ValueError("No result found from paraphrase task.")
+
         parsed_result = json.loads(result_json)
         return parsed_result["items"]
 

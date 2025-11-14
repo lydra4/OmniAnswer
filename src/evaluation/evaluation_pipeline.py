@@ -109,11 +109,11 @@ class EvaluationPipeline:
             ),
             (None, None),
         )
-        if url is None:
+        if url is None or query is None:
             return None
         text_content = self._scrap_text(url=url, num_words=num_words)
         bert_score = self.text_metric([query], [text_content])
-        precision = bert_score["precision"]
+        precision: float = bert_score["precision"]
         self.logger.info(f"The text score is {precision:.2f}.")
         return precision
 
@@ -143,7 +143,7 @@ class EvaluationPipeline:
             return None
         image_tensor = self._scrap_image(url=url)
         raw_score = self.image_metrics(image_tensor, query)
-        score = raw_score.detach().item()
+        score: float = raw_score.detach().item()
         self.logger.info(f"The image score is {score:.2f}.")
         return score
 
@@ -174,7 +174,8 @@ class EvaluationPipeline:
             raise RuntimeError("No video formats found")
 
         best = max(video_formats, key=lambda f: f.get("height") or 0)
-        return best["url"]
+        url: str = best["url"]
+        return url
 
     def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
         cmd = [
@@ -256,7 +257,7 @@ class EvaluationPipeline:
             ),
             (None, None),
         )
-        if url is None:
+        if url is None or query is None:
             return None
         stream_url = self._get_stream_url(url=url)
         video = self._load_video_to_ram(stream_url=stream_url, duration=duration)
@@ -278,7 +279,7 @@ class EvaluationPipeline:
         self.logger.info(f"The video score is {sim:.2f}.")
         return sim
 
-    def evaluate(self):
+    def evaluate(self) -> None:
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
 

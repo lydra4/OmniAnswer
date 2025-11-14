@@ -16,11 +16,11 @@ class ImageSearchTool(BaseTool):
     description: str = (
         "Searches Google Images for a given query and returns a list of image URLs."
     )
-    developer_key: str = Field(
+    developer_key: str | None = Field(
         default_factory=lambda: os.getenv("GEMINI_API_KEY"),
         description="API Key for searching google image",
     )
-    custom_search_cx: str = Field(
+    custom_search_cx: str | None = Field(
         default_factory=lambda: os.getenv("GOOGLE_CSE_ID"),
         description="Specify search engine configuration to use",
     )

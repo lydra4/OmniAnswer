@@ -16,7 +16,7 @@ class VideoSearchTool(BaseTool):
     description: str = "Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs."
     serviceName: str = "youtube"
     version: str = "v3"
-    developerKey: str = Field(
+    developerKey: str | None = Field(
         default_factory=lambda: os.getenv("GEMINI_API_KEY"),
         description="API Key for searching Youtube videos",
     )

@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from crewai import LLM, Agent, Task
 from crewai.tools import BaseTool
@@ -34,10 +34,10 @@ class BaseAgentTask(ABC):
         return agent
 
     @abstractmethod
-    def _parse_result(self, result):
+    def _parse_result(self, result) -> Any:
         pass
 
-    def create_task(self, query: str, **kwargs) -> Task:
+    def create_task(self, query: str, **kwargs: Any) -> Task:
         rendered = {
             k: str(v).format(query=query, **kwargs) for k, v in self.cfg.task.items()
         }

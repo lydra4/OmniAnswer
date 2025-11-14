@@ -3,11 +3,13 @@ import logging
 import os
 from typing import Any, List, Optional
 
-from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
+from crewai.tasks.task_output import TaskOutput
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
+
+from agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class TextAgent(BaseAgentTask):
@@ -41,12 +43,15 @@ class TextAgent(BaseAgentTask):
         )
         self.cfg = cfg
 
-    def _parse_result(self, result: str) -> str:
+    def _parse_result(self, result: TaskOutput) -> str:
         result_json = result.json
+        if result_json is None:
+            raise ValueError("No result found from text search.")
+
         parsed_result = json.loads(result_json)
         return parsed_result["url"]
 
-    def run_query(self, query: str, **kwargs):
+    def run_query(self, query: str, **kwargs) -> str:
         task = super().create_task(
             query=query, max_results=self.cfg.max_results, **kwargs
         )

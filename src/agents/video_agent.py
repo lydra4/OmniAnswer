@@ -2,10 +2,12 @@ import json
 import logging
 from typing import Any, List, Optional
 
-from agents.base_agent.base_agent_task import BaseAgentTask
 from crewai import LLM
+from crewai.tasks.task_output import TaskOutput
 from omegaconf import DictConfig
 from pydantic import BaseModel
+
+from agents.base_agent.base_agent_task import BaseAgentTask
 from tools.video_search import video_search
 
 
@@ -28,12 +30,15 @@ class VideoAgent(BaseAgentTask):
         )
         self.cfg = cfg
 
-    def _parse_result(self, result: str) -> str:
+    def _parse_result(self, result: TaskOutput) -> str:
         result_json = result.json
+        if result_json is None:
+            raise ValueError("No result found from video search.")
+
         parsed_result = json.loads(result_json)
         return parsed_result["url"]
 
-    def run_query(self, query: str, **kwargs):
+    def run_query(self, query: str, **kwargs) -> str:
         task = super().create_task(
             query=query, num_results=self.cfg.max_results, **kwargs
         )

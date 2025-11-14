@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def setup_logging(
     logging_config_path="../conf/logging.yaml", default_level=logging.INFO
-):
+) -> None:
     try:
         os.makedirs("logs", exist_ok=True)
         with open(logging_config_path, encoding="utf-8") as file:

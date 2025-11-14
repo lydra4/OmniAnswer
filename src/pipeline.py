@@ -12,7 +12,7 @@ from utils.pipeline_utils import init_components, process_file
 
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
-def main(cfg: DictConfig):
+def main(cfg: DictConfig) -> None:
     load_dotenv()
     logger = logging.getLogger(__name__)
     setup_logging(
