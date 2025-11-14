@@ -7,8 +7,8 @@ defaults:
   - agent/video_agent@video_agent
   - evaluation/evaluation@evaluation
 
-model: gpt-4o
+model: gemini-2.5-pro
 temperature: 1.5
 moderation_model: omni-moderation-latest
 questions: "./data/questions/queries.txt"
-evaluate: True
+evaluate: False
