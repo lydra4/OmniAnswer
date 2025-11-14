@@ -2,8 +2,7 @@ import json
 import logging
 from typing import Any, List, Optional
 
-from crewai import LLM
-from crewai.tasks.task_output import TaskOutput
+from crewai import LLM, TaskOutput
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel

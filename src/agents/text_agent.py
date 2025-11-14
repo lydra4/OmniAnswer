@@ -3,8 +3,7 @@ import logging
 import os
 from typing import Any, List, Optional
 
-from crewai import LLM
-from crewai.tasks.task_output import TaskOutput
+from crewai import LLM, TaskOutput
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 from pydantic import BaseModel

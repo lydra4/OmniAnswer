@@ -2,8 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, List, Optional
 
-from crewai import LLM, Agent, Task
-from crewai.tasks.task_output import TaskOutput
+from crewai import LLM, Agent, Task, TaskOutput
 from crewai.tools import BaseTool
 from omegaconf import DictConfig
 from pydantic import BaseModel
