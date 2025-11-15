@@ -30,10 +30,10 @@ def test_create_task_renders_template_and_returns_task(
 
     task = agent.create_task("hello")
     assert agent is not None
-    assert task["prompt"] == "Query: hello"
-    assert task["meta"] == "static"
-    assert task["agent"] == "agent-object"
-    assert task["output_json"] is output
+    assert task["prompt"] == "Query: hello"  # type: ignore[index]
+    assert task["meta"] == "static"  # type: ignore[index]
+    assert task["agent"] == "agent-object"  # type: ignore[index]
+    assert task["output_json"] is output  # type: ignore[index]
 
 
 def test_create_agent_calls_agent_with_llm_and_tools_and_cfg_keys(
@@ -79,8 +79,8 @@ def test_create_task_fills_query_in_multiple_fields(
 
     task = agent.create_task("Q123")
     assert agent is not None
-    assert task["p1"] == "A Q123"
-    assert task["p2"] == "B Q123 end"
+    assert task["p1"] == "A Q123"  # type: ignore[index]
+    assert task["p2"] == "B Q123 end"  # type: ignore[index]
 
 
 def test_logger_info_called_on_agent_initialization(
