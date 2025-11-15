@@ -15,7 +15,7 @@ class BaseAgentTask(ABC):
         cfg: DictConfig,
         logger: logging.Logger,
         llm: LLM,
-        output: BaseModel,
+        output: type[BaseModel],
         tools: Optional[List[BaseTool]] = None,
     ) -> None:
         self.cfg = cfg
