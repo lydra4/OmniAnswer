@@ -40,7 +40,7 @@ class BaseAgentTask(ABC):
 
     def create_task(self, query: str, **kwargs: Any) -> Task:
         rendered = {
-            k: str(v).format(query=query, **kwargs) for k, v in self.cfg.task.items()
+            k: v.format(query=query, **kwargs) for k, v in self.cfg.task.items()
         }
         return Task(
             **rendered,
