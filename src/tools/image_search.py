@@ -37,7 +37,7 @@ class ImageSearchTool(BaseTool):
     def _run(self, query: str) -> List[str]:
         search_params: Dict[str, Union[int, str]] = {
             "q": query,
-            "num": self._cfg.num_results,
+            "num": self._cfg.tool.num_results,
             "fileType": "jpg|gif|png",
             "safe": "active",
         }
