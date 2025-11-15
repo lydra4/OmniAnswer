@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, List
+from typing import Dict, List, cast
 
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai_tools import TavilySearchTool
@@ -97,7 +97,7 @@ class Orchestrator:
         )
         tasks_output = crew_results.tasks_output
         results_dict = {
-            mode: result.pydantic.url
+            mode: cast(StringOutput, result.pydantic).url
             for mode, result in zip(paraphrase_queries.keys(), tasks_output)
             if result.pydantic is not None
         }
@@ -109,7 +109,7 @@ class Orchestrator:
             {
                 "modality": mode,
                 "paraphrase": paraphrase_query,
-                "url": str(task_output.pydantic.url),
+                "url": cast(StringOutput, task_output.pydantic).url,
             }
             for mode, paraphrase_query, task_output in zip(
                 paraphrase_queries.keys(), paraphrase_queries.values(), tasks_output
