@@ -12,8 +12,8 @@ class VideoSearchSchema(BaseModel):
 
 
 class VideoSearchTool(BaseTool):
-    name: str = "Video Search"
-    description: str = "Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs."
+    name: str
+    description: str
     serviceName: str = "youtube"
     version: str = "v3"
     developerKey: str | None = Field(
@@ -25,7 +25,7 @@ class VideoSearchTool(BaseTool):
     args_schema: Type[BaseModel] = VideoSearchSchema
 
     def __init__(self, cfg: DictConfig) -> None:
-        super().__init__(cfg=cfg)
+        super().__init__(name=cfg.tool.name, description=cfg.tool.description, cfg=cfg)
         self._youtube = build(
             serviceName=self.serviceName,
             version=self.version,
@@ -38,7 +38,7 @@ class VideoSearchTool(BaseTool):
             self._youtube.search()
             .list(
                 q=query,
-                maxResults=self.cfg.max_results,
+                maxResults=self.cfg.tool.max_results,
                 part="snippet",
             )
             .execute()

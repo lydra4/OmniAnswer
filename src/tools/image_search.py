@@ -12,10 +12,8 @@ class ImageSearchSchema(BaseModel):
 
 
 class ImageSearchTool(BaseTool):
-    name: str = "Image Search"
-    description: str = (
-        "Searches Google Images for a given query and returns a list of image URLs."
-    )
+    name: str
+    description: str
     developer_key: str | None = Field(
         default_factory=lambda: os.getenv("GEMINI_API_KEY"),
         description="API Key for searching google image",
@@ -28,11 +26,8 @@ class ImageSearchTool(BaseTool):
     _gis: GoogleImagesSearch = PrivateAttr()
     args_schema: Type[BaseModel] = ImageSearchSchema
 
-    def __init__(
-        self,
-        cfg: DictConfig,
-    ) -> None:
-        super().__init__(cfg=cfg)
+    def __init__(self, cfg: DictConfig) -> None:
+        super().__init__(name=cfg.tool.name, description=cfg.tool.description, cfg=cfg)
         self._gis: GoogleImagesSearch = GoogleImagesSearch(
             developer_key=self.developer_key,
             custom_search_cx=self.custom_search_cx,
