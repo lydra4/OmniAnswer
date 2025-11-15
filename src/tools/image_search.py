@@ -22,22 +22,22 @@ class ImageSearchTool(BaseTool):
         default_factory=lambda: os.getenv("GOOGLE_CSE_ID"),
         description="Specify search engine configuration to use",
     )
-    cfg: DictConfig
+    _cfg: DictConfig = PrivateAttr()
     _gis: GoogleImagesSearch = PrivateAttr()
     args_schema: Type[BaseModel] = ImageSearchSchema
 
-    def __init__(self, cfg: DictConfig) -> None:
-        super().__init__(name=cfg.tool.name, description=cfg.tool.description, cfg=cfg)
+    def __init__(self, _cfg: DictConfig) -> None:
+        super().__init__(name=_cfg.tool.name, description=_cfg.tool.description)
         self._gis: GoogleImagesSearch = GoogleImagesSearch(
             developer_key=self.developer_key,
             custom_search_cx=self.custom_search_cx,
         )
-        self.cfg = cfg
+        self._cfg = _cfg
 
     def _run(self, query: str) -> List[str]:
         search_params: Dict[str, Union[int, str]] = {
             "q": query,
-            "num": self.cfg.num_results,
+            "num": self._cfg.num_results,
             "fileType": "jpg|gif|png",
             "safe": "active",
         }

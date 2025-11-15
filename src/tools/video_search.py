@@ -20,25 +20,25 @@ class VideoSearchTool(BaseTool):
         default_factory=lambda: os.getenv("GEMINI_API_KEY"),
         description="API Key for searching Youtube videos",
     )
-    cfg: DictConfig
+    _cfg: DictConfig = PrivateAttr()
     _youtube: build = PrivateAttr()
     args_schema: Type[BaseModel] = VideoSearchSchema
 
-    def __init__(self, cfg: DictConfig) -> None:
-        super().__init__(name=cfg.tool.name, description=cfg.tool.description, cfg=cfg)
+    def __init__(self, _cfg: DictConfig) -> None:
+        super().__init__(name=_cfg.tool.name, description=_cfg.tool.description)
         self._youtube = build(
             serviceName=self.serviceName,
             version=self.version,
             developerKey=self.developerKey,
         )
-        self.cfg = cfg
+        self._cfg = _cfg
 
     def _run(self, query: str) -> List[str]:
         results = (
             self._youtube.search()
             .list(
                 q=query,
-                maxResults=self.cfg.tool.max_results,
+                maxResults=self._cfg.tool.max_results,
                 part="snippet",
             )
             .execute()
