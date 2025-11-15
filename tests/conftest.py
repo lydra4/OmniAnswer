@@ -1,13 +1,14 @@
 import sys
 import types
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
 from pydantic import BaseModel
 
 
-def install_fake_crewai():
+def install_fake_crewai() -> None:
     if "crewai" in sys.modules:
         return
 
@@ -16,10 +17,10 @@ def install_fake_crewai():
     class FakeLLM:
         pass
 
-    def fake_agent_factory(*args, **kwargs):
+    def fake_agent_factory(*args: Any, **kwargs: Any) -> SimpleNamespace:
         return SimpleNamespace(args=args, kwargs=kwargs)
 
-    def fake_task_factory(**kwargs):
+    def fake_task_factory(**kwargs: Any) -> SimpleNamespace:
         return SimpleNamespace(
             **kwargs, execute_sync=lambda: SimpleNamespace(json='{"items": []}')
         )
@@ -38,11 +39,11 @@ def install_fake_crewai():
     sys.modules["crewai.tasks"] = tasks_mod
 
     task_output_mod = types.ModuleType("crewai.tasks.task_output")
-    
+
     class TaskOutput:
-        def __init__(self, json=None):
+        def __init__(self, json=None) -> None:
             self.json = json
-    
+
     task_output_mod.TaskOutput = TaskOutput
     sys.modules["crewai.tasks.task_output"] = task_output_mod
 
@@ -64,32 +65,32 @@ class DummyTool:
     name: str = "Dummy Tool"
     description: str = "Dummy Tool"
 
-    def _run(self, *args, **kwargs):
+    def _run(self, *args: Any, **kwargs: Any) -> str:
         return "ok"
 
 
 @pytest.fixture
-def logger():
+def logger() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def llm():
+def llm() -> MagicMock:
     return MagicMock()
 
 
 @pytest.fixture
-def dummy_output():
+def dummy_output() -> DummyOutput:
     return DummyOutput()
 
 
 @pytest.fixture
-def dummy_tool():
+def dummy_tool() -> DummyTool:
     return DummyTool()
 
 
 @pytest.fixture
-def ba_mod():
+def ba_mod() -> Any:
     import src.agents.base_agent.base_agent_task as ba_mod
 
     return ba_mod

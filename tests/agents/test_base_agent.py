@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import MagicMock
 
 from crewai.tools import BaseTool
@@ -7,13 +8,13 @@ from src.agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class AgentTaskImpl(BaseAgentTask):
-    def _parse_result(self, result):
+    def _parse_result(self, result: Any) -> Any:
         return result
 
 
 def test_create_task_renders_template_and_returns_task(
-    logger, llm, ba_mod, dummy_output
-):
+    logger: MagicMock, llm: MagicMock, ba_mod: Any, dummy_output: Any
+) -> None:
     cfg = OmegaConf.create(
         {
             "agent": {"role": "tester", "name": "TestAgent"},
@@ -36,8 +37,8 @@ def test_create_task_renders_template_and_returns_task(
 
 
 def test_create_agent_calls_agent_with_llm_and_tools_and_cfg_keys(
-    logger, llm, ba_mod, dummy_tool, dummy_output
-):
+    logger: MagicMock, llm: MagicMock, ba_mod: Any, dummy_tool: Any, dummy_output: Any
+) -> None:
     cfg = OmegaConf.create({"agent": {"role": "r1", "extra": "v"}, "task": {}})
 
     ba_mod.Agent = MagicMock(return_value="agent-object")
@@ -60,7 +61,12 @@ def test_create_agent_calls_agent_with_llm_and_tools_and_cfg_keys(
     assert called_kwargs.get("extra") == "v"
 
 
-def test_create_task_fills_query_in_multiple_fields(logger, llm, ba_mod, dummy_output):
+def test_create_task_fills_query_in_multiple_fields(
+    logger: MagicMock,
+    llm: MagicMock,
+    ba_mod: Any,
+    dummy_output: Any,
+) -> None:
     cfg = OmegaConf.create(
         {"agent": {"role": "r2"}, "task": {"p1": "A {query}", "p2": "B {query} end"}}
     )
@@ -77,7 +83,12 @@ def test_create_task_fills_query_in_multiple_fields(logger, llm, ba_mod, dummy_o
     assert task["p2"] == "B Q123 end"
 
 
-def test_logger_info_called_on_agent_initialization(logger, llm, ba_mod, dummy_output):
+def test_logger_info_called_on_agent_initialization(
+    logger: MagicMock,
+    llm: MagicMock,
+    ba_mod: Any,
+    dummy_output: Any,
+) -> None:
     cfg = OmegaConf.create({"agent": {"role": "logger-role"}, "task": {}})
 
     ba_mod.Agent = MagicMock(return_value="agent-object")
