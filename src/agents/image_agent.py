@@ -41,7 +41,7 @@ class ImageAgent(BaseAgentTask):
 
     def run_query(self, query: str, **kwargs: Any) -> str:
         task = super().create_task(
-            query=query, num_results=self.cfg.num_results, **kwargs
+            query=query, num_results=self.cfg.tool.num_results, **kwargs
         )
         result = task.execute_sync()
         parsed_result = self._parse_result(result=result)
