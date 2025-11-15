@@ -1,13 +1,14 @@
+from typing import List
 from unittest.mock import MagicMock
 
 import pytest
-from omegaconf import OmegaConf
+from omegaconf import DictConfig, OmegaConf
 
 from agents.modality_agent import ModalityAgent
 
 
 @pytest.fixture
-def modality_agent_cfg():
+def modality_agent_cfg() -> DictConfig:
     return OmegaConf.create(
         {
             "agent": {
@@ -25,7 +26,7 @@ def modality_agent_cfg():
 
 
 @pytest.fixture
-def modality_agent_fixture(modality_agent_cfg):
+def modality_agent_fixture(modality_agent_cfg: DictConfig) -> ModalityAgent:
     logger = MagicMock()
     llm = MagicMock()
     agent = ModalityAgent(
@@ -45,7 +46,12 @@ def modality_agent_fixture(modality_agent_cfg):
         ("image", ["image"]),
     ],
 )
-def test_modality_agent_routing(modality_agent_fixture, monkeypatch, query, expected):
+def test_modality_agent_routing(
+    modality_agent_fixture: ModalityAgent,
+    monkeypatch: pytest.MonkeyPatch,
+    query: str,
+    expected: List[str],
+):
     monkeypatch.setattr(
         ModalityAgent,
         "run_query",
@@ -55,7 +61,10 @@ def test_modality_agent_routing(modality_agent_fixture, monkeypatch, query, expe
     assert modality_agent_fixture.run_query(query) == expected
 
 
-def test_modality_agent_unsupported_modality(modality_agent_fixture, monkeypatch):
+def test_modality_agent_unsupported_modality(
+    modality_agent_fixture: ModalityAgent,
+    monkeypatch: pytest.MonkeyPatch,
+):
     def fake_run(_, query):
         if query == "audio":
             raise ValueError("Rejected query due to: unsupported modality")

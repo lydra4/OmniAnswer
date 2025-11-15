@@ -20,4 +20,8 @@ task:
     A single YouTube URL string that best matches the query,
     e.g. "https://youtube.com/watch?v=abc123".
     If no relevant result is found, return exactly: "No suitable video found."
-max_results: 5
+
+tool:
+  name: Video Search
+  description: Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs.
+  max_results: 5

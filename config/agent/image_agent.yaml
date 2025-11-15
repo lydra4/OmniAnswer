@@ -19,4 +19,8 @@ task:
       e.g. "https://images.pexels.com/photos/12345/example.jpg"
       If no relevant result is found, return exactly:
       "No suitable image found."
-num_results: 5
+
+tool:
+  name: Image Search
+  description: Searches for images based on a given query and returns a list of image URLs.
+  num_results: 5
