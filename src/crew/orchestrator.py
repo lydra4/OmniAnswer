@@ -27,8 +27,8 @@ class Orchestrator:
             include_images=False,
             exclude_domains=["youtube.com", "youtu.be"],
         )
-        self.image_search = ImageSearchTool(cfg=self.cfg.image_agent)
-        self.video_search = VideoSearchTool(cfg=self.cfg.video_agent)
+        self.image_search = ImageSearchTool(_cfg=self.cfg.image_agent)
+        self.video_search = VideoSearchTool(_cfg=self.cfg.video_agent)
 
     def text_agent(self) -> Agent:
         return Agent(
