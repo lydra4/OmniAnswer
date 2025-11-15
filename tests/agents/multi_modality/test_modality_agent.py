@@ -51,7 +51,7 @@ def test_modality_agent_routing(
     monkeypatch: pytest.MonkeyPatch,
     query: str,
     expected: List[str],
-):
+) -> None:
     monkeypatch.setattr(
         ModalityAgent,
         "run_query",
@@ -64,8 +64,8 @@ def test_modality_agent_routing(
 def test_modality_agent_unsupported_modality(
     modality_agent_fixture: ModalityAgent,
     monkeypatch: pytest.MonkeyPatch,
-):
-    def fake_run(_, query):
+) -> None:
+    def fake_run(_, query: str) -> List[str]:
         if query == "audio":
             raise ValueError("Rejected query due to: unsupported modality")
         return [query]
