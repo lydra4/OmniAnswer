@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 from unittest.mock import MagicMock
 
 import pytest
@@ -65,7 +65,7 @@ def test_modality_agent_unsupported_modality(
     modality_agent_fixture: ModalityAgent,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def fake_run(_, query: str) -> List[str]:
+    def fake_run(_: Any, query: str) -> List[str]:
         if query == "audio":
             raise ValueError("Rejected query due to: unsupported modality")
         return [query]
