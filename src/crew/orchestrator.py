@@ -99,6 +99,7 @@ class Orchestrator:
         results_dict = {
             mode: result.pydantic.url
             for mode, result in zip(paraphrase_queries.keys(), tasks_output)
+            if result.pydantic is not None
         }
         self.logger.info(
             f"For query:'{query}', these are the modes and links for learning: '{results_dict}'."
@@ -113,6 +114,7 @@ class Orchestrator:
             for mode, paraphrase_query, task_output in zip(
                 paraphrase_queries.keys(), paraphrase_queries.values(), tasks_output
             )
+            if task_output.pydantic is not None
         ]
         result_dict: ResultDictFile = {"query": query, "results": results}
         return result_dict
