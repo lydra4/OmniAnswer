@@ -60,11 +60,11 @@ class EvaluationPipeline:
             )
 
         if "video" in self.modes:
-            self.video_processor = XCLIPProcessor.from_pretrained(
+            self.video_processor: XCLIPProcessor = XCLIPProcessor.from_pretrained(
                 pretrained_model_name_or_path=self.cfg.video.video_model_name,
                 use_fast=True,
             )
-            self.video_model = XCLIPModel.from_pretrained(
+            self.video_model: XCLIPModel = XCLIPModel.from_pretrained(
                 self.cfg.video.video_model_name
             )
             self.clip_length: int = self.video_model.config.vision_config.num_frames
@@ -231,7 +231,7 @@ class EvaluationPipeline:
         procesed_video = self.video_processor.video_processor.preprocess(
             video, return_tensors="pt"
         )
-        processed_text = self.video_processor.tokenizer(  # type: ignore [attr-defined]
+        processed_text = self.video_processor.tokenizer(
             [query], return_tensors="pt", padding=True
         )
 
@@ -271,7 +271,7 @@ class EvaluationPipeline:
 
         text_embeds_norm = torch.nn.functional.normalize(text_embeds, p=2, dim=-1)
         video_embeds_norm = torch.nn.functional.normalize(video_embeds, p=2, dim=-1)
-        sim = torch.nn.functional.cosine_similarity(
+        sim: float = torch.nn.functional.cosine_similarity(
             text_embeds_norm, video_embeds_norm, dim=-1
         ).item()
 
