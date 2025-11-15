@@ -15,6 +15,7 @@ repos:
         files: \.py$
         additional_dependencies:
           - types-PyYAML
+          - types-requests
           - pydantic==2.12.3
           - omegaconf
           - crewai
