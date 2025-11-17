@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import omegaconf
 
@@ -21,20 +21,41 @@ class GradioApp:
         ) = init_components(cfg=self.cfg, logger=self.logger)
         self.caption = self.cfg.gradio.caption
 
-    def _infer(self, query: str):
+    def _obtain_modes(self, query: str) -> Tuple[str, str, List[str]]:
         self.content_moderator.moderate_query(query=query)
         modalities = self.modality_agent.run_query(query=query)
+        n = len(modalities)
+        if n == 1:
+            mode_str = modalities[0]
+            msg = f"For your {query}, {mode_str} is the best mode to learn."
+        elif n == 2:
+            mode_str = f"{modalities[0]} and {modalities[1]}"
+            msg = f"For your {query}, {mode_str} are the best mode to learn."
+        else:
+            mode_str = ", ".join(modalities[:-1]) + " and " + modalities[-1]
+            msg = f"For your {query}, {mode_str} are the best mode to learn."
+
+        return msg, query, modalities
+
+    def _infer(self, query: str, modalities: List[str]) -> str:
         paraphrased_queries = self.paraphrase_agent.run_query(
             query=query, modalities=modalities
         )
         result_dict = self.orchestrator.run(
             query=query, paraphrase_queries=paraphrased_queries
         )
+        result_text = "\n".join(
+            [f"For {mode}: {url}" for mode, url in result_dict.items()]
+        )
+        return result_text
 
     def launch_app(self):
         with gr.Blocks() as frontend:
             gr.Markdown(value=self.caption)
-            chatbot = gr.Chatbot()
-            query = gr.Textbox(show_label=True)
+            query = gr.Textbox(
+                show_label=True,
+                label="Your Query",
+                placeholder="A penny for your query.",
+            )
 
         frontend.launch()
