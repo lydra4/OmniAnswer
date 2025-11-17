@@ -12,3 +12,5 @@ temperature: 1.5
 moderation_model: omni-moderation-latest
 questions: "./data/questions/queries.txt"
 evaluate: True
+gradio:
+  caption: "OmniAnswer: Ask any question. I determine the best explanation mode — text, visuals, or structured examples."
