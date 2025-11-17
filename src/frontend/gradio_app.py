@@ -37,7 +37,7 @@ class GradioApp:
 
         return msg, query, modalities
 
-    def _infer(self, query: str, modalities: List[str]) -> str:
+    def _obtain_urls(self, query: str, modalities: List[str]) -> str:
         paraphrased_queries = self.paraphrase_agent.run_query(
             query=query, modalities=modalities
         )
@@ -49,6 +49,11 @@ class GradioApp:
         )
         return result_text
 
+    def _infer(self, query: str) -> Tuple[str, str]:
+        msg, query, modalities = self._obtain_modes(query=query)
+        result_text = self._obtain_urls(query=query, modalities=modalities)
+        return msg, result_text
+
     def launch_app(self):
         with gr.Blocks() as frontend:
             gr.Markdown(value=self.caption)
@@ -56,6 +61,23 @@ class GradioApp:
                 show_label=True,
                 label="Your Query",
                 placeholder="A penny for your query.",
+            )
+
+            output_mode = gr.Textbox(
+                label="Best Mode(s)",
+                interactive=False,
+            )
+
+            output_url = gr.Textbox(
+                label="URL(s) by mode",
+                interactive=False,
+            )
+
+            ask_btn = gr.Button("Enter")
+            ask_btn.click(
+                fn=self._infer,
+                inputs=[query],
+                outputs=[output_mode, output_url],
             )
 
         frontend.launch()
