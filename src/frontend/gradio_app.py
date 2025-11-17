@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Generator, List, Optional, Tuple
 
 import gradio as gr
 import omegaconf
@@ -27,13 +27,13 @@ class GradioApp:
         n = len(modalities)
         if n == 1:
             mode_str = modalities[0]
-            msg = f"For your {query}, {mode_str} is the best mode to learn."
+            msg = f"For {query}, {mode_str} is the best mode to learn."
         elif n == 2:
             mode_str = f"{modalities[0]} and {modalities[1]}"
-            msg = f"For your {query}, {mode_str} are the best mode to learn."
+            msg = f"For {query}, {mode_str} are the best mode to learn."
         else:
             mode_str = ", ".join(modalities[:-1]) + " and " + modalities[-1]
-            msg = f"For your {query}, {mode_str} are the best mode to learn."
+            msg = f"For {query}, {mode_str} are the best mode to learn."
 
         return msg, query, modalities
 
@@ -49,35 +49,16 @@ class GradioApp:
         )
         return result_text
 
-    def _infer(self, query: str) -> Tuple[str, str]:
+    def _infer(
+        self, query: str, history: List[Tuple[str, str]]
+    ) -> Generator[str, None, None]:
         msg, query, modalities = self._obtain_modes(query=query)
         result_text = self._obtain_urls(query=query, modalities=modalities)
-        return msg, result_text
+        yield msg
+        yield result_text
 
     def launch_app(self):
-        with gr.Blocks() as frontend:
-            gr.Markdown(value=self.caption)
-            query = gr.Textbox(
-                show_label=True,
-                label="Your Query",
-                placeholder="Please enter your query.",
-            )
-
-            output_mode = gr.Textbox(
-                label="Best Mode(s)",
-                interactive=False,
-            )
-
-            output_url = gr.Textbox(
-                label="URL(s) by mode",
-                interactive=False,
-            )
-
-            ask_btn = gr.Button("Enter")
-            ask_btn.click(
-                fn=self._infer,
-                inputs=[query],
-                outputs=[output_mode, output_url],
-            )
-
-        frontend.launch()
+        gr.ChatInterface(
+            fn=self._infer,
+            title=self.caption,
+        ).launch()
