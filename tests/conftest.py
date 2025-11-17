@@ -25,14 +25,14 @@ def install_fake_crewai() -> None:
             **kwargs, execute_sync=lambda: SimpleNamespace(json='{"items": []}')
         )
 
-    fake.LLM = object
-    fake.Agent = fake_agent_factory
-    fake.Task = fake_task_factory
+    fake.LLM = object  # type: ignore[attr-defined]
+    fake.Agent = fake_agent_factory  # type: ignore[attr-defined]
+    fake.Task = fake_task_factory  # type: ignore[attr-defined]
 
     sys.modules["crewai"] = fake
 
     tools_mod = types.ModuleType("crewai.tools")
-    tools_mod.BaseTool = object
+    tools_mod.BaseTool = object  # type: ignore[attr-defined]
     sys.modules["crewai.tools"] = tools_mod
 
     tasks_mod = types.ModuleType("crewai.tasks")
@@ -44,7 +44,7 @@ def install_fake_crewai() -> None:
         def __init__(self, json=None) -> None:
             self.json = json
 
-    task_output_mod.TaskOutput = TaskOutput
+    task_output_mod.TaskOutput = TaskOutput  # type: ignore[attr-defined]
     sys.modules["crewai.tasks.task_output"] = task_output_mod
 
 
