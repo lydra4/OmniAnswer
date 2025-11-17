@@ -33,7 +33,7 @@ class GradioApp:
             msg = f"For {query}, {mode_str} are the best mode to learn."
         else:
             mode_str = ", ".join(modalities[:-1]) + " and " + modalities[-1]
-            msg = f"For {query}, {mode_str} are the best mode to learn."
+            msg = f"For '**{query}**', '**{mode_str}**' are the best mode to learn."
 
         return msg, query, modalities
 
@@ -55,7 +55,7 @@ class GradioApp:
         msg, query, modalities = self._obtain_modes(query=query)
         result_text = self._obtain_urls(query=query, modalities=modalities)
         yield msg
-        yield result_text
+        # yield result_text
 
     def launch_app(self):
         gr.ChatInterface(
