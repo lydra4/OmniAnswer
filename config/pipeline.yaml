@@ -13,4 +13,4 @@ moderation_model: omni-moderation-latest
 questions: "./data/questions/queries.txt"
 evaluate: True
 gradio:
-  caption: "OmniAnswer: Ask any question. I determine the best explanation mode — text, visuals, or structured examples."
+  caption: "OmniAnswer: Ask me any question. I determine the best mode(s) of explanation."
