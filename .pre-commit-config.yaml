@@ -19,7 +19,9 @@ repos:
           - pydantic==2.12.3
           - omegaconf
           - crewai
-        args: ["--config-file", "mypy.ini", "--namespace-packages"]
+        args: 
+          -"--config-file=.github/workflows/mypy.ini"
+          - "--namespace-packages"
 
   - repo: https://github.com/psf/black
     rev: 25.11.0
