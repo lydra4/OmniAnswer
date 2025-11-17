@@ -20,7 +20,7 @@ repos:
           - omegaconf
           - crewai
         args: 
-          -"--config-file=.github/workflows/mypy.ini"
+          - "--config-file=.github/workflows/mypy.ini"
           - "--namespace-packages"
 
   - repo: https://github.com/psf/black
