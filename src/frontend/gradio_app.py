@@ -1,9 +1,9 @@
 import logging
 from typing import List, Optional, Tuple
 
+import gradio as gr
 import omegaconf
 
-import gradio as gr
 from utils.pipeline_utils import init_components
 
 
@@ -60,7 +60,7 @@ class GradioApp:
             query = gr.Textbox(
                 show_label=True,
                 label="Your Query",
-                placeholder="A penny for your query.",
+                placeholder="Please enter your query.",
             )
 
             output_mode = gr.Textbox(
