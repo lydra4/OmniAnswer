@@ -53,8 +53,8 @@ class GradioApp:
         )
         return result_text
 
-    def _infer(self, query: str, chat_history: List[Tuple[str, Optional[str]]]):
-        chat_history = chat_history + [(query, None)]
+    def _infer(self, query: str, chat_history: List[Tuple[str, str]]):
+        chat_history = chat_history + [(query, "")]
 
         msg, query, modalities = self._obtain_modes(query=query)
         chat_history[-1] = (query, msg)
@@ -70,4 +70,5 @@ class GradioApp:
             send = gr.Button("Send")
 
             send.click(fn=self._infer, inputs=[query, chatbot], outputs=chatbot)
+            query.submit(fn=self._infer, inputs=[query, chatbot], outputs=chatbot)
         demo.launch()
