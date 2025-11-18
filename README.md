@@ -14,7 +14,7 @@ This project was conceived in response to the rapidly evolving landscape of data
   <img src="assets/openai-logo.png" alt="OpenAI" height="40"/>
   <img src="assets/gemini-logo.png" alt="Gemini" height="40"/>
   <img src="assets/serpapi-logo.png" alt="SerpApi" height="40"/>
-  
+
 ## OmniAnswer
 
 OmniAnswer is a multi-modal, agent-based research assistant designed to find, paraphrase, and aggregate high-quality answers across text, images, and video sources. It combines modular agents (text, image, video, paraphrase) and a team orchestration layer to produce concise, multi-modal responses to user queries while enforcing safety guardrails.

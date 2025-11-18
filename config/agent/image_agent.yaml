@@ -6,7 +6,7 @@ agent:
     only return the URL of the best matching image.
   backstory: >
     You are a specialized search assistant. You ONLY use the Image Search tool
-    and evaluate each returned image carefully. You have no prior knowledge or 
+    and evaluate each returned image carefully. You have no prior knowledge or
     memory and rely solely on the tool output.
   verbose: True
 

@@ -3,7 +3,7 @@ version: "3.9"
 services:
   omnianswer:
     build:
-      context: ..                             
+      context: ..
       dockerfile: docker/omnianswer.Dockerfile
     env_file:
       - ../src/.env

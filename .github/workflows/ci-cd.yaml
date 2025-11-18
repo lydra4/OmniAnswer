@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch: {} 
+  workflow_dispatch: {}
 
 jobs:
   ci-pipeline:
@@ -41,13 +41,13 @@ jobs:
           pytest -q
 
       - name: Build Docker Image
-        run: | 
+        run: |
           docker build -t omnianswer:${{ github.sha }} \
           -f docker/omnianswer.Dockerfile \
           .
-      
+
       - name: Test Docker Image
-        run: | 
+        run: |
           docker run --rm --user root \
           -v "${{ github.workspace }}:/home/omnianswer" \
           -e PYTHONPATH="/home/omnianswer:/home/omnianswer/src" \
@@ -57,11 +57,11 @@ jobs:
   trigger-codebuild:
     needs: ci-pipeline
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Trigger AWS CodeBuild
         uses: aws-actions/aws-codebuild-run-build@v1
-        with: 
+        with:
           project-name: omnianswer-build
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
