@@ -15,6 +15,7 @@ from agents.base_agent.base_agent_task import BaseAgentTask
 
 class ParaphraseAgent(BaseAgentTask):
     """Agent that produces paraphrases tailored to different modalities."""
+
     def __init__(
         self,
         cfg: DictConfig,

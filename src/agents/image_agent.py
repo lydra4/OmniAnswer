@@ -15,6 +15,7 @@ from tools.image_search import image_search
 
 class ImageAgent(BaseAgentTask):
     """Agent that uses an image search tool to retrieve image URLs."""
+
     def __init__(
         self,
         cfg: DictConfig,

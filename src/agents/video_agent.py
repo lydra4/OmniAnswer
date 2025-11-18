@@ -15,6 +15,7 @@ from tools.video_search import video_search
 
 class VideoAgent(BaseAgentTask):
     """Agent that uses a video search tool to retrieve video URLs."""
+
     def __init__(
         self,
         cfg: DictConfig,

@@ -20,6 +20,7 @@ class TextAgent(BaseAgentTask):
     The agent uses a Tavily-based search tool and parses the result into a single
     representative URL.
     """
+
     def __init__(
         self,
         cfg: DictConfig,
