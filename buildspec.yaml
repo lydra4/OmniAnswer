@@ -2,22 +2,27 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_TAG: v1-$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-c7)
+    AWS_REGION: ap-southeast-1
 
 phases:
   pre_build:
     commands:
+      - IMAGE_TAG="v1-$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)"
+      - export IMAGE_TAG
+
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 655252755560.dkr.ecr.ap-southeast-1.amazonaws.com
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 655252755560.dkr.ecr.$AWS_REGION.amazonaws.com
+
   build:
     commands:
       - echo Building Docker image...
       - docker build -f docker/omnianswer.Dockerfile -t omnianswer:$IMAGE_TAG .
-      - docker tag omnianswer:$IMAGE_TAG 655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:$IMAGE_TAG
+      - docker tag omnianswer:$IMAGE_TAG 655252755560.dkr.ecr.$AWS_REGION.amazonaws.com/omnianswer:$IMAGE_TAG
+
   post_build:
     commands:
       - echo Pushing Docker image...
-      - docker push 655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:$IMAGE_TAG
+      - docker push 655252755560.dkr.ecr.$AWS_REGION.amazonaws.com/omnianswer:$IMAGE_TAG
       - echo Build completed on `date`
 
 artifacts:
