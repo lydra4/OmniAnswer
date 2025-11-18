@@ -58,10 +58,10 @@ class GradioApp:
 
         msg, query, modalities = self._obtain_modes(query=query)
         chat_history[-1] = (query, msg)
-        yield msg
+        yield chat_history, ""
         result_text = self._obtain_urls(query=query, modalities=modalities)
         chat_history.append(("", result_text))
-        yield result_text
+        yield chat_history, ""
 
     def launch_app(self):
         with gr.Blocks() as demo:
@@ -69,6 +69,10 @@ class GradioApp:
             query = gr.Textbox(placeholder=self.caption)
             send = gr.Button("Send")
 
-            send.click(fn=self._infer, inputs=[query, chatbot], outputs=chatbot)
-            query.submit(fn=self._infer, inputs=[query, chatbot], outputs=chatbot)
+            send.click(
+                fn=self._infer, inputs=[query, chatbot], outputs=[chatbot, query]
+            )
+            query.submit(
+                fn=self._infer, inputs=[query, chatbot], outputs=[chatbot, query]
+            )
         demo.launch()
