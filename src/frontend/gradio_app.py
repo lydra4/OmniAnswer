@@ -1,5 +1,5 @@
 import logging
-from typing import Generator, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import gradio as gr
 import omegaconf
@@ -44,21 +44,30 @@ class GradioApp:
         result_dict = self.orchestrator.run(
             query=query, paraphrase_queries=paraphrased_queries
         )
+        results_list = result_dict["results"]
         result_text = "\n".join(
-            [f"For {mode}: {url}" for mode, url in result_dict.items()]
+            [
+                f"For {mode_dict['modality']}: {mode_dict['url']}"
+                for mode_dict in results_list
+            ]
         )
         return result_text
 
-    def _infer(
-        self, query: str, history: List[Tuple[str, str]]
-    ) -> Generator[str, None, None]:
+    def _infer(self, query: str, chat_history: List[Tuple[str, Optional[str]]]):
+        chat_history = chat_history + [(query, None)]
+
         msg, query, modalities = self._obtain_modes(query=query)
-        result_text = self._obtain_urls(query=query, modalities=modalities)
+        chat_history[-1] = (query, msg)
         yield msg
-        # yield result_text
+        result_text = self._obtain_urls(query=query, modalities=modalities)
+        chat_history.append(("", result_text))
+        yield result_text
 
     def launch_app(self):
-        gr.ChatInterface(
-            fn=self._infer,
-            title=self.caption,
-        ).launch()
+        with gr.Blocks() as demo:
+            chatbot = gr.Chatbot()
+            query = gr.Textbox(placeholder=self.caption)
+            send = gr.Button("Send")
+
+            send.click(fn=self._infer, inputs=[query, chatbot], outputs=chatbot)
+        demo.launch()
