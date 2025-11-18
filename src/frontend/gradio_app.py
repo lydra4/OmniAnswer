@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Generator, List, Optional, Tuple
 
 import gradio as gr
 import omegaconf
@@ -53,14 +53,20 @@ class GradioApp:
         )
         return result_text
 
-    def _infer(self, query: str, chat_history: List[Tuple[str, str]]):
+    def _infer(
+        self, query: str, chat_history: List[Tuple[str, str]]
+    ) -> Generator[Tuple[List[Tuple[str, str]], str], None, None]:
         chat_history = chat_history + [(query, "")]
+        yield chat_history, ""
 
         msg, query, modalities = self._obtain_modes(query=query)
         chat_history[-1] = (query, msg)
         yield chat_history, ""
         result_text = self._obtain_urls(query=query, modalities=modalities)
-        chat_history.append(("", result_text))
+        chat_history[-1] = (
+            chat_history[-1][0],
+            chat_history[-1][1] + "\n\n" + result_text,
+        )
         yield chat_history, ""
 
     def launch_app(self):
