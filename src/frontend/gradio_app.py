@@ -1,3 +1,5 @@
+"""Gradio-based web frontend for interacting with OmniAnswer."""
+
 import logging
 from typing import Generator, List, Optional, Tuple
 
@@ -8,9 +10,18 @@ from utils.pipeline_utils import init_components
 
 
 class GradioApp:
+    """Wrapper around the Gradio UI and backend pipeline components."""
+
     def __init__(
         self, cfg: omegaconf.DictConfig, logger: Optional[logging.Logger] = None
     ) -> None:
+        """Initialize the Gradio application.
+
+        Args:
+            cfg: Hydra/OMEGACONF configuration for the pipeline and UI.
+            logger: Optional logger instance; if omitted, a module-level logger
+                is created.
+        """
         self.cfg = cfg
         self.logger = logger or logging.getLogger(__name__)
         (
@@ -22,6 +33,15 @@ class GradioApp:
         self.caption = self.cfg.gradio.caption
 
     def _obtain_modes(self, query: str) -> Tuple[str, str, List[str]]:
+        """Determine the best modalities for a query and craft a user message.
+
+        Args:
+            query: Raw user query from the chat interface.
+
+        Returns:
+            A tuple of ``(message, query, modalities)`` where ``message`` is the
+            explanatory text describing the chosen modalities.
+        """
         self.content_moderator.moderate_query(query=query)
         modalities = self.modality_agent.run_query(query=query)
         n = len(modalities)
@@ -38,6 +58,15 @@ class GradioApp:
         return msg, query, modalities
 
     def _obtain_urls(self, query: str, modalities: List[str]) -> str:
+        """Produce URLs for each modality given a query.
+
+        Args:
+            query: User query to answer.
+            modalities: Modalities selected for this query.
+
+        Returns:
+            A human-readable string listing the URLs for each modality.
+        """
         paraphrased_queries = self.paraphrase_agent.run_query(
             query=query, modalities=modalities
         )
@@ -56,6 +85,15 @@ class GradioApp:
     def _infer(
         self, query: str, chat_history: List[Tuple[str, str]]
     ) -> Generator[Tuple[List[Tuple[str, str]], str], None, None]:
+        """Streaming inference callback used by the Gradio Chatbot.
+
+        Args:
+            query: Current user message.
+            chat_history: Existing chat history between user and assistant.
+
+        Yields:
+            Updated chat history and an (unused) text value for the input box.
+        """
         chat_history = chat_history + [(query, "")]
         yield chat_history, ""
 
@@ -70,6 +108,7 @@ class GradioApp:
         yield chat_history, ""
 
     def launch_app(self):
+        """Create and launch the Gradio Blocks interface."""
         with gr.Blocks() as demo:
             chatbot = gr.Chatbot()
             query = gr.Textbox(placeholder=self.caption)

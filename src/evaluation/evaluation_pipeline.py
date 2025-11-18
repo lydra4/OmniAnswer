@@ -1,3 +1,5 @@
+"""Offline evaluation utilities for the OmniAnswer recommendation pipeline."""
+
 import json
 import logging
 import os
@@ -24,6 +26,8 @@ from utils.general_utils import init_mlflow
 
 
 class EvaluationPipeline:
+    """Compute modality-specific similarity metrics for a recommendation result."""
+
     def __init__(
         self,
         cfg: DictConfig,
@@ -32,6 +36,15 @@ class EvaluationPipeline:
         llm_name: str,
         temperature: int | float,
     ) -> None:
+        """Initialize the evaluation pipeline and metric objects.
+
+        Args:
+            cfg: Global configuration; the evaluation-specific section is used.
+            logger: Logger instance for reporting progress and errors.
+            result_dict: Result dictionary produced by the orchestrator.
+            llm_name: Name of the language model being evaluated.
+            temperature: Sampling temperature of the language model.
+        """
         self.cfg = cfg.evaluation
         self.logger = logger
         self.result_dict = result_dict
@@ -70,6 +83,18 @@ class EvaluationPipeline:
             self.clip_length: int = self.video_model.config.vision_config.num_frames
 
     def _load_results_dict(self, path: str) -> ResultDictFile:
+        """Load a previously saved evaluation dictionary from disk.
+
+        Args:
+            path: Directory containing ``evaluation_dict.json``.
+
+        Returns:
+            The loaded results dictionary, or an empty skeleton if the file is
+            not present.
+
+        Raises:
+            Exception: Propagates any JSON loading errors.
+        """
         result_dict_path = os.path.join(path, "evaluation_dict.json")
         if os.path.exists(result_dict_path):
             try:
@@ -81,6 +106,18 @@ class EvaluationPipeline:
         return {"query": "", "results": []}
 
     def _scrap_text(self, url: str, num_words: int) -> str:
+        """Scrape article text from a URL and truncate to ``num_words`` words.
+
+        The function prefers text inside an ``<article>`` tag and falls back
+        to the page body if necessary.
+
+        Args:
+            url: Target web page URL.
+            num_words: Maximum number of words to keep from the cleaned text.
+
+        Returns:
+            A plain-text string containing the first ``num_words`` words.
+        """
         self.logger.info(f"Web scraping url:'{url}'.")
         response = self.text_scrap_client.get(url=url, params={"render": True})
         soup = BeautifulSoup(response, "html.parser")
@@ -99,6 +136,14 @@ class EvaluationPipeline:
         return clean_text
 
     def _evaluate_text(self, num_words: int) -> Optional[float]:
+        """Evaluate the text resource using BERTScore against the paraphrase.
+
+        Args:
+            num_words: Number of words to scrape from the article for comparison.
+
+        Returns:
+            The scalar precision score, or ``None`` if no text modality is present.
+        """
         url, query = next(
             (
                 (result_dict["url"], result_dict["paraphrase"])
@@ -116,6 +161,17 @@ class EvaluationPipeline:
         return precision
 
     def _scrap_image(self, url: str) -> torch.Tensor:
+        """Download and convert a remote image to a batched tensor.
+
+        Args:
+            url: URL of the image to download.
+
+        Returns:
+            A tensor of shape ``(1, C, H, W)`` ready for CLIP scoring.
+
+        Raises:
+            ValueError: If the image cannot be downloaded or opened.
+        """
         self.logger.info(f"Image scraping '{url}'.")
         try:
             response = requests.get(url=url, timeout=10)
@@ -130,6 +186,12 @@ class EvaluationPipeline:
             raise ValueError(f"Error occurred: {e}.") from e
 
     def _evaluate_image(self) -> Optional[float]:
+        """Evaluate the image resource using CLIPScore against the paraphrase.
+
+        Returns:
+            The scalar CLIP-based similarity score, or ``None`` if no image
+            modality is present.
+        """
         url, query = next(
             (
                 (result_dict["url"], result_dict["paraphrase"])
@@ -147,6 +209,17 @@ class EvaluationPipeline:
         return score
 
     def _get_stream_url(self, url: str) -> str:
+        """Resolve a YouTube page URL to a direct video stream URL.
+
+        Args:
+            url: Original YouTube video page URL.
+
+        Returns:
+            A direct stream URL suitable for consumption by ``ffmpeg``.
+
+        Raises:
+            RuntimeError: If no suitable video formats can be located.
+        """
         ydl_opts = {
             "noplaylist": True,
             "quiet": True,
@@ -177,6 +250,18 @@ class EvaluationPipeline:
         return video_url
 
     def _load_video_to_ram(self, stream_url: str, duration: int) -> List[Image.Image]:
+        """Download a video segment to RAM and decode it into frames.
+
+        Args:
+            stream_url: Direct video stream URL.
+            duration: Maximum number of seconds to process.
+
+        Returns:
+            A list of PIL images representing decoded video frames.
+
+        Raises:
+            RuntimeError: If ``ffmpeg`` fails to fetch or decode the stream.
+        """
         cmd = [
             "ffmpeg",
             "-hide_banner",
@@ -219,6 +304,16 @@ class EvaluationPipeline:
         clip_length: int,
         segment_length: int,
     ) -> List[Image.Image]:
+        """Select a fixed number of evenly spaced frames from a video segment.
+
+        Args:
+            video: List of decoded video frames.
+            clip_length: Number of frames to sample.
+            segment_length: Total number of frames available.
+
+        Returns:
+            A list containing ``clip_length`` frames sampled across the segment.
+        """
         indices = np.linspace(
             start=0, stop=(segment_length - 1), num=clip_length
         ).astype(np.int64)
@@ -228,6 +323,16 @@ class EvaluationPipeline:
     def _preprocess_video_text(
         self, video: List[Image.Image], query: str
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Tokenize and encode video frames and query text for similarity scoring.
+
+        Args:
+            video: Sequence of video frames as PIL images.
+            query: Natural language query describing the content.
+
+        Returns:
+            A tuple ``(text_embeds, video_embeds)`` containing the encoded
+            representations.
+        """
         procesed_video = self.video_processor.video_processor.preprocess(
             video, return_tensors="pt"
         )
@@ -248,6 +353,14 @@ class EvaluationPipeline:
         return text_embeds, video_embeds
 
     def _evaluate_video(self, duration: int) -> Optional[float]:
+        """Evaluate the video resource using cosine similarity in embedding space.
+
+        Args:
+            duration: Number of seconds of video to download and analyze.
+
+        Returns:
+            A scalar similarity score, or ``None`` if no video modality exists.
+        """
         url, query = next(
             (
                 (result_dict["url"], result_dict["paraphrase"])
@@ -279,6 +392,7 @@ class EvaluationPipeline:
         return sim
 
     def evaluate(self) -> None:
+        """Run the full evaluation pipeline and log metrics to MLflow."""
         original_query = self.result_dict["query"]
         self.logger.info(f"Evaluating query:'{original_query}'.")
 

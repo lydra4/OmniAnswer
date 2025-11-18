@@ -1,3 +1,5 @@
+"""Custom CrewAI tool for searching educational videos on YouTube."""
+
 import os
 from typing import List, Type
 
@@ -8,10 +10,14 @@ from pydantic import BaseModel, Field, PrivateAttr
 
 
 class VideoSearchSchema(BaseModel):
+    """Schema describing the inputs to the video search tool."""
+
     query: str = Field(description="The search query for finding youtube videos.")
 
 
 class VideoSearchTool(BaseTool):
+    """CrewAI tool that wraps the YouTube Data API for video search."""
+
     name: str
     description: str
     serviceName: str = "youtube"
@@ -25,6 +31,12 @@ class VideoSearchTool(BaseTool):
     args_schema: Type[BaseModel] = VideoSearchSchema
 
     def __init__(self, _cfg: DictConfig) -> None:
+        """Create a new video search tool instance.
+
+        Args:
+            _cfg: Configuration object containing tool metadata and limits such as
+                ``max_results``.
+        """
         super().__init__(name=_cfg.tool.name, description=_cfg.tool.description)
         self._youtube = build(
             serviceName=self.serviceName,
@@ -34,6 +46,14 @@ class VideoSearchTool(BaseTool):
         self._cfg = _cfg
 
     def _run(self, query: str) -> List[str]:
+        """Execute a YouTube search for the given query.
+
+        Args:
+            query: Natural language query describing the desired videos.
+
+        Returns:
+            A list of YouTube watch URLs corresponding to the search results.
+        """
         results = (
             self._youtube.search()
             .list(

@@ -1,3 +1,5 @@
+"""Agent for retrieving image resources relevant to a query."""
+
 import json
 import logging
 from typing import Any, List, Optional
@@ -12,6 +14,7 @@ from tools.image_search import image_search
 
 
 class ImageAgent(BaseAgentTask):
+    """Agent that uses an image search tool to retrieve image URLs."""
     def __init__(
         self,
         cfg: DictConfig,
@@ -20,6 +23,16 @@ class ImageAgent(BaseAgentTask):
         output: BaseModel,
         tools: Optional[List[Any]] = None,
     ):
+        """Initialize the image agent.
+
+        Args:
+            cfg: Configuration for the agent and task.
+            logger: Logger instance used for operational logging.
+            llm: Language model powering reasoning for the task.
+            output: Pydantic model describing the expected JSON output schema.
+            tools: Optional list of tools to use instead of the default
+                `image_search` tool.
+        """
         tools = [image_search] if tools is None else tools
         super().__init__(
             cfg=cfg,
@@ -31,6 +44,17 @@ class ImageAgent(BaseAgentTask):
         self.cfg = cfg
 
     def _parse_result(self, result: TaskOutput) -> str:
+        """Parse the task output and extract the image URL.
+
+        Args:
+            result: Task output returned by the CrewAI task.
+
+        Returns:
+            The URL to a recommended image resource.
+
+        Raises:
+            ValueError: If the result payload is missing.
+        """
         result_json = result.json
         if result_json is None:
             raise ValueError("No result found from image search.")
@@ -40,6 +64,15 @@ class ImageAgent(BaseAgentTask):
         return url
 
     def run_query(self, query: str, **kwargs: Any) -> str:
+        """Execute an image search for the given query.
+
+        Args:
+            query: Natural language query describing the concept to learn.
+            **kwargs: Additional parameters forwarded to the underlying task.
+
+        Returns:
+            URL of the best matching image resource.
+        """
         task = super().create_task(
             query=query, num_results=self.cfg.tool.num_results, **kwargs
         )

@@ -1,3 +1,5 @@
+"""Unit tests for the generic `BaseAgentTask` abstraction."""
+
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -8,6 +10,8 @@ from src.agents.base_agent.base_agent_task import BaseAgentTask
 
 
 class AgentTaskImpl(BaseAgentTask):
+    """Concrete test implementation that echoes back the raw result."""
+
     def _parse_result(self, result: Any) -> Any:
         return result
 
@@ -15,6 +19,7 @@ class AgentTaskImpl(BaseAgentTask):
 def test_create_task_renders_template_and_returns_task(
     logger: MagicMock, llm: MagicMock, ba_mod: Any, dummy_output: Any
 ) -> None:
+    """`create_task` should format the prompt and return a configured task."""
     cfg = OmegaConf.create(
         {
             "agent": {"role": "tester", "name": "TestAgent"},
@@ -39,6 +44,7 @@ def test_create_task_renders_template_and_returns_task(
 def test_create_agent_calls_agent_with_llm_and_tools_and_cfg_keys(
     logger: MagicMock, llm: MagicMock, ba_mod: Any, dummy_tool: Any, dummy_output: Any
 ) -> None:
+    """Agent initialization should receive LLM, tools, and config keys."""
     cfg = OmegaConf.create({"agent": {"role": "r1", "extra": "v"}, "task": {}})
 
     ba_mod.Agent = MagicMock(return_value="agent-object")
@@ -67,6 +73,7 @@ def test_create_task_fills_query_in_multiple_fields(
     ba_mod: Any,
     dummy_output: Any,
 ) -> None:
+    """Query placeholders should be substituted in all task fields."""
     cfg = OmegaConf.create(
         {"agent": {"role": "r2"}, "task": {"p1": "A {query}", "p2": "B {query} end"}}
     )
@@ -89,6 +96,7 @@ def test_logger_info_called_on_agent_initialization(
     ba_mod: Any,
     dummy_output: Any,
 ) -> None:
+    """`logger.info` should be called when a new agent is initialized."""
     cfg = OmegaConf.create({"agent": {"role": "logger-role"}, "task": {}})
 
     ba_mod.Agent = MagicMock(return_value="agent-object")

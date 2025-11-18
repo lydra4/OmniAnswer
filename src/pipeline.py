@@ -1,3 +1,10 @@
+"""Entry point for running the offline OmniAnswer evaluation pipeline.
+
+This script wires together content moderation, modality selection, paraphrasing,
+and orchestration to process a list of learning queries, and optionally runs
+the quantitative evaluation pipeline.
+"""
+
 import logging
 import os
 
@@ -13,6 +20,12 @@ from utils.pipeline_utils import init_components, process_file
 
 @hydra.main(version_base=None, config_path="../config", config_name="pipeline.yaml")
 def main(cfg: DictConfig) -> None:
+    """Run the end‑to‑end pipeline for a batch of questions.
+
+    Args:
+        cfg: Hydra configuration object containing model, agent, and
+            evaluation settings.
+    """
     load_dotenv()
     logger = logging.getLogger(__name__)
     setup_logging(

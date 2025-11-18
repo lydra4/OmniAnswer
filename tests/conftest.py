@@ -1,3 +1,5 @@
+"""Test fixtures and stub implementations shared across the test suite."""
+
 import sys
 import types
 from types import SimpleNamespace
@@ -9,6 +11,7 @@ from pydantic import BaseModel
 
 
 def install_fake_crewai() -> None:
+    """Install lightweight stand-ins for the ``crewai`` package into ``sys.modules``."""
     if "crewai" in sys.modules:
         return
 
@@ -52,6 +55,8 @@ install_fake_crewai()
 
 
 class DummyOutput(BaseModel):
+    """Minimal pydantic model used as an output schema in tests."""
+
     result: str = ""
 
 

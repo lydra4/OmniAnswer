@@ -1,3 +1,5 @@
+"""Unit tests for the `ModalityAgent` routing behaviour."""
+
 from typing import Any, List
 from unittest.mock import MagicMock
 
@@ -9,6 +11,7 @@ from agents.modality_agent import ModalityAgent
 
 @pytest.fixture
 def modality_agent_cfg() -> DictConfig:
+    """Return a minimal configuration for constructing a `ModalityAgent`."""
     return OmegaConf.create(
         {
             "agent": {
@@ -27,6 +30,7 @@ def modality_agent_cfg() -> DictConfig:
 
 @pytest.fixture
 def modality_agent_fixture(modality_agent_cfg: DictConfig) -> ModalityAgent:
+    """Create a `ModalityAgent` instance with a mocked guard."""
     logger = MagicMock()
     llm = MagicMock()
     agent = ModalityAgent(
@@ -52,6 +56,7 @@ def test_modality_agent_routing(
     query: str,
     expected: List[str],
 ) -> None:
+    """`ModalityAgent.run_query` should return the expected modalities."""
     monkeypatch.setattr(
         ModalityAgent,
         "run_query",
@@ -65,6 +70,8 @@ def test_modality_agent_unsupported_modality(
     modality_agent_fixture: ModalityAgent,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Unsupported modalities should raise a `ValueError`."""
+
     def fake_run(_: Any, query: str) -> List[str]:
         if query == "audio":
             raise ValueError("Rejected query due to: unsupported modality")

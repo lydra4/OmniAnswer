@@ -1,3 +1,5 @@
+"""General utility functions for logging, model loading, and MLflow setup."""
+
 import logging
 import logging.config
 import os
@@ -13,13 +15,22 @@ logger = logging.getLogger(__name__)
 def setup_logging(
     logging_config_path: str = "../conf/logging.yaml", default_level: int = logging.INFO
 ) -> None:
+    """Configure application-wide logging using a YAML config file.
+
+    If the configuration file is missing or invalid, a basic logging
+    configuration is installed instead.
+
+    Args:
+        logging_config_path: Path to the logging YAML configuration file.
+        default_level: Logging level used for the fallback basic configuration.
+    """
     try:
         os.makedirs("logs", exist_ok=True)
         with open(logging_config_path, encoding="utf-8") as file:
             log_config = yaml.safe_load(file.read())
         logging.config.dictConfig(log_config)
 
-    except Exception as error:
+    except Exception as error:  # pragma: no cover - defensive fallback
         logging.basicConfig(
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             level=default_level,
@@ -29,6 +40,21 @@ def setup_logging(
 
 
 def load_llm(model_name: str, temperature: float) -> LLM:
+    """Instantiate a CrewAI LLM wrapper for the requested model.
+
+    The function currently supports OpenAI (``gpt-``) and Gemini (``gemini-``)
+    model families, using the appropriate API keys from the environment.
+
+    Args:
+        model_name: Name of the model, e.g. ``\"gpt-4o\"`` or ``\"gemini-2.0-pro\"``.
+        temperature: Sampling temperature for the model.
+
+    Returns:
+        A configured :class:`~crewai.LLM` instance.
+
+    Raises:
+        ValueError: If the model family is not supported or no API key is set.
+    """
     model_name_clean = model_name.strip().lower()
 
     if model_name_clean.startswith("gemini-"):
@@ -61,6 +87,18 @@ def init_mlflow(
     image_similarity: Optional[float] = None,
     video_similarity: Optional[float] = None,
 ) -> None:
+    """Initialize an MLflow experiment and log evaluation metrics.
+
+    Args:
+        directory: Local directory used as the MLflow tracking URI.
+        experiment_name: Name of the MLflow experiment.
+        llm_name: Identifier of the language model under evaluation.
+        temperature: Sampling temperature used with the language model.
+        modes: List of modalities included in the evaluation.
+        text_similarity: Optional similarity score for text.
+        image_similarity: Optional similarity score for images.
+        video_similarity: Optional similarity score for video.
+    """
     os.makedirs(name=directory, exist_ok=True)
     mlflow.set_tracking_uri(uri=f"file:{directory}")
     mlflow.set_experiment(experiment_name=experiment_name)

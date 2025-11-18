@@ -1,3 +1,5 @@
+"""Crew-based orchestration of text, image, and video retrieval agents."""
+
 import logging
 import os
 from typing import Dict, List, cast
@@ -12,12 +14,21 @@ from tools.video_search import VideoSearchTool
 
 
 class Orchestrator:
+    """Coordinate modality-specific agents and aggregate their results."""
+
     def __init__(
         self,
         cfg: DictConfig,
         logger: logging.Logger,
         llm: LLM,
     ) -> None:
+        """Initialize the orchestrator and its underlying tools.
+
+        Args:
+            cfg: Configuration containing agent and task definitions.
+            logger: Logger instance for reporting orchestration events.
+            llm: Shared language model used by all underlying agents.
+        """
         self.cfg = cfg
         self.logger = logger
         self.llm = llm
@@ -31,6 +42,7 @@ class Orchestrator:
         self.video_search = VideoSearchTool(_cfg=self.cfg.video_agent)
 
     def text_agent(self) -> Agent:
+        """Create the text-focused research agent."""
         return Agent(
             llm=self.llm,
             tools=[self.text_search],
@@ -38,6 +50,7 @@ class Orchestrator:
         )
 
     def image_agent(self) -> Agent:
+        """Create the image-focused research agent."""
         return Agent(
             llm=self.llm,
             tools=[self.image_search],
@@ -45,6 +58,7 @@ class Orchestrator:
         )
 
     def video_agent(self) -> Agent:
+        """Create the video-focused research agent."""
         return Agent(
             llm=self.llm,
             tools=[self.video_search],
@@ -52,6 +66,7 @@ class Orchestrator:
         )
 
     def text_task(self) -> Task:
+        """Create the text retrieval task definition."""
         return Task(
             description=self.cfg.text_agent.task.description,
             agent=self.text_agent(),
@@ -60,6 +75,7 @@ class Orchestrator:
         )
 
     def image_task(self) -> Task:
+        """Create the image retrieval task definition."""
         return Task(
             description=self.cfg.image_agent.task.description,
             agent=self.image_agent(),
@@ -68,6 +84,7 @@ class Orchestrator:
         )
 
     def video_task(self) -> Task:
+        """Create the video retrieval task definition."""
         return Task(
             description=self.cfg.video_agent.task.description,
             agent=self.video_agent(),
@@ -76,6 +93,7 @@ class Orchestrator:
         )
 
     def crew(self) -> Crew:
+        """Assemble a Crew comprising all modality-specific agents and tasks."""
         return Crew(
             agents=[self.text_agent(), self.image_agent(), self.video_agent()],
             tasks=[self.text_task(), self.image_task(), self.video_task()],
@@ -87,6 +105,16 @@ class Orchestrator:
         query: str,
         paraphrase_queries: Dict[str, str],
     ) -> ResultDictFile:
+        """Kick off the crew and aggregate results into a structured dictionary.
+
+        Args:
+            query: Original user query.
+            paraphrase_queries: Mapping from modality to paraphrased query text.
+
+        Returns:
+            A :class:`ResultDictFile` object containing modality, paraphrase, and
+            URL tuples.
+        """
         research_crew = self.crew()
         crew_results = research_crew.kickoff(
             inputs={
