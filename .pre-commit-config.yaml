@@ -5,7 +5,12 @@ repos:
       - id: ruff
         files: \.py$
         args: [--fix]
-      - id: ruff-format
+
+  - repo: https://github.com/pycqa/isort
+    rev: 7.0.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
         files: \.py$
 
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -19,7 +24,7 @@ repos:
           - pydantic==2.12.3
           - omegaconf
           - crewai
-        args: 
+        args:
           - "--config-file=.github/workflows/mypy.ini"
           - "--namespace-packages"
 
@@ -29,19 +34,10 @@ repos:
       - id: black
         files: \.py$
 
-  - repo: https://github.com/pycqa/isort
-    rev: 7.0.0
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-        files: \.py$
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: check-yaml
       - id: check-json
       - id: end-of-file-fixer
-        files: \.py$
       - id: trailing-whitespace
-        files: \.py$
