@@ -5,9 +5,10 @@ import logging.config
 import os
 from typing import List, Optional
 
-import mlflow
 import yaml
 from crewai import LLM
+
+import mlflow
 
 logger = logging.getLogger(__name__)
 
