@@ -1,0 +1,14 @@
+artifact_uri: file:///home/sagemaker-user/OmniAnswer/mlflow/892632396401470805/fcf041d19b84429d8b9d612bea081af9/artifacts
+end_time: 1762752537065
+entry_point_name: ''
+experiment_id: '892632396401470805'
+lifecycle_stage: active
+run_id: fcf041d19b84429d8b9d612bea081af9
+run_name: gemini-2.5-pro-1.5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762752537047
+status: 3
+tags: []
+user_id: sagemaker-user

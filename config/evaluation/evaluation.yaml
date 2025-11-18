@@ -1,4 +1,4 @@
-mlflow_directory: ./mlflow/
+mlflow_directory: ./mlruns/
 
 text:
   text_model_name: "bert-base-uncased"

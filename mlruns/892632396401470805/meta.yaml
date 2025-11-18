@@ -1,0 +1,6 @@
+artifact_location: file:///home/sagemaker-user/OmniAnswer/mlflow/892632396401470805
+creation_time: 1762416122237
+experiment_id: '892632396401470805'
+last_update_time: 1762416122237
+lifecycle_stage: active
+name: evaluation_ablation

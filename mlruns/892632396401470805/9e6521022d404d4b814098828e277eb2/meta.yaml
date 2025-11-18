@@ -1,0 +1,14 @@
+artifact_uri: file:///home/sagemaker-user/OmniAnswer/mlflow/892632396401470805/9e6521022d404d4b814098828e277eb2/artifacts
+end_time: 1762752741071
+entry_point_name: ''
+experiment_id: '892632396401470805'
+lifecycle_stage: active
+run_id: 9e6521022d404d4b814098828e277eb2
+run_name: gpt-4o-0.0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1762752741051
+status: 3
+tags: []
+user_id: sagemaker-user
