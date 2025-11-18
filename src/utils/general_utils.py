@@ -5,9 +5,10 @@ import logging.config
 import os
 from typing import List, Optional
 
-import mlflow
 import yaml
 from crewai import LLM
+
+import mlflow
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def setup_logging(
             log_config = yaml.safe_load(file.read())
         logging.config.dictConfig(log_config)
 
-    except Exception as error:  # pragma: no cover - defensive fallback
+    except Exception as error:
         logging.basicConfig(
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             level=default_level,
@@ -100,8 +101,8 @@ def init_mlflow(
         video_similarity: Optional similarity score for video.
     """
     os.makedirs(name=directory, exist_ok=True)
-    mlflow.set_tracking_uri(uri=f"file:{directory}")
-    mlflow.set_experiment(experiment_name=experiment_name)
+    mlflow.set_tracking_uri(uri=f"file:{directory}")  # type: ignore[attr-defined]
+    mlflow.set_experiment(experiment_name=experiment_name)  # type: ignore[attr-defined]
 
     metrics = {
         "Text Similarity": text_similarity,
@@ -110,9 +111,9 @@ def init_mlflow(
     }
 
     run_name = f"{llm_name}-{temperature}"
-    with mlflow.start_run(run_name=run_name):
-        mlflow.log_params({"llm": llm_name, "temperature": temperature})
-        mlflow.set_tag("modes", ",".join(modes))
+    with mlflow.start_run(run_name=run_name):  # type: ignore[attr-defined]
+        mlflow.log_params({"llm": llm_name, "temperature": temperature})  # type: ignore[attr-defined]
+        mlflow.set_tag("modes", ",".join(modes))  # type: ignore[attr-defined]
         for metric_name, value in metrics.items():
             if value is not None:
-                mlflow.log_metric(metric_name, value)
+                mlflow.log_metric(metric_name, value)  # type: ignore[attr-defined]
