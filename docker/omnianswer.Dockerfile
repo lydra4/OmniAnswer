@@ -42,3 +42,7 @@ COPY --chown=${NON_ROOT_USER}:${NON_ROOT_GID} ${REPO_DIR} .
 
 # Switch to the non-root user for running the application
 USER ${NON_ROOT_USER}
+
+EXPOSE 8080
+
+CMD ["python", "src/launch_gradio.py"]
