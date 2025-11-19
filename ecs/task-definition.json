@@ -4,6 +4,8 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
+  "executionRoleArn": "arn:aws:iam::655252755560:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::655252755560:role/omnianswer-task-role",
   "containerDefinitions": [
     {
       "name": "omnianswer",
@@ -14,13 +16,7 @@
           "protocol": "tcp"
         }
       ],
-      "essential": true,
-      "environment": [
-        {
-          "name": "ENV_VAR_NAME",
-          "value": "value"
-        }
-      ]
+      "essential": true
     }
   ]
 }
