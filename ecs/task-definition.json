@@ -1,0 +1,26 @@
+{
+  "family": "omnianswer-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "omnianswer",
+      "image": "655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "ENV_VAR_NAME",
+          "value": "value"
+        }
+      ]
+    }
+  ]
+}
