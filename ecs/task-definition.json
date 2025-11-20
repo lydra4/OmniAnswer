@@ -2,17 +2,32 @@
   "family": "omnianswer-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "256",
-  "memory": "512",
+  "cpu": "1024",
+  "memory": "2048",
   "executionRoleArn": "arn:aws:iam::655252755560:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::655252755560:role/omnianswer-task-role",
+  "healthCheck": {
+    "command": ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"],
+    "interval": 30,
+    "timeout": 5,
+    "retries": 3,
+    "startPeriod": 0
+  },
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "omnianswer",
+      "awslogs-region": "ap-southeast-1",
+      "awslogs-stream-prefix": "omnianswer"
+    }
+  },
   "containerDefinitions": [
     {
       "name": "omnianswer",
       "image": "655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:latest",
       "portMappings": [
         {
-          "containerPort": 80,
+          "containerPort": 8080,
           "protocol": "tcp"
         }
       ],
