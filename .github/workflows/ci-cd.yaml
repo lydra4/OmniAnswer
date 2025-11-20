@@ -72,11 +72,18 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build, tag and push image
         run: |
           IMAGE_URI=655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:${{ github.sha }}
-          docker build -t $IMAGE_URI -f docker/omnianswer.Dockerfile .
-          docker push $IMAGE_URI
+          docker buildx build \
+          --cache-from type=registry,ref=655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:cache \
+          --cache-to type=registry,ref=655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:cache,mode=max \
+          -t $IMAGE_URI \
+          -f docker/omnianswer.Dockerfile \
+          --push .
 
       - name: Inject Gemini API Key into task definition
         run: |
