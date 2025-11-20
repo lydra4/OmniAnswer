@@ -7,11 +7,11 @@
   "executionRoleArn": "arn:aws:iam::655252755560:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::655252755560:role/omnianswer-task-role",
   "healthCheck": {
-    "command": ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"],
+    "command": ["CMD-SHELL", "curl -f http://localhost:8080/ || exit 1"],
     "interval": 30,
     "timeout": 5,
     "retries": 3,
-    "startPeriod": 0
+    "startPeriod": 60
   },
   "logConfiguration": {
     "logDriver": "awslogs",
