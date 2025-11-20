@@ -1,3 +1,6 @@
+# Ignore Sphinx Documenation
+docs/
+
 # Ignore all local configuration
 **/conf/local/**
 !**/conf/local/.gitkeep
