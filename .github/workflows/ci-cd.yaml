@@ -54,7 +54,7 @@ jobs:
           "omnianswer:${{ github.sha }}" \
           bash -c "pip install pytest && pytest -q tests"
 
-  deploy-to-ecs:
+  cd-pipeline:
     needs: ci-pipeline
     runs-on: ubuntu-latest
 
