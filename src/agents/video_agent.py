@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 
 from agents.base_agent.base_agent_task import BaseAgentTask
-from tools.video_search import video_search
+from tools.video_search import VideoSearchTool
 
 
 class VideoAgent(BaseAgentTask):
@@ -34,7 +34,7 @@ class VideoAgent(BaseAgentTask):
             tools: Optional list of tools to use instead of the default
                 `video_search` tool.
         """
-        tools = [video_search] if tools is None else tools
+        tools = [VideoSearchTool] if tools is None else tools
         super().__init__(
             cfg=cfg,
             logger=logger,

@@ -10,7 +10,7 @@ from omegaconf import DictConfig
 from pydantic import BaseModel
 
 from agents.base_agent.base_agent_task import BaseAgentTask
-from tools.image_search import image_search
+from tools.image_search import ImageSearchTool
 
 
 class ImageAgent(BaseAgentTask):
@@ -34,7 +34,7 @@ class ImageAgent(BaseAgentTask):
             tools: Optional list of tools to use instead of the default
                 `image_search` tool.
         """
-        tools = [image_search] if tools is None else tools
+        tools = [ImageSearchTool] if tools is None else tools
         super().__init__(
             cfg=cfg,
             logger=logger,
