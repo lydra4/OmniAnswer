@@ -2,13 +2,12 @@ name: OmniAnswer CI-CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 jobs:
-
   ci-pipeline:
     runs-on: ubuntu-latest
 
@@ -79,6 +78,16 @@ jobs:
           docker build -t $IMAGE_URI -f docker/omnianswer.Dockerfile .
           docker push $IMAGE_URI
 
+      - name: Inject Gemini API Key into task definition
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+          TASK_DEF=$(cat ecs/task-definition.json)
+          TASK_DEF=$(echo "$TASK_DEF" | jq --arg GEMINI_API_KEY "${{ secrets.GEMINI_API_KEY }}" \
+          '.containerDefinitions[0].environment = [
+          {"name": "GEMINI_API_KEY", "value": $GEMINI_API_KEY}
+          ]')
+          echo "$TASK_DEF" > ecs/task-definition.json
+
       - name: Render new task definition
         id: taskdef
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -88,7 +97,7 @@ jobs:
           image: 655252755560.dkr.ecr.ap-southeast-1.amazonaws.com/omnianswer:${{ github.sha }}
 
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.taskdef.outputs.task-definition }}
           service: omnianswer-service
