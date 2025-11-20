@@ -16,7 +16,7 @@
   "logConfiguration": {
     "logDriver": "awslogs",
     "options": {
-      "awslogs-group": "omnianswer",
+      "awslogs-group": "/aws/ecs/omnianswer",
       "awslogs-region": "ap-southeast-1",
       "awslogs-stream-prefix": "omnianswer"
     }
