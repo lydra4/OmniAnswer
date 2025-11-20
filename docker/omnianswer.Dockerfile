@@ -10,6 +10,7 @@ RUN apt-get update && \
     libffi-dev \
     libsqlite3-dev \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 ARG DEBIAN_FRONTEND="noninteractive"
