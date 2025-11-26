@@ -408,6 +408,9 @@ pre-commit install
 ## 📊 Architecture
 
 <!-- (Add architecture diagram here: assets/architecture.png) -->
+<p align="center">
+  <img src="assets/architecture.jpg" alt="gemini-2.5-pro" height="500"/>
+</p>
 
 OmniAnswer follows a multi-agent architecture:
 
