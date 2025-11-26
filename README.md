@@ -11,6 +11,32 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [Project Context](#-project-context)
+- [Key Features](#-key-features)
+- [Tech Stack](#️-tech-stack)
+- [Quickstart](#-quickstart)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Environment Variables](#-environment-variables)
+- [Configuration](#️-configuration)
+- [Project Structure](#-project-structure)
+- [Usage Examples](#-usage-examples)
+- [Docker Deployment](#-docker-deployment)
+- [AWS ECS Deployment](#️-aws-ecs-deployment)
+- [Evaluation](#-evaluation)
+- [Development](#-development)
+- [Architecture](#-architecture)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgements](#-acknowledgements)
+- [Contact](#-contact)
+- [Additional Resources](#-additional-resources)
+
+---
+
 ## 📖 Project Context
 
 This project was conceived in response to the rapidly evolving landscape of data science and artificial intelligence. As new technologies and methodologies emerge, it becomes increasingly challenging to find clear, concise, and authoritative answers to technical questions. The typical process often involves sifting through a multitude of resources—ranging from Medium articles, Towards Data Science posts, to countless YouTube videos—before finally discovering an article or video that truly clarifies the topic at hand.
@@ -72,6 +98,7 @@ This project was conceived in response to the rapidly evolving landscape of data
 ## 🚀 Quickstart
 
 <!-- (Add quickstart/installation diagram here: assets/dev-env.png) -->
+<!-- A quickstart/installation diagram typically shows the step-by-step process of setting up the project, including cloning, environment setup, dependency installation, and configuration steps. -->
 
 ### Prerequisites
 
@@ -124,23 +151,13 @@ GOOGLE_API_KEY=your_google_api_key_here
 SERP_API_KEY=your_serpapi_key_here
 ```
 
-4. **Run the application:**
-
-**Option A: Launch the Gradio Web Interface (Recommended for interactive use):**
+4. **Launch the Gradio Web Interface:**
 
 ```bash
 python src/launch_gradio.py
 ```
 
-The web interface will be available at `http://localhost:8080`
-
-**Option B: Run the batch pipeline:**
-
-```bash
-python src/pipeline.py
-```
-
-The pipeline processes queries from the file specified in `config/pipeline.yaml` (default: `./data/questions/queries.txt`).
+The web interface will be available at `http://localhost:8080`. You can interact with the agents through the UI to ask questions and receive multi-modal search results.
 
 ---
 
@@ -273,6 +290,7 @@ OmniAnswer/
 ```
 
 <!-- (Add development workflow diagram here: assets/dev-workflow.png) -->
+<!-- A development workflow diagram typically illustrates the process of developing, testing, and deploying changes, including steps like code editing, running tests, linting, committing changes, and deployment. -->
 
 ---
 
@@ -293,59 +311,9 @@ Then open your browser to `http://localhost:8080` and start asking questions. Th
 3. Paraphrase queries for each modality
 4. Search and return relevant URLs
 
-### Batch Processing
-
-Run the pipeline on a file of queries:
-
-```bash
-python src/pipeline.py
-```
-
-The pipeline will:
-
-- Process each query from the configured questions file
-- Run content moderation
-- Select appropriate modalities
-- Generate paraphrased queries
-- Execute searches across modalities
-- Optionally run evaluation metrics (if `evaluate: True` in config)
-
-### Programmatic Usage
-
-```python
-from src.utils.pipeline_utils import init_components
-from omegaconf import DictConfig
-import logging
-
-# Initialize components
-cfg = # Load your config
-logger = logging.getLogger(__name__)
-content_moderator, modality_agent, paraphrase_agent, orchestrator = init_components(
-    cfg=cfg, logger=logger
-)
-
-# Process a query
-query = "How do transformer attention masks work?"
-content_moderator.moderate_query(query=query)
-modalities = modality_agent.run_query(query=query)
-paraphrased_queries = paraphrase_agent.run_query(query=query, modalities=modalities)
-result_dict = orchestrator.run(query=query, paraphrase_queries=paraphrased_queries)
-
-print(result_dict)
-```
-
 ---
 
 ## 🐳 Docker Deployment
-
-### Build and Run with Docker Compose
-
-```bash
-cd docker
-docker-compose up --build
-```
-
-The application will be available at `http://localhost:8080`.
 
 ### Build Docker Image Manually
 
