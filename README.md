@@ -62,7 +62,10 @@ This project was conceived in response to the rapidly evolving landscape of data
 - **Google Custom Search** - Image search
 - **SerpApi** - Video/YouTube search
 
-<!-- (Add tech stack logos here: assets/gemini-2.5-pro.jpg, assets/gpt-4o.jpg) -->
+<p align="center">
+  <img src="assets/llm-gemini-2.5-pro.jpg" alt="gemini-2.5-pro" height="200"/>
+  <img src="assets/llm-gpt-4o.jpg" alt="gpt-4o" height="200"/>
+</p>
 
 ---
 
