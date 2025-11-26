@@ -28,6 +28,7 @@
 - [Evaluation](#-evaluation)
 - [Development](#-development)
 - [Architecture](#-architecture)
+  - [Evaluation Architecture](#evaluation-architecture)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 - [License](#-license)
@@ -97,12 +98,6 @@ This project was conceived in response to the rapidly evolving landscape of data
 
 ## 🚀 Quickstart
 
-<p align="center">
-  <img src="assets/dev-env.png" alt="Development Environment Setup" height="400"/>
-</p>
-
-**What it shows**: The development environment setup diagram (`assets/dev-env.png`) illustrates the step-by-step process for setting up the OmniAnswer project. It guides users through cloning the repository, creating a Python environment (conda or venv), installing dependencies, configuring environment variables, and launching the application. This diagram helps new users understand the complete installation workflow at a glance.
-
 ### Prerequisites
 
 - Python 3.11+
@@ -165,10 +160,6 @@ The web interface will be available at `http://localhost:8080`. You can interact
 ---
 
 ## 🔧 Environment Variables
-
-<p align="center">
-  <img src="assets/env-vars.png" alt="Environment Variables Guide" height="400"/>
-</p>
 
 **What it shows**: The environment variables guide (`assets/env-vars.png`) provides a visual overview of all required API keys and configuration variables needed to run OmniAnswer. It explains which services each variable connects to (OpenAI, Gemini, Tavily, Google Custom Search, SerpApi) and how they're used throughout the system. This diagram helps developers quickly identify which API keys they need to obtain and configure before running the application.
 
