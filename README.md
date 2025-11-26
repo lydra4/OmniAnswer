@@ -97,8 +97,11 @@ This project was conceived in response to the rapidly evolving landscape of data
 
 ## 🚀 Quickstart
 
-<!-- (Add quickstart/installation diagram here: assets/dev-env.png) -->
-<!-- A quickstart/installation diagram typically shows the step-by-step process of setting up the project, including cloning, environment setup, dependency installation, and configuration steps. -->
+<p align="center">
+  <img src="assets/dev-env.png" alt="Development Environment Setup" height="400"/>
+</p>
+
+**What it shows**: The development environment setup diagram (`assets/dev-env.png`) illustrates the step-by-step process for setting up the OmniAnswer project. It guides users through cloning the repository, creating a Python environment (conda or venv), installing dependencies, configuring environment variables, and launching the application. This diagram helps new users understand the complete installation workflow at a glance.
 
 ### Prerequisites
 
@@ -163,7 +166,11 @@ The web interface will be available at `http://localhost:8080`. You can interact
 
 ## 🔧 Environment Variables
 
-<!-- (Add environment variables guide image here: assets/env-vars.png) -->
+<p align="center">
+  <img src="assets/env-vars.png" alt="Environment Variables Guide" height="400"/>
+</p>
+
+**What it shows**: The environment variables guide (`assets/env-vars.png`) provides a visual overview of all required API keys and configuration variables needed to run OmniAnswer. It explains which services each variable connects to (OpenAI, Gemini, Tavily, Google Custom Search, SerpApi) and how they're used throughout the system. This diagram helps developers quickly identify which API keys they need to obtain and configure before running the application.
 
 Required environment variables (store in `.env` or export in your shell):
 
@@ -182,7 +189,11 @@ Use `python-dotenv` (already included) to automatically load `.env` files in dev
 
 ## ⚙️ Configuration
 
-<!-- (Add configuration diagram here: create a config-structure.png showing config hierarchy) -->
+<p align="center">
+  <img src="assets/config-structure.png" alt="Configuration Structure" height="400"/>
+</p>
+
+**What it shows**: The configuration structure diagram (`assets/config-structure.png`) visualizes the hierarchical organization of YAML configuration files in the `config/` directory. It shows how the main `pipeline.yaml` file references agent-specific configurations, evaluation settings, and logging configurations. This diagram helps developers understand how Hydra merges configurations and where to modify settings for different components of the system.
 
 All runtime configuration lives in `config/`. The repository uses Hydra-style YAML configuration files.
 
@@ -221,7 +232,7 @@ evaluate: True
 
 ## 📁 Project Structure
 
-<!-- (Add architecture diagram here: assets/architecture.png) -->
+<!-- Architecture diagram is shown in the Architecture section below -->
 
 ```
 OmniAnswer/
@@ -289,8 +300,11 @@ OmniAnswer/
 └── README.md
 ```
 
-<!-- (Add development workflow diagram here: assets/dev-workflow.png) -->
-<!-- A development workflow diagram typically illustrates the process of developing, testing, and deploying changes, including steps like code editing, running tests, linting, committing changes, and deployment. -->
+<p align="center">
+  <img src="assets/dev-workflow.png" alt="Development Workflow" height="400"/>
+</p>
+
+**What it shows**: The development workflow diagram (`assets/dev-workflow.png`) illustrates the complete software development lifecycle for contributing to OmniAnswer. It shows the iterative process of editing code, running tests, applying linting and formatting tools (Black, Ruff, Pylint), committing changes, and deploying updates. This diagram helps contributors understand the recommended workflow for maintaining code quality and ensuring changes are properly tested before integration.
 
 ---
 
@@ -407,10 +421,11 @@ pre-commit install
 
 ## 📊 Architecture
 
-<!-- (Add architecture diagram here: assets/architecture.png) -->
 <p align="center">
-  <img src="assets/architecture.jpg" alt="gemini-2.5-pro" height="500"/>
+  <img src="assets/architecture.jpg" alt="System Architecture" height="500"/>
 </p>
+
+**What it shows**: The architecture diagram (`assets/architecture.jpg`) provides a high-level overview of the OmniAnswer system's multi-agent architecture. It visualizes the flow of data from user queries through content moderation, modality selection, query paraphrasing, and multi-modal search orchestration. The diagram shows how different agents interact and how results are aggregated and returned to users. This helps developers understand the system's component relationships and data flow.
 
 OmniAnswer follows a multi-agent architecture:
 
@@ -423,6 +438,37 @@ OmniAnswer follows a multi-agent architecture:
    - **Video Agent**: Searches using SerpApi (YouTube)
 
 The orchestrator aggregates results from all agents and returns structured recommendations.
+
+### Evaluation Architecture
+
+The evaluation pipeline is integrated into the main architecture and provides quantitative assessment of recommendation quality:
+
+1. **Evaluation Pipeline** (`src/evaluation/evaluation_pipeline.py`): Computes modality-specific similarity metrics after the orchestrator returns results
+   - **Text Evaluation**: Uses BERTScore to measure semantic similarity between paraphrased queries and scraped article content
+     - Scrapes text from URLs using ScraperAPI
+     - Extracts article content (preferring `<article>` tags, falling back to `<body>`)
+     - Compares query paraphrases against scraped text using BERT-base-uncased embeddings
+   - **Image Evaluation**: Uses CLIP Score to measure visual-text alignment
+     - Downloads images from URLs
+     - Computes CLIP-based similarity between image embeddings and query paraphrase embeddings
+     - Uses OpenAI's CLIP-ViT-Base-Patch32 model
+   - **Video Evaluation**: Uses X-CLIP Score to measure video-text alignment
+     - Downloads video segments (default: 5 seconds) using yt-dlp and ffmpeg
+     - Samples evenly-spaced frames based on model requirements (X-CLIP-base-patch32)
+     - Computes cosine similarity between video and text embeddings in the X-CLIP embedding space
+
+2. **MLflow Integration**: All evaluation metrics are automatically logged to MLflow for experiment tracking
+   - Tracks text similarity, image similarity, and video similarity scores per query
+   - Records model configuration (LLM name, temperature) and selected modalities
+   - Enables comparison across different model configurations and hyperparameters
+   - Stores results in `mlruns/` directory for analysis via MLflow UI
+
+3. **Evaluation Configuration**: Controlled via `config/evaluation/evaluation.yaml`
+   - Configurable model selection for each modality (BERT, CLIP, X-CLIP variants)
+   - Adjustable parameters (text word count, video duration)
+   - MLflow experiment naming and directory configuration
+
+The evaluation pipeline runs automatically when `evaluate: True` is set in `config/pipeline.yaml`, allowing for systematic assessment of recommendation quality across different model configurations and query types.
 
 ---
 
@@ -501,7 +547,15 @@ If you have questions or want to collaborate, open an issue or PR on the reposit
 
 ## 📚 Additional Resources
 
+### Documentation Links
+
+- **[CrewAI Documentation](https://docs.crewai.com/)** - Learn about multi-agent orchestration, agents, crews, and flows
+- **[Hydra Documentation](https://hydra.cc/docs/intro/)** - Understand hierarchical configuration composition and command-line overrides
+- **[MLflow Python API](https://mlflow.org/docs/latest/api_reference/python_api/index.html)** - Reference for experiment tracking, metrics logging, and model management
+
+### Project Resources
+
 - Check `config/` for detailed configuration options
 - See `tests/` for example usage patterns
 - Review `src/` for implementation details
-- MLflow UI for experiment tracking and evaluation metrics
+- MLflow UI for experiment tracking and evaluation metrics (run `mlflow ui` to access)
