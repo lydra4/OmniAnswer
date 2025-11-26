@@ -5,6 +5,7 @@ import os
 from typing import Dict, List, cast
 
 from crewai import LLM, Agent, Crew, Process, Task
+from crewai.crews.crew_output import CrewOutput
 from crewai_tools import TavilySearchTool
 from omegaconf import DictConfig
 
@@ -116,12 +117,15 @@ class Orchestrator:
             URL tuples.
         """
         research_crew = self.crew()
-        crew_results = research_crew.kickoff(
-            inputs={
-                "text_query": paraphrase_queries.get("text", ""),
-                "image_query": paraphrase_queries.get("image", ""),
-                "video_query": paraphrase_queries.get("video", ""),
-            }
+        crew_results = cast(
+            CrewOutput,
+            research_crew.kickoff(
+                inputs={
+                    "text_query": paraphrase_queries.get("text", ""),
+                    "image_query": paraphrase_queries.get("image", ""),
+                    "video_query": paraphrase_queries.get("video", ""),
+                }
+            ),
         )
         tasks_output = crew_results.tasks_output
         results_dict = {
