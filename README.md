@@ -316,6 +316,8 @@ Then open your browser to `http://localhost:8080` and start asking questions. Th
 3. Paraphrase queries for each modality
 4. Search and return relevant URLs
 
+![Demo](assets/gradio_app.gif)
+
 ---
 
 ## 🐳 Docker Deployment
