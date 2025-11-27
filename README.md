@@ -15,6 +15,7 @@
 
 - [Project Context](#-project-context)
 - [Key Features](#-key-features)
+- [Quick Demo](#-quick-demo)
 - [Tech Stack](#️-tech-stack)
 - [Quickstart](#-quickstart)
   - [Prerequisites](#prerequisites)
@@ -30,6 +31,8 @@
 - [Architecture](#-architecture)
   - [Evaluation Architecture](#evaluation-architecture)
 - [Troubleshooting](#-troubleshooting)
+  - [Common Issues](#common-issues)
+- [FAQ](#-frequently-asked-questions)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Acknowledgements](#-acknowledgements)
@@ -57,6 +60,59 @@ This project was conceived in response to the rapidly evolving landscape of data
 - **YAML-driven Configuration**: Hydra-compatible configuration system for easy experimentation
 - **Docker Support**: Containerized deployment with Docker Compose
 - **Cloud Ready**: ECS task definition included for AWS deployment
+
+---
+
+## 🎬 Quick Demo
+
+Here's what happens when you ask OmniAnswer a question:
+
+![Demo](assets/gradio_app.gif)
+
+**Example Query:** _"How does gradient descent work?"_
+
+### Step-by-Step Process:
+
+1. **🔒 Content Moderation**
+
+   - Query is checked for safety using OpenAI's moderation API
+   - ✅ Query passes moderation
+
+2. **🎯 Modality Selection**
+
+   - OmniAnswer determines the best learning modalities for your query
+   - Selected modalities: **Text** + **Video**
+
+3. **🔄 Query Paraphrasing**
+
+   - Original query is optimized for each modality:
+     - **Text**: "gradient descent algorithm explanation mathematical optimization"
+     - **Video**: "gradient descent visualization tutorial step by step"
+
+4. **🔍 Multi-Modal Search**
+
+   - **Text Agent** searches using Tavily API → Returns 5 relevant articles
+   - **Video Agent** searches using SerpApi (YouTube) → Returns 3 tutorial videos
+
+5. **📊 Results Aggregation**
+   - All results are combined and presented with:
+     - Source URLs
+     - Relevance scores (if evaluation is enabled)
+     - Modality-specific metadata
+
+### Try It Yourself:
+
+```bash
+python src/launch_gradio.py
+```
+
+Then visit `http://localhost:8080` and ask any question!
+
+**More Example Queries:**
+
+- _"Explain neural network backpropagation"_ → Text + Video
+- _"Show me data visualization best practices"_ → Image + Text
+- _"How to implement gradient descent in Python?"_ → Video + Text
 
 ---
 
@@ -138,7 +194,7 @@ pip install -r requirements.txt -r dev-requirements.txt
 
 3. **Set up environment variables:**
 
-Create a `.env` file in the project root with your API keys:
+Create a `.env` file in the src folder with your API keys:
 
 ```bash
 OPENAI_API_KEY=your_openai_key_here
@@ -161,7 +217,7 @@ The web interface will be available at `http://localhost:8080`. You can interact
 
 ## 🔧 Environment Variables
 
-**What it shows**: The environment variables guide (`assets/env-vars.png`) provides a visual overview of all required API keys and configuration variables needed to run OmniAnswer. It explains which services each variable connects to (OpenAI, Gemini, Tavily, Google Custom Search, SerpApi) and how they're used throughout the system. This diagram helps developers quickly identify which API keys they need to obtain and configure before running the application.
+**What it shows**: The environment variables guide provides a visual overview of all required API keys and configuration variables needed to run OmniAnswer. It explains which services each variable connects to (OpenAI, Gemini, Tavily, Google Custom Search, SerpApi) and how they're used throughout the system. This diagram helps developers quickly identify which API keys they need to obtain and configure before running the application.
 
 Required environment variables (store in `.env` or export in your shell):
 
@@ -316,8 +372,6 @@ Then open your browser to `http://localhost:8080` and start asking questions. Th
 3. Paraphrase queries for each modality
 4. Search and return relevant URLs
 
-![Demo](assets/gradio_app.gif)
-
 ---
 
 ## 🐳 Docker Deployment
@@ -437,6 +491,7 @@ The orchestrator aggregates results from all agents and returns structured recom
 The evaluation pipeline is integrated into the main architecture and provides quantitative assessment of recommendation quality:
 
 1. **Evaluation Pipeline** (`src/evaluation/evaluation_pipeline.py`): Computes modality-specific similarity metrics after the orchestrator returns results
+
    - **Text Evaluation**: Uses BERTScore to measure semantic similarity between paraphrased queries and scraped article content
      - Scrapes text from URLs using ScraperAPI
      - Extracts article content (preferring `<article>` tags, falling back to `<body>`)
@@ -451,6 +506,7 @@ The evaluation pipeline is integrated into the main architecture and provides qu
      - Computes cosine similarity between video and text embeddings in the X-CLIP embedding space
 
 2. **MLflow Integration**: All evaluation metrics are automatically logged to MLflow for experiment tracking
+
    - Tracks text similarity, image similarity, and video similarity scores per query
    - Records model configuration (LLM name, temperature) and selected modalities
    - Enables comparison across different model configurations and hyperparameters
@@ -486,6 +542,246 @@ pip install -r requirements.txt -r dev-requirements.txt
 ### Port Already in Use
 
 If port 8080 is already in use, modify the port in `src/frontend/gradio_app.py` or set the `GRADIO_SERVER_PORT` environment variable.
+
+### Common Issues
+
+#### Issue: "ModuleNotFoundError: No module named 'crewai'"
+
+**Symptoms:**
+
+```
+ModuleNotFoundError: No module named 'crewai'
+```
+
+**Solution:**
+
+1. Ensure you've activated your conda/venv environment:
+
+   ```bash
+   # For conda:
+   conda activate omnianswer
+
+   # For venv:
+   # Windows:
+   .venv\Scripts\activate
+   # Unix/MacOS:
+   source .venv/bin/activate
+   ```
+
+2. Reinstall dependencies:
+   ```bash
+   pip install -r requirements.txt -r dev-requirements.txt
+   ```
+
+#### Issue: "API rate limit exceeded" or "429 Too Many Requests"
+
+**Symptoms:**
+
+- API calls fail with rate limit errors
+- Search results are empty or incomplete
+
+**Solution:**
+
+1. Check your API key quotas and usage limits for each service:
+
+   - OpenAI: Check [OpenAI Usage Dashboard](https://platform.openai.com/usage)
+   - Gemini: Check [Google Cloud Console](https://console.cloud.google.com/)
+   - Tavily: Check [Tavily Dashboard](https://tavily.com/dashboard)
+   - SerpApi: Check [SerpApi Dashboard](https://serpapi.com/dashboard)
+
+2. Implement rate limiting in your configuration or wait before retrying
+
+3. Consider upgrading your API plan if you need higher rate limits
+
+#### Issue: "Evaluation metrics are 0.0" or evaluation fails
+
+**Symptoms:**
+
+- MLflow shows similarity scores of 0.0
+- Evaluation pipeline crashes with model loading errors
+
+**Solution:**
+
+1. Ensure evaluation models are downloaded:
+
+   - Text evaluation requires BERT model (auto-downloaded)
+   - Image evaluation requires CLIP model (auto-downloaded)
+   - Video evaluation requires X-CLIP model and ffmpeg
+
+2. For video evaluation, install required dependencies:
+
+   ```bash
+   # Install ffmpeg (varies by OS)
+   # Windows: Download from https://ffmpeg.org/download.html
+   # macOS: brew install ffmpeg
+   # Linux: sudo apt-get install ffmpeg
+
+   pip install yt-dlp
+   ```
+
+3. Check that you have sufficient disk space and memory for model downloads
+
+#### Issue: "HydraConfigNotFound" or configuration errors
+
+**Symptoms:**
+
+- Configuration files not found
+- Hydra initialization errors
+
+**Solution:**
+
+1. Ensure you're running from the project root directory:
+
+   ```bash
+   cd OmniAnswer
+   python src/launch_gradio.py
+   ```
+
+2. Verify `config/` directory exists and contains all required YAML files
+
+3. Check that configuration file syntax is valid YAML
+
+#### Issue: "Connection timeout" or network errors
+
+**Symptoms:**
+
+- API calls timeout
+- Search results fail to load
+
+**Solution:**
+
+1. Check your internet connection
+2. Verify API keys are valid and not expired
+3. Check if any firewall or proxy is blocking API requests
+4. For Google Custom Search, ensure your CSE ID is correctly configured
+
+#### Issue: "Gradio interface not loading" or blank page
+
+**Symptoms:**
+
+- Browser shows blank page at `http://localhost:8080`
+- Connection refused errors
+
+**Solution:**
+
+1. Check if the Gradio server started successfully (look for startup messages)
+2. Verify port 8080 is not in use by another application:
+
+   ```bash
+   # Windows:
+   netstat -ano | findstr :8080
+   # Unix/MacOS:
+   lsof -i :8080
+   ```
+
+3. Try a different port by setting environment variable:
+
+   ```bash
+   set GRADIO_SERVER_PORT=8081  # Windows
+   export GRADIO_SERVER_PORT=8081  # Unix/MacOS
+   ```
+
+4. Check browser console for JavaScript errors
+
+#### Issue: "Content moderation blocking valid queries"
+
+**Symptoms:**
+
+- Legitimate queries are flagged as unsafe
+- Moderation API returns false positives
+
+**Solution:**
+
+1. Review your query - some technical terms may trigger moderation
+2. Check moderation settings in `config/pipeline.yaml`
+3. Consider adjusting the moderation model or threshold if needed
+4. For development, you can temporarily disable moderation (not recommended for production)
+
+---
+
+## ❓ Frequently Asked Questions
+
+### General Questions
+
+**Q: Do I need all API keys to use OmniAnswer?**  
+A: No, you only need the API keys for the modalities you want to use. However, you must have at least one search API key (Tavily, Google Custom Search, or SerpApi) and the LLM provider key (Gemini). OpenAI API key is required for content moderation.
+
+**Q: Can I use OmniAnswer without the web interface?**  
+A: Yes! You can use the batch pipeline by running `python src/pipeline.py` with a queries file. Check `config/pipeline.yaml` for configuration options.
+
+**Q: What programming languages does OmniAnswer support?**  
+A: Currently, OmniAnswer is built with Python 3.11+ and supports queries in English. The system can search for content in any language, but the query processing and agent interactions are optimized for English.
+
+### Configuration Questions
+
+**Q: Can I use a different LLM provider instead of Gemini?**  
+A: Yes, you can modify `config/pipeline.yaml` to change the model. OmniAnswer uses CrewAI, which supports multiple LLM providers including OpenAI, Anthropic, and others. Check the [CrewAI documentation](https://docs.crewai.com/) for supported providers.
+
+**Q: How do I disable evaluation?**  
+A: Set `evaluate: False` in `config/pipeline.yaml`. This will skip the evaluation pipeline and improve response time, but you won't get similarity metrics.
+
+**Q: Can I customize the number of results per modality?**  
+A: Yes, you can modify the agent configurations in `config/agent/` directory. Each agent (text, image, video) has settings for the number of results to return.
+
+### Technical Questions
+
+**Q: Does OmniAnswer require a GPU?**  
+A: No, OmniAnswer works on CPU. However, evaluation metrics (BERTScore, CLIP, X-CLIP) will run faster with a GPU. For production use without evaluation, CPU is sufficient.
+
+**Q: How much memory does OmniAnswer need?**  
+A: Minimum 4GB RAM is recommended. If you're running evaluation, 8GB+ is recommended. The LLM models are loaded into memory, and evaluation models require additional memory.
+
+**Q: Can I run OmniAnswer in a Docker container?**  
+A: Yes! See the [Docker Deployment](#-docker-deployment) section. The project includes a Dockerfile and docker-compose.yml for easy containerized deployment.
+
+**Q: How do I deploy OmniAnswer to AWS?**  
+A: The project includes an ECS task definition in `ecs/task-definition.json`. See the [AWS ECS Deployment](#️-aws-ecs-deployment) section for details.
+
+### Evaluation Questions
+
+**Q: What do the similarity scores mean?**  
+A: Similarity scores range from 0.0 to 1.0, where higher scores indicate better relevance:
+
+- **Text Similarity (BERTScore)**: Measures semantic similarity between query and article content
+- **Image Similarity (CLIP Score)**: Measures visual-text alignment
+- **Video Similarity (X-CLIP Score)**: Measures video-text alignment
+
+**Q: How do I view evaluation results?**  
+A: Run `mlflow ui` and open `http://localhost:5000` in your browser. You'll see all experiment runs, metrics, and can compare different configurations.
+
+**Q: Can I evaluate my own queries?**  
+A: Yes! Create a text file with one query per line and set `questions: "./path/to/your/queries.txt"` in `config/pipeline.yaml`. Then run the batch pipeline.
+
+### API and Service Questions
+
+**Q: What are the API rate limits?**  
+A: Rate limits depend on your subscription with each service:
+
+- **OpenAI**: Varies by plan (check your dashboard)
+- **Gemini**: Free tier has limits, paid plans have higher quotas
+- **Tavily**: Check [Tavily pricing](https://tavily.com/pricing)
+- **Google Custom Search**: 100 queries/day free, more with paid plans
+- **SerpApi**: Varies by plan (check [SerpApi pricing](https://serpapi.com/pricing))
+
+**Q: How much do the API services cost?**  
+A: Costs vary by provider and usage. Most services offer free tiers for development. Check each provider's pricing page for current rates.
+
+**Q: Can I use my own search APIs?**  
+A: Yes, you can extend the search tools in `src/tools/` to integrate with your preferred search APIs. The agent architecture is modular and supports custom tools.
+
+### Development Questions
+
+**Q: How do I contribute to OmniAnswer?**  
+A: See the [Contributing](#-contributing) section. Fork the repository, create a feature branch, make your changes, run tests, and submit a pull request.
+
+**Q: What code style should I follow?**  
+A: The project uses Black for formatting and Ruff/Pylint for linting. Run `black .` and `ruff check .` before committing. See the [Development](#-development) section for details.
+
+**Q: How do I run the tests?**  
+A: Run `pytest -q` from the project root. For coverage reports, use `pytest --cov=src --cov-report=html`.
+
+**Q: Can I add support for additional modalities (e.g., audio)?**  
+A: Yes! The architecture is designed to be extensible. You can create a new agent in `src/agents/`, add a search tool in `src/tools/`, and update the modality agent to include your new modality.
 
 ---
 
