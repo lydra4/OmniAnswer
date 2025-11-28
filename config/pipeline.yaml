@@ -11,6 +11,6 @@ model: gemini-2.5-pro
 temperature: 1.5
 moderation_model: omni-moderation-latest
 questions: "./data/questions/queries.txt"
-evaluate: True
+evaluate: False
 gradio:
   caption: "OmniAnswer: Ask me any question. I determine the best mode(s) of explanation."
