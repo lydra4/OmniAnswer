@@ -703,58 +703,58 @@ ModuleNotFoundError: No module named 'crewai'
 
 ### General Questions
 
-**Q: Do I need all API keys to use OmniAnswer?**  
+**Q: Do I need all API keys to use OmniAnswer?**
 A: No, you only need the API keys for the modalities you want to use. However, you must have at least one search API key (Tavily, Google Custom Search, or SerpApi) and the LLM provider key (Gemini). OpenAI API key is required for content moderation.
 
-**Q: Can I use OmniAnswer without the web interface?**  
+**Q: Can I use OmniAnswer without the web interface?**
 A: Yes! You can use the batch pipeline by running `python src/pipeline.py` with a queries file. Check `config/pipeline.yaml` for configuration options.
 
-**Q: What programming languages does OmniAnswer support?**  
+**Q: What programming languages does OmniAnswer support?**
 A: Currently, OmniAnswer is built with Python 3.11+ and supports queries in English. The system can search for content in any language, but the query processing and agent interactions are optimized for English.
 
 ### Configuration Questions
 
-**Q: Can I use a different LLM provider instead of Gemini?**  
+**Q: Can I use a different LLM provider instead of Gemini?**
 A: Yes, you can modify `config/pipeline.yaml` to change the model. OmniAnswer uses CrewAI, which supports multiple LLM providers including OpenAI, Anthropic, and others. Check the [CrewAI documentation](https://docs.crewai.com/) for supported providers.
 
-**Q: How do I disable evaluation?**  
+**Q: How do I disable evaluation?**
 A: Set `evaluate: False` in `config/pipeline.yaml`. This will skip the evaluation pipeline and improve response time, but you won't get similarity metrics.
 
-**Q: Can I customize the number of results per modality?**  
+**Q: Can I customize the number of results per modality?**
 A: Yes, you can modify the agent configurations in `config/agent/` directory. Each agent (text, image, video) has settings for the number of results to return.
 
 ### Technical Questions
 
-**Q: Does OmniAnswer require a GPU?**  
+**Q: Does OmniAnswer require a GPU?**
 A: No, OmniAnswer works on CPU. However, evaluation metrics (BERTScore, CLIP, X-CLIP) will run faster with a GPU. For production use without evaluation, CPU is sufficient.
 
-**Q: How much memory does OmniAnswer need?**  
+**Q: How much memory does OmniAnswer need?**
 A: Minimum 4GB RAM is recommended. If you're running evaluation, 8GB+ is recommended. The LLM models are loaded into memory, and evaluation models require additional memory.
 
-**Q: Can I run OmniAnswer in a Docker container?**  
+**Q: Can I run OmniAnswer in a Docker container?**
 A: Yes! See the [Docker Deployment](#-docker-deployment) section. The project includes a Dockerfile and docker-compose.yml for easy containerized deployment.
 
-**Q: How do I deploy OmniAnswer to AWS?**  
+**Q: How do I deploy OmniAnswer to AWS?**
 A: The project includes an ECS task definition in `ecs/task-definition.json`. See the [AWS ECS Deployment](#️-aws-ecs-deployment) section for details.
 
 ### Evaluation Questions
 
-**Q: What do the similarity scores mean?**  
+**Q: What do the similarity scores mean?**
 A: Similarity scores range from 0.0 to 1.0, where higher scores indicate better relevance:
 
 - **Text Similarity (BERTScore)**: Measures semantic similarity between query and article content
 - **Image Similarity (CLIP Score)**: Measures visual-text alignment
 - **Video Similarity (X-CLIP Score)**: Measures video-text alignment
 
-**Q: How do I view evaluation results?**  
+**Q: How do I view evaluation results?**
 A: Run `mlflow ui` and open `http://localhost:5000` in your browser. You'll see all experiment runs, metrics, and can compare different configurations.
 
-**Q: Can I evaluate my own queries?**  
+**Q: Can I evaluate my own queries?**
 A: Yes! Create a text file with one query per line and set `questions: "./path/to/your/queries.txt"` in `config/pipeline.yaml`. Then run the batch pipeline.
 
 ### API and Service Questions
 
-**Q: What are the API rate limits?**  
+**Q: What are the API rate limits?**
 A: Rate limits depend on your subscription with each service:
 
 - **OpenAI**: Varies by plan (check your dashboard)
@@ -763,24 +763,24 @@ A: Rate limits depend on your subscription with each service:
 - **Google Custom Search**: 100 queries/day free, more with paid plans
 - **SerpApi**: Varies by plan (check [SerpApi pricing](https://serpapi.com/pricing))
 
-**Q: How much do the API services cost?**  
+**Q: How much do the API services cost?**
 A: Costs vary by provider and usage. Most services offer free tiers for development. Check each provider's pricing page for current rates.
 
-**Q: Can I use my own search APIs?**  
+**Q: Can I use my own search APIs?**
 A: Yes, you can extend the search tools in `src/tools/` to integrate with your preferred search APIs. The agent architecture is modular and supports custom tools.
 
 ### Development Questions
 
-**Q: How do I contribute to OmniAnswer?**  
+**Q: How do I contribute to OmniAnswer?**
 A: See the [Contributing](#-contributing) section. Fork the repository, create a feature branch, make your changes, run tests, and submit a pull request.
 
-**Q: What code style should I follow?**  
+**Q: What code style should I follow?**
 A: The project uses Black for formatting and Ruff/Pylint for linting. Run `black .` and `ruff check .` before committing. See the [Development](#-development) section for details.
 
-**Q: How do I run the tests?**  
+**Q: How do I run the tests?**
 A: Run `pytest -q` from the project root. For coverage reports, use `pytest --cov=src --cov-report=html`.
 
-**Q: Can I add support for additional modalities (e.g., audio)?**  
+**Q: Can I add support for additional modalities (e.g., audio)?**
 A: Yes! The architecture is designed to be extensible. You can create a new agent in `src/agents/`, add a search tool in `src/tools/`, and update the modality agent to include your new modality.
 
 ---
