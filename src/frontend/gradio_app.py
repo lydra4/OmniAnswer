@@ -1,7 +1,7 @@
 """Gradio-based web frontend for interacting with OmniAnswer."""
 
 import logging
-from typing import Generator, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import gradio as gr
 import omegaconf
@@ -57,7 +57,7 @@ class GradioApp:
 
         return msg, query, modalities
 
-    def _obtain_urls(self, query: str, modalities: List[str]) -> str:
+    async def _obtain_urls(self, query: str, modalities: List[str]) -> str:
         """Produce URLs for each modality given a query.
 
         Args:
@@ -70,7 +70,7 @@ class GradioApp:
         paraphrased_queries = self.paraphrase_agent.run_query(
             query=query, modalities=modalities
         )
-        result_dict = self.orchestrator.run(
+        result_dict = await self.orchestrator.run(
             query=query, paraphrase_queries=paraphrased_queries
         )
         results_list = result_dict["results"]
@@ -82,9 +82,7 @@ class GradioApp:
         )
         return result_text
 
-    def _infer(
-        self, query: str, chat_history: List[Tuple[str, str]]
-    ) -> Generator[Tuple[List[Tuple[str, str]], str], None, None]:
+    async def _infer(self, query: str, chat_history: List[Tuple[str, str]]):
         """Streaming inference callback used by the Gradio Chatbot.
 
         Args:
@@ -100,7 +98,7 @@ class GradioApp:
         msg, query, modalities = self._obtain_modes(query=query)
         chat_history[-1] = (query, msg)
         yield chat_history, ""
-        result_text = self._obtain_urls(query=query, modalities=modalities)
+        result_text = await self._obtain_urls(query=query, modalities=modalities)
         chat_history[-1] = (
             chat_history[-1][0],
             chat_history[-1][1] + "\n\n" + result_text,
