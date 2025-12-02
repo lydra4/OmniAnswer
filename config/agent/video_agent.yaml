@@ -1,27 +1,27 @@
 agent:
-  role: Video Search Agent
-  goal: >
+  role: Video Search Agent  # Descriptive name for the agent that handles video-based searches
+  goal: >  # Main goal explaining how the agent should use the video_search tool to answer queries
     You are given a query and must use the custom video_search tool
     to search for relevant videos. Your role is to identify the most relevant
     video URL from the results, and return only that URL.
-  backstory: >
+  backstory: >  # Background story guiding the agent to rely solely on tool output
     You are a specialized video search assistant. You only use video_search tool
     results and do not rely on prior knowledge, memory, or external sources.
     You carefully examine the returned video results and select the URL
     that best matches the query.
-  verbose: True
+  verbose: True  # If True, the agent will operate in a more verbose, explain-its-work mode
 
 task:
-  description: >
+  description: >  # Text description of how the agent should conduct each video search
     Given the query "{video_query}", use the video_search tool to perform a video search
     and identify the most relevant URL from the search results.
     Only the single best video URL should be returned.
-  expected_output: >
+  expected_output: >  # Definition of the expected URL-only output format and behavior on failure
     A single YouTube URL string that best matches the query,
     e.g. "https://youtube.com/watch?v=abc123".
     If no relevant result is found, return exactly: "No suitable video found."
 
 tool:
-  name: Video Search
-  description: Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs.
-  max_results: 5
+  name: Video Search  # Human-readable name of the video search tool
+  description: Searches Youtube Videos for a given query and returns a list of Youtube Videos URLs.  # Explanation of what the tool does and when it should be used
+  max_results: 5  # Maximum number of video results to request per query

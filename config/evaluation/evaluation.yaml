@@ -1,12 +1,12 @@
-mlflow_directory: ./mlruns/
+mlflow_directory: ./mlruns/  ## Directory where MLflow will store experiment runs and artifacts
 
 text:
-  text_model_name: "bert-base-uncased"
-  num_words: 100
+  text_model_name: "bert-base-uncased"  # Name of the text model used for evaluating text-based outputs
+  num_words: 100  # Number of words to consider when evaluating or truncating text outputs
 
 image:
-  image_model_name: "openai/clip-vit-base-patch32"
+  image_model_name: "openai/clip-vit-base-patch32"  # Name of the image model used for evaluating image-based results
 
 video:
-  duration: 5
-  video_model_name: "microsoft/xclip-base-patch32"
+  duration: 5  # Duration in seconds for video clips used during evaluation
+  video_model_name: "microsoft/xclip-base-patch32"  # Name of the video model used for evaluating video-based results

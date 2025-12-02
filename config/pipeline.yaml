@@ -1,16 +1,21 @@
-defaults:
-  - _self_
-  - agent/image_agent@image_agent
-  - agent/modality_agent@modality_agent
-  - agent/paraphrase_agent@paraphrase_agent
-  - agent/text_agent@text_agent
-  - agent/video_agent@video_agent
-  - evaluation/evaluation@evaluation
+defaults:  # List of configuration files to compose into the main pipeline config
+  - _self_  # Include this file as part of the Hydra defaults
+  - agent/image_agent@image_agent  # Configuration for the image search agent
+  - agent/modality_agent@modality_agent  # Configuration for choosing content modalities
+  - agent/paraphrase_agent@paraphrase_agent  # Configuration for paraphrasing and query optimization
+  - agent/text_agent@text_agent  # Configuration for the text search agent
+  - agent/video_agent@video_agent  # Configuration for the video search agent
+  - evaluation/evaluation@evaluation  # Configuration for evaluation and metrics
 
-model: gemini-2.5-pro
-temperature: 1.5
-moderation_model: omni-moderation-latest
-questions: "./data/questions/queries.txt"
-evaluate: False
+model: gemini-2.5-pro  # Name of the main LLM used to orchestrate OmniAnswer
+
+temperature: 1.5  # Sampling temperature controlling randomness of the LLM outputs
+
+moderation_model: omni-moderation-latest  # Moderation model used to filter or flag unsafe content
+
+questions: "./data/questions/queries.txt"  # Path to the file containing user questions for batch or demo runs
+
+evaluate: False  # Whether to run evaluation mode instead of interactive mode
+
 gradio:
-  caption: "OmniAnswer: Ask me any question. I determine the best mode(s) of explanation."
+  caption: "OmniAnswer: Ask me any question. I determine the best mode(s) of explanation." # Caption shown at the top of the Gradio UI interface
