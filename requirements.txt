@@ -19,7 +19,7 @@ pycountry==24.6.1
 pydantic==2.11.9
 
 # Platform-specific Dependencies
-windows-curses==2.4.11; sys_platform == "win32"
+windows-curses==2.4.1; sys_platform == "win32"
 
 # Front-end
 gradio==5.49.1
