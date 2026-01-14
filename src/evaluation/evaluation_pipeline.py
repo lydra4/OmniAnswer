@@ -336,7 +336,7 @@ class EvaluationPipeline:
         procesed_video = self.video_processor.video_processor.preprocess(
             video, return_tensors="pt"
         )
-        processed_text = self.video_processor.tokenizer(
+        processed_text = self.video_processor.tokenizer( # type: ignore[attr-defined]
             [query], return_tensors="pt", padding=True
         )
 
