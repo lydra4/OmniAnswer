@@ -58,4 +58,3 @@ jobs:
           -e PYTHONPATH="/home/omnianswer:/home/omnianswer/src" \
           "omnianswer:${{ github.sha }}" \
           bash -c "pip install pytest && pytest -q tests"
-
